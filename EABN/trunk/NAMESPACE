@@ -1,0 +1,23 @@
+import(methods)
+import(Peanut)
+import(CPTtools)
+## Use explict imports from RNetica so we can keep track of dependencies.
+#import(RNetica)
+importFrom("mongolite","mongo")
+importFrom("jsonlite", "toJSON", "fromJSON", "unbox","base64_enc","base64_dec")
+
+
+export(StudentRecord)
+exportClasses(StudentRecord)
+exportMethods(app,uid,context,timestamp,evidence,sm,stats)
+
+export(EvidenceSet)
+exportClasses(EvidenceSet)
+exportMethods(app,uid,context,timestamp,mess,details)
+
+
+
+
+
+
+
