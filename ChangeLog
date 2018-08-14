@@ -1,0 +1,14 @@
+2018-08-14  Rusell Almond  <ralmond@Cherry>
+
+	* DESCRIPTION (Depends): Renamed package EABN, as this version is
+	BN specific.
+
+2018-08-02  Rusell Almond  <ralmond@Cherry>
+
+	* src/mongo.cpp: To compile run
+	c++ --std=c++11 <input>.cpp $(pkg-config --cflags --libs
+	libmongocxx)
+	
+
+	* DESCRIPTION (License): Started Package
+

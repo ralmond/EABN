@@ -1,0 +1,11 @@
+Package: EABN
+Version: 0.1-1
+Date: 2018/08/14
+Title: Evidence Accumulation Bayes Net Engine
+Author: Russell Almond
+Maintainer: Russell Almond <ralmond@fsu.edu>
+Depends: R (>= 3.0), methods, jsonlite, mongolite, Peanut (>= 0.3-4), 
+Description: Extracts observables from a sequence of events.
+License: Artistic-2.0 
+URL: http://pluto.coe.fsu.edu/RNetica
+

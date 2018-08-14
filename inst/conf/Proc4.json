@@ -1,0 +1,6 @@
+[
+    {"user":"EAP","pwd":"Secret1"},
+    {"user":"ASP","pwd":"Secret2"},
+    {"user":"EIP","pwd":"Secret3"},
+    {"user":"C4","pwd":"Secret4"}
+]
