@@ -24,7 +24,7 @@ setGeneric("details",function(x) standardGeneric("details"))
 setMethod("details","EvidenceSet", function(x) x@obs)
 
 EvidenceSet <- function(uid,context,timestamp=Sys.time(),
-                        obs=list(),app="default",mess="Accumulate")
+                        obs=list(),app="default",mess="Accumulate") {
   new("EvidenceSet",app=app,uid=uid,context=context,mess=mess,
       timestamp=timestamp,obs=obs,"_id"=NA_character_,
       seqno=NA_integer_ )
@@ -47,9 +47,11 @@ setMethod("as.json","EvidenceSet", function(x) {
   esl$"_id" <- NULL
   if (is.na(esl$seqno)) esl$seqno <- NULL
   esl$class <-NULL
+  esl$timestamp <- unbox(esl$timestamp) # Auto_unbox bug.
   raw <- toJSON(esl,auto_unbox=TRUE,POSIXt="mongo")
   ## Timestamp is not unboxed.  Need to do that manually.
-  sub('"timestamp":\\[(.*)\\]','"timestamp":\\1',raw)
+  ## sub('"timestamp":\\[(.*)\\]','"timestamp":\\1',raw)
+  raw
   })
 
 dquote <- function (str) {paste('"',str,'"',sep="")}
