@@ -6,9 +6,10 @@ setClass("EvidenceSet",
          contains="P4Message")
 
 EvidenceSet <- function(uid,context,timestamp=Sys.time(),
-                        obs=list(),app="default",mess="Accumulate") {
+                        obs=list(),app="default",mess="Accumulate",
+                        sender="EI") {
   new("EvidenceSet",app=app,uid=uid,context=context,mess=mess,
-      timestamp=timestamp,obs=obs,"_id"=NA_character_,
+      timestamp=timestamp,data=obs,sender=sender,"_id"=NA_character_,
       seqno=NA_integer_ )
 }
 
@@ -24,6 +25,10 @@ setMethod("toString","EvidenceSet", function(x, ...) {
 setMethod("show","EvidenceSet",function(object) {
   cat(toString(object),"\n")
 })
+
+setGeneric("observables",function(x) standardGeneric("observables"))
+setMethod("observables","EvidenceSet", function(x) x@data)
+
 
 setMethod("as.jlist",c("EvidenceSet","list"), function(obj,ml,serialize=TRUE) {
   ## Call Next Method

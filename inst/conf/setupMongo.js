@@ -116,3 +116,35 @@ db.createCollection("StudentRecords", {
     validationAction: "warn"
 })
 db.StudentRecords.createIndex( { app:1, uid: 1, timestamp:-1});
+db.createCollection("Manifest", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["app","Name","Hub","Pathname",],
+            properties: {
+                app: {
+                    bsonType: "string",
+                    description: "Application ID (string)"
+                },
+                Name: {
+                    bsonType: "string",
+                    description: "Model Name"
+                },
+                Hub: {
+                    bsonType: "string",
+                    description: "Name of Proficiency Model, or null for PM"
+                },
+                Pathname: {
+                    bsonType: "string",
+                    description: "Pathname for Network."
+                },
+                Description: {
+                    bsonType: "string",
+                    description: "Documentation string for network."
+                },
+            }
+        }
+    },
+    validationAction: "warn"
+})
+db.Manifest.createIndex( { app:1, Name:1 })
