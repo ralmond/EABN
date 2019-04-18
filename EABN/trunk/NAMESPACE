@@ -1,21 +1,22 @@
 import(methods)
 import(Proc4)
 import(Peanut)
-import(CPTtools)
+import(PNetica)
+import(futile.logger)
 ## Use explict imports from RNetica so we can keep track of dependencies.
 #import(RNetica)
 importFrom("mongolite","mongo")
-importFrom("jsonlite", "toJSON", "fromJSON", "unbox","base64_enc","base64_dec")
-
+importFrom("jsonlite", "toJSON", "fromJSON","base64_enc","base64_dec")
 
 export(StudentRecord, sm, stats, evidence)
 exportClasses(StudentRecord)
-exportMethods(app,uid,context,timestamp,evidence,sm,stats,
+exportMethods(evidence,sm,stats,app,uid,context,timestamp,mess,
               as.jlist,toString,show)
 
-export(EvidenceSet,parseEvidence,seqno)
+export(EvidenceSet,parseEvidence,seqno, observables)
 exportClasses(EvidenceSet)
 exportMethods(seqno)
+
 
 
 

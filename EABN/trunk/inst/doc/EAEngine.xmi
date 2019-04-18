@@ -37,6 +37,9 @@
        </UML:Namespace.ownedElement>
       </UML:Package>
       <UML:Class isRoot="false" namespace="Logical_View" comment="A collection of evidence coming from the evidence accumulation process." isLeaf="false" isAbstract="false" name="EvidenceSet" isSpecification="false" xmi.id="uOJ4xRqLycZbE" visibility="public">
+       <UML:GeneralizableElement.generalization>
+        <UML:Generalization xmi.idref="uZkxz3mtCEEQ4"/>
+       </UML:GeneralizableElement.generalization>
        <UML:Classifier.feature>
         <UML:Attribute name="app" isSpecification="false" xmi.id="uN6EAqIHOuZvo" type="urhMdtgI2cugN" visibility="private"/>
         <UML:Attribute name="uid" isSpecification="false" xmi.id="up6mQcLEDnIf9" type="uqKUsvVg1cHOD" visibility="protected"/>
@@ -45,9 +48,17 @@
         <UML:Attribute comment="This should be one of a fixed number of actions.  &quot;Accumulate&quot;, &quot;Remove&quot; or &quot;Replace&quot;." name="message" isSpecification="false" xmi.id="uenf21CwL0XwH" type="uNb64L1CkuGVA" visibility="protected"/>
         <UML:Attribute comment="key-value observable pairs" name="obs" isSpecification="false" xmi.id="ucQ2MA5PSOKJa" type="ueuRwuvrhjwCD" visibility="protected"/>
         <UML:Attribute name="seqno" initialValue="0" isSpecification="false" xmi.id="uyAUXX52YT8TO" type="uIKRvJrOczvNf" visibility="private"/>
+        <UML:Operation isAbstract="false" visibility="public" isRoot="false" isOverride="false" isSpecification="false" xmi.id="uGzp1qcoSdps6" comment="Synonym for data." isLeaf="false" isQuery="false" name="obs">
+         <UML:BehavioralFeature.parameter>
+          <UML:Parameter xmi.id="uhfbymIvY2xs6" kind="return" type="ueuRwuvrhjwCD"/>
+         </UML:BehavioralFeature.parameter>
+        </UML:Operation>
        </UML:Classifier.feature>
       </UML:Class>
       <UML:Class isRoot="false" namespace="Logical_View" isLeaf="false" isAbstract="false" name="StudentRecord" isSpecification="false" xmi.id="u7NLSHj56TkzD" visibility="public">
+       <UML:GeneralizableElement.generalization>
+        <UML:Generalization xmi.idref="uaWmNdCpQow6k"/>
+       </UML:GeneralizableElement.generalization>
        <UML:Classifier.feature>
         <UML:Attribute name="app" isSpecification="false" xmi.id="u7ilvKfWvJCdO" type="urhMdtgI2cugN" visibility="private"/>
         <UML:Attribute name="uid" isSpecification="false" xmi.id="uLYkqHAfPPc02" type="uqKUsvVg1cHOD" visibility="private"/>
@@ -58,6 +69,11 @@
         <UML:Attribute name="stats" isSpecification="false" xmi.id="uZoRtryVfHR0I" type="u1emyYjOYyk2G" visibility="protected"/>
         <UML:Attribute name="prev" isSpecification="false" xmi.id="unZEr0XYjpifm" type="u7NLSHj56TkzD" visibility="private"/>
         <UML:Attribute comment="Used to generate a unique network name for the Bayes nets." name="seqno" isSpecification="false" xmi.id="uDH14DKXjC9I2" type="uIKRvJrOczvNf" visibility="private"/>
+        <UML:Operation isAbstract="false" visibility="public" isRoot="false" isOverride="false" isSpecification="false" xmi.id="uZ9A7zwnJBqAS" comment="Synonmym for data." isLeaf="false" isQuery="false" name="stats">
+         <UML:BehavioralFeature.parameter>
+          <UML:Parameter xmi.id="uRXyAqbePCBKy" kind="return" type="ueuRwuvrhjwCD"/>
+         </UML:BehavioralFeature.parameter>
+        </UML:Operation>
        </UML:Classifier.feature>
       </UML:Class>
       <UML:Class isRoot="false" namespace="Logical_View" isLeaf="false" isAbstract="false" name="UID" isSpecification="false" xmi.id="uqKUsvVg1cHOD" visibility="public"/>
@@ -66,6 +82,58 @@
       <UML:Class isRoot="false" namespace="Logical_View" isLeaf="false" isAbstract="false" name="AppID" isSpecification="false" xmi.id="urhMdtgI2cugN" visibility="public"/>
       <UML:Class isRoot="false" namespace="Logical_View" isLeaf="false" isAbstract="false" name="list" isSpecification="false" xmi.id="ueuRwuvrhjwCD" visibility="public"/>
       <UML:Class isRoot="false" namespace="Logical_View" isLeaf="false" isAbstract="false" name="Pnet" isSpecification="false" xmi.id="uyQ9lwyzVFuYI" visibility="public"/>
+      <UML:Class isAbstract="false" visibility="public" isRoot="false" isSpecification="false" xmi.id="ukakJcTVFskGg" comment="Generic Message sent to in the four process system." isLeaf="false" namespace="Logical_View" name="P4Message">
+       <UML:Classifier.feature>
+        <UML:Attribute visibility="private" isSpecification="false" xmi.id="uH04V1UqqLtWd" comment="Mongo Database ID." name="_id" type="uNb64L1CkuGVA"/>
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="u3sRg5LYW5Rp3" name="app" type="urhMdtgI2cugN"/>
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="ugdfQcvlwsV6t" name="uid" type="uqKUsvVg1cHOD"/>
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="ucDS2dR50oD8R" name="context" type="us5a6Yz8d3y9v"/>
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="u8weFMuL69Fge" name="sender" type="uNb64L1CkuGVA"/>
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="uVZ2JRjIgXTXQ" name="message" type="uNb64L1CkuGVA"/>
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="uccHiVyh0Wilv" name="timestamp" type="uc7WY1yputqsh"/>
+        <UML:Attribute visibility="public" isSpecification="false" xmi.id="uuFJDxp2Ls1uq" comment="This is a colleciton of key-value pairs, like an R list object or a JSON/BSON object." name="data" type="ueuRwuvrhjwCD"/>
+        <UML:Operation isAbstract="false" visibility="public" isRoot="false" isOverride="false" isSpecification="false" xmi.id="ujWdU0T2C5vff" comment="This converts this to a JSON object for storing in a mongo DB (or other serialization)&#x9;" isLeaf="false" isQuery="false" name="as.json">
+         <UML:BehavioralFeature.parameter>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="uJaVj1IvogRJa" comment="The object to be serialized." value="" name="x" type="ukakJcTVFskGg"/>
+         </UML:BehavioralFeature.parameter>
+        </UML:Operation>
+        <UML:Operation isAbstract="false" visibility="public" isRoot="false" isOverride="false" isSpecification="false" xmi.id="ugC4JL4e0zpC2" comment="This is an inner generic function used by as.json.  Can be used to pre/post process the list conversion operations." isLeaf="false" isQuery="false" name="as.jlist">
+         <UML:BehavioralFeature.parameter>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="uecpcg8OWsznB" comment="Mainly for message dispatch." value="" name="obj" type="ukakJcTVFskGg"/>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="uJknKLLG6uZxH" comment="The class as a list object.  General way to get this is by calling &quot;attributes(obj)&quot;" value="attributes(obj)" name="ml" type="ucmjCmhh0KLZn"/>
+         </UML:BehavioralFeature.parameter>
+        </UML:Operation>
+        <UML:Operation isAbstract="false" visibility="public" isRoot="false" isOverride="false" isSpecification="false" xmi.id="umFd3XbDTAJ7d" comment="Saves to collection" isLeaf="false" isQuery="false" name="saveRec">
+         <UML:BehavioralFeature.parameter>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="uGqysgpFmn3wp" value="" name="obj" type="ukakJcTVFskGg"/>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="umd190hLdxdUo" comment="Handle for database collection." value="" name="col" type="uFamzDi1BqKfR"/>
+         </UML:BehavioralFeature.parameter>
+        </UML:Operation>
+        <UML:Operation isAbstract="false" visibility="public" isRoot="false" isOverride="false" isSpecification="false" xmi.id="uqTl1GktN6iY5" isLeaf="false" isQuery="false" ownerScope="classifier" name="parseMessage">
+         <UML:BehavioralFeature.parameter>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="uqJ9WIWVADjug" comment="Retrieved json object as list." value="" name="rec" type="ucmjCmhh0KLZn"/>
+         </UML:BehavioralFeature.parameter>
+        </UML:Operation>
+        <UML:Operation isAbstract="false" visibility="public" isRoot="false" isOverride="false" isSpecification="false" xmi.id="ubml7rvH2zJvm" isLeaf="false" isQuery="false" name="getOneRec">
+         <UML:BehavioralFeature.parameter>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="uqh8f85UtpVSI" value="" name="query" type="uXBfH40sTO9nn"/>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="uJUDvvhTkxdvQ" comment="Handle to Mongo database" value="" name="col" type="uFamzDi1BqKfR"/>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="ugqkfCQlSMxBW" comment="Function used to create objects" value="" name="parser" type="uC7yCFxiNNzJT"/>
+         </UML:BehavioralFeature.parameter>
+        </UML:Operation>
+        <UML:Operation isAbstract="false" visibility="public" isRoot="false" isOverride="false" isSpecification="false" xmi.id="u39A2Zl6xZv1k" isLeaf="false" isQuery="false" name="getManyRecs">
+         <UML:BehavioralFeature.parameter>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="uAluK1WaRK9H0" value="" name="query" type="uXBfH40sTO9nn"/>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="u4IJj79RQypUe" comment="Collection handle." value="" name="col" type="uFamzDi1BqKfR"/>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="uO1DUIwIjr9N1" value="" name="parser" type="uC7yCFxiNNzJT"/>
+          <UML:Parameter visibility="private" isSpecification="false" xmi.id="umo8eXArTpEOm" comment="Sorts on timestamp.  -1 for newest first, +1 for oldest first." value="-1" name="sort" type="u49DH2zGch7tO"/>
+         </UML:BehavioralFeature.parameter>
+        </UML:Operation>
+       </UML:Classifier.feature>
+      </UML:Class>
+      <UML:Generalization parent="ukakJcTVFskGg" discriminator="" visibility="public" child="u7NLSHj56TkzD" isSpecification="false" xmi.id="uaWmNdCpQow6k" namespace="Logical_View" name=""/>
+      <UML:Generalization parent="ukakJcTVFskGg" discriminator="" visibility="public" child="uOJ4xRqLycZbE" isSpecification="false" xmi.id="uZkxz3mtCEEQ4" namespace="Logical_View" name=""/>
+      <UML:Class isAbstract="false" visibility="public" isRoot="false" isSpecification="false" xmi.id="uc7WY1yputqsh" isLeaf="false" namespace="Logical_View" name="POSIXt"/>
      </UML:Namespace.ownedElement>
      <XMI.extension xmi.extender="umbrello">
       <diagrams resolution="96">
@@ -92,6 +160,20 @@
            <point x="-538.75" y="12"/>
           </linepath>
           <floatingtext localid="umXI02wUayWWb" height="18" usesdiagramfillcolor="1" autoresize="1" y="-36" usefillcolor="1" textcolor="none" fillcolor="none" x="-582.25" isinstance="0" linecolor="#ff0000" usesdiagramusefillcolor="1" width="36" xmi.id="uX8KsTOX4hcMr" pretext="-" posttext="" showstereotype="1" linewidth="0" text="prev" font="Ubuntu,12,-1,5,50,0,0,0,0,0" role="710"/>
+         </assocwidget>
+         <assocwidget usesdiagramusefillcolor="1" font="Ubuntu,12,-1,5,50,0,0,0,0,0" linewidth="0" xmi.id="uaWmNdCpQow6k" autoresize="1" widgetbid="ukakJcTVFskGg" indexa="1" fillcolor="none" indexb="1" totalcountb="2" type="500" textcolor="none" usesdiagramfillcolor="1" usefillcolor="1" linecolor="#ff0000" totalcounta="2" seqnum="" widgetaid="u7NLSHj56TkzD">
+          <linepath layout="Polyline">
+           <startpoint startx="-682" starty="-188"/>
+           <endpoint endx="-744" endy="-188"/>
+          </linepath>
+         </assocwidget>
+         <assocwidget visibilityA="2" usesdiagramusefillcolor="0" font="Ubuntu,12,-1,5,50,0,0,0,0,0" linewidth="0" xmi.id="ujjpp0umnIl4b" autoresize="1" widgetbid="uOJ4xRqLycZbE" indexa="2" fillcolor="#ffff00" indexb="1" totalcountb="2" type="510" changeabilityA="900" textcolor="#000000" usesdiagramfillcolor="0" usefillcolor="1" visibilityB="2" linecolor="#ff0000" changeabilityB="900" totalcounta="3" seqnum="" widgetaid="u7NLSHj56TkzD">
+          <linepath layout="Polyline">
+           <startpoint startx="-592" starty="-176"/>
+           <endpoint endx="-592" endy="37"/>
+          </linepath>
+          <floatingtext usesdiagramusefillcolor="1" font="Ubuntu,12,-1,5,50,0,0,0,0,0" posttext="" linewidth="0" role="702" xmi.id="u8ylx0xj1QecC" autoresize="1" localid="uMCA7kxpP0Ljs" height="22" text="*" fillcolor="none" x="-590" width="16" textcolor="none" y="13" isinstance="0" usesdiagramfillcolor="1" usefillcolor="1" linecolor="#ff0000" pretext="" showstereotype="1"/>
+          <floatingtext usesdiagramusefillcolor="1" font="Ubuntu,12,-1,5,50,0,0,0,0,0" posttext="" linewidth="0" role="710" xmi.id="ujmrFuleZBSz8" autoresize="1" localid="unrLsBcD7n00X" height="22" text="evidence" fillcolor="none" x="-667" width="84" textcolor="none" y="13" isinstance="0" usesdiagramfillcolor="1" usefillcolor="1" linecolor="#ff0000" pretext="#" showstereotype="1"/>
          </assocwidget>
         </associations>
        </diagram>
