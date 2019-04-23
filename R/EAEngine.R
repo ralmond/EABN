@@ -89,7 +89,7 @@ BNEngine <-
                         histNodesdb()$ind(buildJQuery(app=tapp))$Nodes[[1]]
                     }
                     histNodes
-                  }
+                  },
                   setHistNodes = function(nodenames) {
                     if (!is.character(nodenames))
                       stop("Expected nodenames to be a character expression.")
