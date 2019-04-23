@@ -14,8 +14,7 @@ EvidenceSet <- function(uid,context,timestamp=Sys.time(),
 }
 
 setGeneric("seqno",function(x) standardGeneric("seqno"))
-setMethod("seqno","Event", function(x) x@seqno)
-
+setMethod("seqno","EvidenceSet", function(x) x@seqno)
 
 
 setMethod("toString","EvidenceSet", function(x, ...) {
@@ -29,7 +28,6 @@ setMethod("show","EvidenceSet",function(object) {
 setGeneric("observables",function(x) standardGeneric("observables"))
 setMethod("observables","EvidenceSet", function(x) x@data)
 
-
 setMethod("as.jlist",c("EvidenceSet","list"), function(obj,ml,serialize=TRUE) {
   ## Call Next Method
   as.p4jlist <- getMethod("as.jlist",c("P4Message","list"))
@@ -39,8 +37,9 @@ setMethod("as.jlist",c("EvidenceSet","list"), function(obj,ml,serialize=TRUE) {
     ml$seqno <- NULL
   } else {
     ml$seqno <- unbox(ml$seqno)
+  }
   ml
-  })
+})
 
 parseEvidence<- function (rec) {
   if (is.null(rec$"_id")) rec$"_id" <- NA_character_

@@ -102,6 +102,10 @@ db.createCollection("StudentRecords", {
                     bsonType: "object",
                     description: "Statistics about student."
                 },
+                hist: {
+                    bsonType: "object",
+                    description: "Statistics about student."
+                },
                 prev: {
                     bsonType: "string",
                     description: "Reference to previous student model."
@@ -148,3 +152,98 @@ db.createCollection("Manifest", {
     validationAction: "warn"
 })
 db.Manifest.createIndex( { app:1, Name:1 })
+db.createCollection("Statistics", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["app","Name","Fun","Node",],
+            properties: {
+                app: {
+                    bsonType: "string",
+                    description: "Application ID (string)"
+                },
+                Name: {
+                    bsonType: "string",
+                    description: "Model Name"
+                },
+                Node: {
+                    bsonType: "string",
+                    description: "Name of node in Proficiency Model"
+                },
+                Fun: {
+                    bsonType: "string",
+                    description: "Name of calculation Function."
+                },
+                Doc: {
+                    bsonType: "string",
+                    description: "Documentation string for network."
+                },
+            }
+        }
+    },
+    validationAction: "warn"
+})
+db.Manifest.createIndex( { app:1, Name:1 })
+db.createCollection("Messages", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["app","uid","timestamp"],
+            properties: {
+                _id: {
+                    bsonType: "string",
+                    description: "app@uid@seqno",
+                },
+                app: {
+                    bsonType: "string",
+                    description: "Application ID (string)"
+                },
+                uid: {
+                    bsonType: "string",
+                    description: "User (studnet) ID (string)"
+                },
+                context: {
+                    bsonType: "string",
+                    description: "Context (task) ID (string)"
+                },
+                sender: {
+                    bsonType: "string",
+                    description: "Who posted this message."
+                },
+                mess: {
+                    bsonType: "string",
+                    description: "Instructions to PP/ASP"
+                },
+                timestamp: {
+                    bsonType: "date",
+                    description: "Timestamp"
+                },
+                data: {
+                    bsonType: "object",
+                    description: "Named list of statistics or WOEs."
+                }
+            }
+        }
+    },
+    validationAction: "warn"
+})
+db.Messages.createIndex( { app:1, uid: 1, timestamp:-1});
+db.createCollection("histNodes", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["app","Nodes",],
+            properties: {
+                app: {
+                    bsonType: "string",
+                    description: "Application ID (string)"
+                },
+                Nodes: {
+                    bsonType: "array",
+                    description: "Names of nodes in Proficiency Model"
+                },
+            }
+        }
+    },
+    validationAction: "warn"
+})
