@@ -8,16 +8,22 @@ import(futile.logger)
 importFrom("mongolite","mongo")
 importFrom("jsonlite", "toJSON", "fromJSON","base64_enc","base64_dec")
 
-export(StudentRecord, sm, stats, evidence)
+export(StudentRecord, sm, stats, evidence, statNames, histNames, stat,
+       history, parseStudentRecord)
 exportClasses(StudentRecord)
-exportMethods(evidence,sm,stats,app,uid,context,timestamp,mess,
-              as.jlist,toString,show)
+exportMethods(evidence, sm, stats, app, uid, context, timestamp, mess,
+              as.jlist, toString, show, statNames, histNames, stat,
+              history)
 
-export(EvidenceSet,parseEvidence,seqno, observables)
+export(EvidenceSet, parseEvidence, seqno, observables)
 exportClasses(EvidenceSet)
 exportMethods(seqno)
 
-
+exportClass(BNEngine)
+export(BNEngine, loadManifest, setupDefaultSR, createDefaultSR,
+       logEvidence, accumulateEvidence, configStats, updateStats,
+       announceStats, baselineHist, updateHist)
+exportMethods(notifyListeners)
 
 
 
