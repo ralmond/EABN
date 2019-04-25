@@ -11,6 +11,7 @@ setClassUnion("EmptyWarehouse",c("BNWarehouse","NULL"))
 setClass("StudentRecord",
          slots=c(evidence="list",
                  sm="BayesianNetwork",
+                 smser="character",
                  seqno="integer",
                  hist="list",
                  prev_id="character"),
@@ -22,14 +23,12 @@ setMethod("context","StudentRecord", function(x) x@context)
 setMethod("timestamp","StudentRecord", function(x) x@timestamp)
 
 
-setGeneric("sm",function(x) standardGeneric("sm"))
 setGeneric("stats",function(x) standardGeneric("stats"))
 setGeneric("statNames",function (sr) standardGeneric("statNames"))
 setGeneric("histNames",function (sr) standardGeneric("histNames"))
 setGeneric("stat",function (sr,name) standardGeneric("stat"))
 setGeneric("history",function (sr,name) standardGeneric("history"))
 
-setMethod("sm","StudentRecord", function(x) x@sm)
 setMethod("stats","StudentRecord", function(x) x@data)
 setMethod("statNames","StudentRecord", function (sr) names(stats(sr)))
 setMethod("stat",c("StudentRecord","character"),
@@ -39,14 +38,23 @@ setMethod("history",c("StudentRecord","character"),
           function (sr, name) sr@hist[[name]])
 
 
+setGeneric("sm",function(x) standardGeneric("sm"))
+setMethod("sm","StudentRecord", function(x) x@sm)
+unpackSM <- function (sr, warehouse) {
+  if (length(sr@smser))
+    stop("No serialized version to unpack.")
+  sr@sm <- WarehouseUnpack(warehouse,list(name(sr),sr@smser))
+  sm
+}
+
 StudentRecord <- function(uid,context="",timestamp=Sys.time(),
                           evidence=list(),evidence_id=character(),
-                          sm=NULL,stats=list(),hist=list(),
+                          smser=character(),sm=NULL,stats=list(),hist=list(),
                           app="default") {
   new("StudentRecord",app=app,uid=uid,context=context,
-      timestamp=timestamp,evidence=evidence,sm=sm,data=stats,
-      hist=hist,
-      seqno=NA_integer_,prev=NULL,"_id"=NA_character_,
+      timestamp=timestamp,evidence=evidence,smser=smser,
+      sm=sm,data=stats,hist=hist,
+      seqno=NA_integer_,"_id"=NA_character_,
       prev_id=NA_character_)
 }
 
@@ -84,7 +92,6 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
     ml$evidence <- unboxer(x@evidence)
   }
   ## Normalize Prev_id
-  ml$prev <- NULL
   ml$"prev_id" <- NULL
   if (!is.na(x@"prev_id")) {
     ml$prev <- unboxer(x@"prev_id")
@@ -100,17 +107,17 @@ parseStudentRecord <- function (rec) {
   if (is.null(rec$prev_id)) rec$prev_id <- NA_character_
   if (is.null(rec$seqno)) rec$seqno <- NA_integer_
   elist <- list()
-  smo <- NULL  ## HERE
+  smo <- NULL
+  smser <- rec$sm
   slist <- list()
-  prev <- NULL
   hist <- unserializeJSON(rec$hist)
   new("StudentRecord","_id"=ununboxer(rec$"_id"),
       app=ununboxer(rec$app), context=ununboxer(rec$context),
       uid=ununboxer(rec$uid),
       timestamp=as.POSIXlt(ununboxer(rec$timestamp)),
       evidence_id=ununboxer(rec$evidence_id),evidence=elist,
-      sm=smo,stats=slist,prev=prev,prev_id=ununboxer(rec$prev_id))
-  }
+      sm=smo,smser=smser, stats=slist,prev_id=ununboxer(rec$prev_id))
+}
 
 ###########
 ## Evidence Lists
@@ -149,14 +156,16 @@ StudentRecordSet <-
                        dbname="character",
                        dburi="character",
                        db="MongoDB",
+                       warehouse="EmptyWarehouse",
                        defaultSR="SRorNull"),
               methods = list(
                   initialize =
                     function(app="default",dbname="EIRecords",
                              dburi="mongodb://localhost:271017",
-                             db = NULL,
+                             db = NULL,warehouse=NULL,
                              ...)
-                      callSuper(app=app,db=db,dbname=dbname,dburi=dburi,...)
+                      callSuper(app=app,db=db,dbname=dbname,dburi=dburi,
+                                warehouse=NULL,defaultSR=NULL,...)
               ))
 
 

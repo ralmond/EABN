@@ -11,5 +11,3 @@ POfMom_EAP,PnodeEAP,POfMom
 ConOfMom_EAP,PnodeEAP,ConOfMom
 EnergyTransfer_EAP,PnodeEAP,EnergyTransfer
 EnergyDissipate_EAP,PnodeEAP,EnergyDissipate
-PropertiesOfTorque_EAP,PnodeEAP,PropertiesOfTorque
-StaticEquilibrium_EAP,PnodeEAP,StaticEquilibrium

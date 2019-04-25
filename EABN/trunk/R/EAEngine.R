@@ -1,3 +1,5 @@
+setClassUnion("NullRecordSet",c("StudentRecordSet","NULL"))
+
 
 BNEngine <-
   setRefClass("BNEngine",
@@ -10,7 +12,7 @@ BNEngine <-
                   evidenceDB = "MongoDB",
                   statDB = "MongoDB",
                   histNodesDB = "MongoDB",
-                  srs = "StudentRecordSet",
+                  srs = "NullRecordSet",
                   profModel = "character",
                   listenerSet="ListenerSet",
                   statistics="list",
@@ -26,38 +28,35 @@ BNEngine <-
                              statistics=list(), histNodes=character(),
                              ...) {
 
-                    ## Setup DB URI
-                    security <- ""
-                    if (nchar(username) > 0L) {
-                      if (nchar(password) > 0L)
-                        security <- paste(username,password,sep=":")
+                      ## Setup DB URI
+                      security <- ""
+                      if (nchar(username) > 0L) {
+                        if (nchar(password) > 0L)
+                          security <- paste(username,password,sep=":")
+                        else
+                          security <- username
+                      }
+                      if (nchar(port) > 0L)
+                        host <- paste(host,port,sep=":")
                       else
-                        security <- username
-                    }
-                    if (nchar(port) > 0L)
-                      host <- paste(host,port,sep=":")
-                    else
-                      host <- host
-                    if (nchar(security) > 0L)
-                      host <- paste(security,host,sep="@")
-                    dburl <- paste("mongodb:/",host,sep="/")
-                    flog.info("Connecting to database %s/%s\n",dburl,dbname)
-                    ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                                      dbname=dbname,
-                                      dburi=dburl,
-                                      listeners=listeners,
-                                      colname="Messages",
-                                      ...)
-                    srset <- StudentRecordSet(app=app,dbname=dbname,
-                                              dburi=dburl)
-                    callSuper(app=app,dburi=dburl,dbname=dbname,
-                              session=session,statDB=NULL,
-                              manifestDB=NULL, evidenceDB=NULL,
-                              srs=srset,listenerSet=ls,
-                              warehouseObj=NULL,histNodesDB=NULL,
-                              statistics=statistics,
-                              histNodes=histNodes,
-                              ...)
+                        host <- host
+                      if (nchar(security) > 0L)
+                        host <- paste(security,host,sep="@")
+                      dburl <- paste("mongodb:/",host,sep="/")
+                      flog.info("Connecting to database %s/%s\n",dburl,dbname)
+                      ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
+                                        dbname=dbname, dburi=dburl,
+                                        listeners=listeners,
+                                        colname="Messages",
+                                        ...)
+                      callSuper(app=app,dburi=dburl,dbname=dbname,
+                                session=session,statDB=NULL,
+                                manifestDB=NULL, evidenceDB=NULL,
+                                srs=NULL,listenerSet=ls,
+                                warehouseObj=NULL,histNodesDB=NULL,
+                                statistics=statistics,
+                                histNodes=histNodes,
+                                ...)
                   },
                   manifestdb = function() {
                     if (is.null(manifestDB)) {
@@ -70,6 +69,11 @@ BNEngine <-
                       statDB <<- mongo("Statistics",dbname,dburi)
                     }
                     statDB
+                  },
+                  stats = function() {
+                    if (length(statistics) == 0L)
+                      configStats(.self)
+                    statistics
                   },
                   evidenceSets = function() {
                     if (is.null(evidenceDB)) {
@@ -86,7 +90,7 @@ BNEngine <-
                   getHistNodes = function() {
                     if (length(histNodes) == 0L) {
                       histNodes <<-
-                        histNodesdb()$ind(buildJQuery(app=tapp))$Nodes[[1]]
+                        histNodesdb()$find(buildJQuery(app=tapp))$Nodes[[1]]
                     }
                     histNodes
                   },
@@ -100,7 +104,13 @@ BNEngine <-
                                                       collapse=",")))
                     histNodes
                   },
-                  studentRecords = function() {srs},
+                  studentRecords = function() {
+                    if (is.null(srs)) {
+                      srs <<- StudentRecordSet(app=app,warehouse=warehouse(),
+                                              dbname=dbname,dburi=dburi)
+                    }
+                    srs
+                  },
                   warehouse = function() {
                     if (is.null(warehouseObj)) {
                       warehouseObj <<- BNWarehouse(manifest=data.frame(),
@@ -116,8 +126,7 @@ BNEngine <-
                                                   session=session,
                                                   key="Name")
                     } else {
-                      warehouseObj <<- WarehouseManifest(warehouseObj,
-                                                         manifest)
+                      WarehouseManifest(warehouseObj) <<- manifest
                     }
                   },
                   show = function() {
@@ -169,10 +178,11 @@ loadManifest <- function(eng,manifest=data.frame()) {
 ## Log Initial Stats
 
 setupDefaultSR <- function (eng) {
+  eng$studentRecords()                  #Make sure initialized
   dsr <- StudentRecord("*DEFAULT*",app=app(eng),context="*Baseline*")
   if (length(eng$profModel) > 0L) {
     flog.info("Using proficieny model %s.",eng$profModel)
-    dsr@sm <- WarehouseFetch(eng$warehouse(),eng$profModel)
+    dsr@sm <- WarehouseSupply(eng$warehouse(),eng$profModel)
     if (is.null(dsr@sm))
       flog.warn("Proficiency Model %s not found.",eng$profModel)
   }
@@ -181,12 +191,13 @@ setupDefaultSR <- function (eng) {
     manf <-WarehouseManifest(eng$warehouse())
     pMod <-manf$Name[manf$Hub==""]
     flog.info("Using proficiency model %s from warehouse.",pMod)
-    dsr@sm <- WarehouseFetch(eng$Warehouse(),pMod)
+    dsr@sm <- WarehouseSupply(eng$warehouse(),pMod)
     if (is.null(dsr@sm))
       flog.error('Proficiency Model "%s" and backup "%s" not found.',
                  eng$profModel,pMod)
   }
   if (is.null(dsr@sm)) stop("Proficiency Model not found.")
+  CompileNetwork(dsr@sm)                #Replace with abstract version later.
   dsr <- updateStats(eng,dsr)
   dsr <- baselineHist(eng,dsr)
   eng$srs$defaultSR <- dsr
@@ -196,7 +207,7 @@ setupDefaultSR <- function (eng) {
 ################
 ## Big Update Function
 
-createDefaultSR <- function(eng){}
+newSR <- function(eng){}
 
 logEvidence <- function (eng,rec,evidMess) {}
 
@@ -229,9 +240,9 @@ registerStats <- function(eng,statmat) {
 
 
 updateStats <- function(eng,rec) {
-  rec@stats <- lapply(eng$statistics,
+  rec@data <- lapply(eng$stats(),
                       function (stat) calcStat(stat,sm(rec)))
-  names(rec@stats) <- sapply(eng$statistics,name)
+  names(rec@data) <- sapply(eng$stats(),name)
   rec
 }
 
