@@ -15,6 +15,10 @@ EvidenceSet <- function(uid,context,timestamp=Sys.time(),
 
 setGeneric("seqno",function(x) standardGeneric("seqno"))
 setMethod("seqno","EvidenceSet", function(x) x@seqno)
+setGeneric("seqno<-",function(x,value) standardGeneric("seqno<-"))
+setMethod("seqno<-","EvidenceSet", function(x,value) {
+  x@seqno <- value
+})
 
 
 setMethod("toString","EvidenceSet", function(x, ...) {
@@ -42,15 +46,16 @@ setMethod("as.jlist",c("EvidenceSet","list"), function(obj,ml,serialize=TRUE) {
 })
 
 parseEvidence<- function (rec) {
-  if (is.null(rec$"_id")) rec$"_id" <- NA_character_
-  names(rec$"_id") <- "oid"
-  if (is.null(rec$app)) rec$app <- "default"
+  rec <- cleanMessageJlist(rec)
   if (is.null(rec$seqno)) rec$seqno <- NA_integer_
-  if (is.null(rec$timestamp)) rec$timestamp <- Sys.time()
-  new("EvidenceSet","_id"=rec$"_id", app=as.vector(rec$app),
-      uid=as.vector(rec$uid),
-      context=as.vector(rec$context),mess=as.vector(rec$mess),
+  new("EvidenceSet","_id"=ununboxer(rec$"_id"),
+      app=as.vector(ununboxer(rec$app)),
+      uid=as.vector(ununboxer(rec$uid)),
+      context=as.vector(ununboxer(rec$context)),
+      mess=as.vector(ununboxer(rec$mess)),
       timestamp=as.POSIXlt(ununboxer(rec$timestamp)),
+      processed=ununboxer(rec$processed),
+      pError=rec$pError,
       data=parseData(ununboxer(rec$data)),
       seqno=as.vector(rec$seqno))
 }

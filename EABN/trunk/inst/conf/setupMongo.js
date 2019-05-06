@@ -20,7 +20,7 @@ eapUser = pwds.filter(function(u) {return u.user == "EAP";})[0];
 con = new Mongo();
 db=con.getDB("EARecords");                 
 db.auth(eapUser.user,eapUser.pwd);
-db.createCollection("EvidenceSets", {
+db.createCollection("Observables", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
@@ -42,6 +42,10 @@ db.createCollection("EvidenceSets", {
                     bsonType: "string",
                     description: "Context (task) ID (string)"
                 },
+                sender: {
+                    bsonType: "string",
+                    description: "Who posted this message."
+                },
                 timestamp: {
                     bsonType: "date",
                     description: "Timestamp"
@@ -50,13 +54,13 @@ db.createCollection("EvidenceSets", {
                     bsonType: "string",
                     description: "Instructions to EAP"
                 },
-                obs: {
+                data: {
                     bsonType: "object",
                     description: "Named list of evidence."
                 },
-                seqno: {
-                    bsonType: "int",
-                    description: "Sequence number for this step for student."
+                processed: {
+                    bsonType: "bool",
+                    description: "Has this record been processed?"
                 }
             }
         }

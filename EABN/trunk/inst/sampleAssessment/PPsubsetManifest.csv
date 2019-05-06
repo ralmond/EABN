@@ -1,7 +1,7 @@
 Name,Hub,Title,Pathname,Description
 PPOrangeNodes,,Physics Playground Proficiency Model,PP-OrangeNodes-6.dne,Penultimate Proficiency Model
 AnnoyingLever,PPOrangeNodes,Annoying Lever,AnnoyingLeverEM.dne,
-AroundTheTree,PPOrangeNodes,Around the Tree,AroundTheTreeEM.dne,
+AroundTheTree,PPOrangeNodes,Around the Tree,AroundTreeEM.dne,
 Attic,PPOrangeNodes,Attic,AtticEM.dne,
 Balance,PPOrangeNodes,Balance,BalanceEM.dne,
 Bowtie,PPOrangeNodes,Bowtie,BowtieEM.dne,

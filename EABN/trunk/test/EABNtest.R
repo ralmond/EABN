@@ -19,12 +19,23 @@ sess <- NeticaSession(LicenseKey=NeticaLicenseKey)
 startSession(sess)
 
 cl <- new("CaptureListener")
+ul <- UpdateListener(dbname="Proc4",dburi="mongodb://localhost",
+            colname="Statistics",targetField="data",
+            messSet=c("Statistics")
+            jsonEncoder="stats2json"))
 
-EAeng <- BNEngine(tapp,sess,list(cl))
+
+
+EAeng <- BNEngine(tapp,sess,list(cl,ul))
+loadManifest(EAeng)
+configStats(EAeng)
 
 loadManifest(EAeng,mantab)
 configStats(EAeng,stattab)
 
 setupDefaultSR(EAeng)
 
-dsr1<- EAeng$studentRecords()$defaultSR
+srs<- EAeng$studentRecords()
+
+fsr <- getSR(srs,"Phred")
+
