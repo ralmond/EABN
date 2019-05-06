@@ -13,15 +13,14 @@ setClass("StudentRecord",
                  app="character",
                  uid="character",
                  context="character",
-                 evidence="list",
+                 evidence="character",
                  timestamp="POSIXt",      #Date of last update.
                  sm="BayesianNetwork",
-                 smser="character",
+                 smser="list",
                  seqno="integer",
                  stats="list",
                  hist="list",
                  prev_id="character"))
-
 
 setMethod("app","StudentRecord", function(x) x@app)
 setMethod("uid","StudentRecord", function(x) x@uid)
@@ -59,7 +58,7 @@ setMethod("history",c("StudentRecord","character"),
 setGeneric("sm",function(x) standardGeneric("sm"))
 setMethod("sm","StudentRecord", function(x) x@sm)
 fetchSM <- function (sr, warehouse) {
-  sr@sm <- WarehouseFetch(warehouse,as.IDname(name(sr),"S"))
+  sr@sm <- WarehouseFetch(warehouse,as.IDname(uid(sr),"S"))
   if (is.null(sm(sr)) || !is.active(sm(sr))) {
     sr@sm <- unpackSM(sr,warehouse)
   }
@@ -73,13 +72,13 @@ unpackSM <- function (sr, warehouse) {
 }
 
 StudentRecord <- function(uid,context="",timestamp=Sys.time(),
-                          evidence_id=character(),
-                          smser=character(),sm=NULL,stats=list(),hist=list(),
-                          app="default") {
+                          smser=NULL,sm=NULL,stats=list(),hist=list(),
+                          evidence=character(),
+                          app="default",seqno=-1L) {
   new("StudentRecord",app=app,uid=uid,context=context,
-      timestamp=timestamp,evidence=evidence_id,smser=smser,
+      timestamp=timestamp,smser=smser,evidence=evidence,
       sm=sm,stats=stats,hist=hist,
-      seqno=NA_integer_,"_id"=NA_character_,
+      seqno=seqno,"_id"=NA_character_,
       prev_id=NA_character_)
 }
 
@@ -116,40 +115,46 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
   } else {
     ml$sm <- NULL
   }
+  ml$smser <- NULL
   ## Normalize Evidence Sets
   ml$evidence <- NULL
   if (length(obj@evidence)>0L) {
-    ml$evidence <- unboxer(obj@evidence)
+    ml$evidence <- obj@evidence
   }
   ## Normalize Prev_id
   ml$"prev_id" <- NULL
   if (!is.na(obj@"prev_id")) {
     ml$prev <- unboxer(obj@"prev_id")
   }
+  ml$seqno <- NULL
+  if (!is.na(obj@seqno)) {
+    ml$sqno <- unboxer(obj@seqno)
+  }
   ml$stats <- unparseStats(ml$stats)
-  ml$hist <- serializeJSON(ml$hist)
+  ml$hist <- lapply(ml$hist,unparseHist)
   ml
 })
 
 parseStudentRecord <- function (rec) {
   if (is.null(rec$"_id")) rec$"_id" <- NA_character_
   names(rec$"_id") <- "oid"
-  if (is.null(rec$evidence_id)) rec$evidence_id <- NA_character_
   if (is.null(rec$prev_id)) rec$prev_id <- NA_character_
   if (is.null(rec$seqno)) rec$seqno <- NA_integer_
-  elist <- list()
+  else rec$seqno <- as.integer(ununboxer(rec$seqno))
   smo <- NULL
   smser <- rec$sm
   slist <- parseStats(rec$stats)
-  hist <- unserializeJSON(rec$hist)
+  hist <- lapply(rec$hist,parseHist)
   new("StudentRecord","_id"=ununboxer(rec$"_id"),
       app=ununboxer(rec$app), context=ununboxer(rec$context),
       uid=ununboxer(rec$uid),
       timestamp=as.POSIXlt(ununboxer(rec$timestamp)),
-      evidence_id=ununboxer(rec$evidence_id),evidence=elist,
-      sm=smo,smser=smser, stats=slist,hist=hist,
+      evidence=as.character(rec$evidence),
+      sm=smo,smser=smser,stats=slist,hist=hist,
+      seqno=rec$seqno,
       prev_id=ununboxer(rec$prev_id))
 }
+
 
 unparseStats <- function (slist) {
   lapply(slist,function (s)
@@ -164,6 +169,19 @@ stats2json <- function (slist) {
 }
 parseStats <- function (slist) {
   lapply(slist,function(s) do.call(c,as.list(s)))
+}
+
+unparseHist <- function(histo) {
+  hlist <- as.list(as.data.frame(histo))
+  names(hlist) <- colnames(histo)
+  hlist$rownames <- rownames(histo)
+  hlist
+}
+
+parseHist <- function(hlist) {
+  rn <- names(hlist)=="row.names"
+  hdf <- as.data.frame(hlist[!rn],row.names=hlist$rownames)
+  as.matrix(hdf)
 }
 
 
@@ -216,7 +234,7 @@ StudentRecordSet <-
                                 warehouse=warehouse,defaultSR=NULL,...),
                   recorddb = function () {
                     if (is.null(db)) {
-                      db <<- mongo("States",dbname,dburi)
+                      db <<- mongo("StudentRecords",dbname,dburi)
                     }
                     db
                   },
@@ -242,7 +260,7 @@ getSR <- function (srs,uid) {
   if (is.null(rec)) {
     rec <- newSR(srs,uid)
   } else {
-    rec <- fetchSM(rec,warehouse)
+    rec <- fetchSM(rec,srs$warehouse)
   }
   rec
 }
@@ -256,7 +274,8 @@ newSR <- function (srs,uid) {
   dsr <- srs$defaultSR
   rec <- StudentRecord(uid=uid,context(dsr),timestamp=Sys.time(),
                       sm=CopyNetworks(sm(dsr),as.IDname(uid,"S")),
-                      stats=stats(dsr),hist=dsr@hist)
+                      stats=stats(dsr),hist=dsr@hist,app=app(srs),
+                      seqno=0L)
   saveRec(rec,srs$recorddb())
   rec
 }

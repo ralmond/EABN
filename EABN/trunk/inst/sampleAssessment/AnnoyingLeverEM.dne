@@ -1,11 +1,10 @@
 // ~->[DNET-1]->~
 
-// File created by AlmondR at FloridaStateU using Netica 5.04 on 05/03/2019 at 09:46:13 PM.
+// File created by AlmondR at FloridaStateU using Netica 5.05 on Apr 17, 2019 at 16:50:33.
 
-bnet AnnoyingLever {
+bnet AnnoyingLeverEM {
 autoupdate = TRUE;
-title = "Annoying Lever";
-whenchanged = 1556934345;
+whenchanged = 1555534233;
 
 visual V1 {
 	defdispform = BELIEFBARS;
@@ -42,139 +41,6 @@ visual V1 {
 	};
 user U1 {
 	priorWeight = "10";
-	Hub = "PPOrangeNodes";
-	Pathname = "/home/ralmond/Projects/EABN/inst/sampleAssessment/AnnoyingLeverEM.dne";
-	};
-
-param X_EnergyTransfer_4 {
-	kind = DISCONNECTED;
-	discrete = TRUE;
-	chance = CHANCE;
-	states = (High, Medium, Low);
-	probs = 
-		// High         Medium       Low          
-		  (0.3333333,   0.3333333,   0.3333333);
-	title = "EnergyTransfer";
-	whenchanged = 1556934242;
-	};
-
-param X_PropertiesofTorque_4 {
-	kind = DISCONNECTED;
-	discrete = TRUE;
-	chance = CHANCE;
-	states = (High, Medium, Low);
-	probs = 
-		// High         Medium       Low          
-		  (0.3333333,   0.3333333,   0.3333333);
-	title = "PropertiesofTorque";
-	whenchanged = 1556934242;
-	};
-
-node Duration {
-	kind = NATURE;
-	discrete = FALSE;
-	chance = CHANCE;
-	states = (Very_fast, Fast, Slow, Very_slow);
-	levels = (0, 30, 120, 300, INFINITY);
-	inputs = (PropertiesofTorque, EnergyTransfer);
-	parents = (X_PropertiesofTorque_4, X_EnergyTransfer_4);
-	probs = 
-		// Very fast    Fast         Slow         Very slow     // PropertiesofTorque EnergyTransfer 
-		  (0.7252621,   0.2024506,   0.05651234,  0.01577493,   // High               High           
-		   0.5284212,   0.2675407,   0.1354563,   0.06858179,   // High               Medium         
-		   0.2828,      0.2597011,   0.2384891,   0.2190098,    // High               Low            
-		   0.4058683,   0.2767498,   0.1887076,   0.1286743,    // Medium             High           
-		   0.1767377,   0.2185832,   0.2703363,   0.3343428,    // Medium             Medium         
-		   0.05111607,  0.1146648,   0.257219,    0.577,        // Medium             Low            
-		   0.09939337,  0.1655532,   0.2757515,   0.4593019,    // Low                High           
-		   0.02455676,  0.07418851,  0.2241312,   0.6771235,    // Low                Medium         
-		   0.00497416,  0.02725654,  0.1493557,   0.8184136);   // Low                Low            ;
-	whenchanged = 1556934242;
-	visual V1 {
-		center = (135, 50);
-		height = 5;
-		link 1 {
-			labelposn = (92, 2, 195, 17);
-			path = ((92, 0), (92, 0));
-			};
-		link 2 {
-			labelposn = (178, 2, 261, 17);
-			path = ((178, 0), (178, 0));
-			};
-		};
-	};
-
-param X_PropertiesofTorque_3 {
-	kind = DISCONNECTED;
-	discrete = TRUE;
-	chance = CHANCE;
-	states = (High, Medium, Low);
-	levels = (0.967421566101701, 0, -0.967421566101701);
-	probs = 
-		// High         Medium       Low          
-		  (0.4267575,   0.3390673,   0.2341752);
-	title = "PropertiesofTorque";
-	whenchanged = 1555534179;
-	};
-
-param X_EnergyTransfer_1 {
-	kind = DISCONNECTED;
-	discrete = TRUE;
-	chance = CHANCE;
-	states = (High, Medium, Low);
-	levels = (0.967421566101701, 0, -0.967421566101701);
-	probs = 
-		// High         Medium       Low          
-		  (0.438105,    0.2857577,   0.2761373);
-	title = "EnergyTransfer";
-	whenchanged = 1555534182;
-	};
-
-node NumberAttempts {
-	kind = NATURE;
-	discrete = TRUE;
-	chance = CHANCE;
-	states = (one, two, three_four, more_than_four);
-	inputs = (PropertiesofTorque, EnergyTransfer);
-	parents = (X_PropertiesofTorque_3, X_EnergyTransfer_1);
-	probs = 
-		// one          two          three four   more than four  // PropertiesofTorque EnergyTransfer 
-		  (0.7252621,   0.2024506,   0.05651234,  0.01577493,   // High               High           
-		   0.5284212,   0.2675407,   0.1354563,   0.06858179,   // High               Medium         
-		   0.2828,      0.2597011,   0.2384891,   0.2190098,    // High               Low            
-		   0.4058683,   0.2767498,   0.1887076,   0.1286743,    // Medium             High           
-		   0.1767377,   0.2185832,   0.2703363,   0.3343428,    // Medium             Medium         
-		   0.05111607,  0.1146648,   0.257219,    0.577,        // Medium             Low            
-		   0.09939337,  0.1655532,   0.2757515,   0.4593019,    // Low                High           
-		   0.02455676,  0.07418851,  0.2241312,   0.6771235,    // Low                Medium         
-		   0.00497416,  0.02725654,  0.1493557,   0.8184136);   // Low                Low            ;
-	title = "Number of attempts";
-	whenchanged = 1555534182;
-	visual V1 {
-		center = (906, 174);
-		height = 4;
-		link 1 {
-			labelposn = (714, 200, 819, 215);
-			path = ((714, 198), (808, 186));
-			};
-		link 2 {
-			labelposn = (696, 133, 780, 148);
-			path = ((696, 150), (808, 163));
-			};
-		};
-	};
-
-param X_PropertiesofTorque_1 {
-	kind = DISCONNECTED;
-	discrete = TRUE;
-	chance = CHANCE;
-	states = (High, Medium, Low);
-	levels = (0.967421566101701, 0, -0.967421566101701);
-	probs = 
-		// High         Medium       Low          
-		  (0.4267575,   0.3390673,   0.2341752);
-	title = "PropertiesofTorque";
-	whenchanged = 1555534170;
 	};
 
 param X_EnergyTransfer_3 {
@@ -188,6 +54,19 @@ param X_EnergyTransfer_3 {
 		  (0.438105,    0.2857577,   0.2761373);
 	title = "EnergyTransfer";
 	whenchanged = 1555534194;
+	};
+
+param X_PropertiesofTorque_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	probs = 
+		// High         Medium       Low          
+		  (0.4267575,   0.3390673,   0.2341752);
+	title = "PropertiesofTorque";
+	whenchanged = 1555534170;
 	};
 
 node TrophyLevel {
@@ -223,11 +102,131 @@ node TrophyLevel {
 			};
 		};
 	};
+
+param X_EnergyTransfer_2 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	probs = 
+		// High         Medium       Low          
+		  (0.438105,    0.2857577,   0.2761373);
+	title = "EnergyTransfer";
+	whenchanged = 1555534188;
+	};
+
+param X_PropertiesofTorque_2 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	probs = 
+		// High         Medium       Low          
+		  (0.4267575,   0.3390673,   0.2341752);
+	title = "PropertiesofTorque";
+	whenchanged = 1555534174;
+	};
+
+node Duration {
+	kind = NATURE;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (Very_fast, Fast, Slow, Very_slow);
+	inputs = (PropertiesofTorque, EnergyTransfer);
+	parents = (X_PropertiesofTorque_2, X_EnergyTransfer_2);
+	probs = 
+		// Very fast    Fast         Slow         Very slow     // PropertiesofTorque EnergyTransfer 
+		  (0.7252621,   0.2024506,   0.05651234,  0.01577493,   // High               High           
+		   0.5284212,   0.2675407,   0.1354563,   0.06858179,   // High               Medium         
+		   0.2828,      0.2597011,   0.2384891,   0.2190098,    // High               Low            
+		   0.4058683,   0.2767498,   0.1887076,   0.1286743,    // Medium             High           
+		   0.1767377,   0.2185832,   0.2703363,   0.3343428,    // Medium             Medium         
+		   0.05111607,  0.1146648,   0.257219,    0.577,        // Medium             Low            
+		   0.09939337,  0.1655532,   0.2757515,   0.4593019,    // Low                High           
+		   0.02455676,  0.07418851,  0.2241312,   0.6771235,    // Low                Medium         
+		   0.00497416,  0.02725654,  0.1493557,   0.8184136);   // Low                Low            ;
+	title = "Duration to solve level";
+	whenchanged = 1555534188;
+	visual V1 {
+		center = (918, 276);
+		height = 3;
+		link 1 {
+			labelposn = (726, 344, 831, 359);
+			path = ((726, 342), (833, 305));
+			};
+		link 2 {
+			labelposn = (744, 217, 828, 232);
+			path = ((744, 234), (833, 256));
+			};
+		};
+	};
+
+param X_EnergyTransfer_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	probs = 
+		// High         Medium       Low          
+		  (0.438105,    0.2857577,   0.2761373);
+	title = "EnergyTransfer";
+	whenchanged = 1555534182;
+	};
+
+param X_PropertiesofTorque_3 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	probs = 
+		// High         Medium       Low          
+		  (0.4267575,   0.3390673,   0.2341752);
+	title = "PropertiesofTorque";
+	whenchanged = 1555534179;
+	};
+
+node NumberAttempts {
+	kind = NATURE;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (one, two, three_four, more_than_four);
+	inputs = (PropertiesofTorque, EnergyTransfer);
+	parents = (X_PropertiesofTorque_3, X_EnergyTransfer_1);
+	probs = 
+		// one          two          three four   more than four  // PropertiesofTorque EnergyTransfer 
+		  (0.7252621,   0.2024506,   0.05651234,  0.01577493,   // High               High           
+		   0.5284212,   0.2675407,   0.1354563,   0.06858179,   // High               Medium         
+		   0.2828,      0.2597011,   0.2384891,   0.2190098,    // High               Low            
+		   0.4058683,   0.2767498,   0.1887076,   0.1286743,    // Medium             High           
+		   0.1767377,   0.2185832,   0.2703363,   0.3343428,    // Medium             Medium         
+		   0.05111607,  0.1146648,   0.257219,    0.577,        // Medium             Low            
+		   0.09939337,  0.1655532,   0.2757515,   0.4593019,    // Low                High           
+		   0.02455676,  0.07418851,  0.2241312,   0.6771235,    // Low                Medium         
+		   0.00497416,  0.02725654,  0.1493557,   0.8184136);   // Low                Low            ;
+	title = "Number of attempts";
+	whenchanged = 1555534182;
+	visual V1 {
+		center = (906, 174);
+		height = 4;
+		link 1 {
+			labelposn = (714, 200, 819, 215);
+			path = ((714, 198), (808, 186));
+			};
+		link 2 {
+			labelposn = (696, 133, 780, 148);
+			path = ((696, 150), (808, 163));
+			};
+		};
+	};
 NodeSet HighLevel {Nodes = ();};
 NodeSet Proficiency {Nodes = ();};
 NodeSet LowLevel {Nodes = ();};
 NodeSet pnode {Nodes = ();};
 NodeSet pnodes {Nodes = ();};
 NodeSet Proficiencies {Nodes = ();};
-NodeSet Observable {Nodes = (NumberAttempts, TrophyLevel);};
+NodeSet Observable {Nodes = (NumberAttempts, Duration, TrophyLevel);};
 };

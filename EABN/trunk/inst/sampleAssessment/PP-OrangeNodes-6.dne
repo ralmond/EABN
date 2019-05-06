@@ -6,38 +6,6 @@ bnet PP_OrangeNodes_6 {
 autoupdate = TRUE;
 whenchanged = 1507822597;
 
-visual V1 {
-	defdispform = BELIEFBARS;
-	nodelabeling = TITLE;
-	NodeMaxNumEntries = 50;
-	nodefont = font {shape= "Arial"; size= 9;};
-	linkfont = font {shape= "Arial"; size= 9;};
-	windowposn = (451, 0, 902, 545);
-	resolution = 72;
-	drawingbounds = (1515, 782);
-	showpagebreaks = FALSE;
-	usegrid = TRUE;
-	gridspace = (6, 6);
-	NodeSet Node {BuiltIn = 1; Color = 0x00e1e1e1;};
-	NodeSet Nature {BuiltIn = 1; Color = 0x00f8eed2;};
-	NodeSet Deterministic {BuiltIn = 1; Color = 0x00d3caa6;};
-	NodeSet Finding {BuiltIn = 1; Color = 0x00c8c8c8;};
-	NodeSet Constant {BuiltIn = 1; Color = 0x00ffffff;};
-	NodeSet ConstantValue {BuiltIn = 1; Color = 0x00ffffb4;};
-	NodeSet Utility {BuiltIn = 1; Color = 0x00ffbdbd;};
-	NodeSet Decision {BuiltIn = 1; Color = 0x00dee8ff;};
-	NodeSet Documentation {BuiltIn = 1; Color = 0x00f0fafa;};
-	NodeSet Title {BuiltIn = 1; Color = 0x00ffffff;};
-	NodeSet HighLevel {Color = 0x00ff8080;};
-	NodeSet Proficiency {Disabled = 1; Color = 0x00c8c8c8;};
-	NodeSet LowLevel {Color = 0x00ff8000;};
-	NodeSet pnode {Disabled = 1; Color = 0x00c8c8c8;};
-	NodeSet pnodes {Disabled = 1; Color = 0x00c8c8c8;};
-	NodeSet Proficiencies {Disabled = 1; Color = 0x00c8c8c8;};
-	PrinterSetting A {
-		margins = (1270, 1270, 1270, 1270);
-		};
-	};
 user U1 {
 	priorWeight = "10";
 	};
@@ -62,11 +30,6 @@ node Physics {
 		linkScale = "1";
 		lnAlphas = "1";
 		betas = "0";
-		};
-	visual V1 {
-		center = (81, 216);
-		dispform = LABELBOX;
-		height = 2;
 		};
 	};
 
@@ -95,11 +58,6 @@ node ScienceAndEngineeringPractices {
 		lnAlphas = "structure(-0.255412811882995, .Names = \"Physics\")";
 		betas = "0";
 		};
-	visual V1 {
-		center = (246, 24);
-		dispform = LABELBOX;
-		height = 3;
-		};
 	};
 
 node ForceAndMotion {
@@ -126,11 +84,6 @@ node ForceAndMotion {
 		linkScale = "0.447213595499958";
 		lnAlphas = "structure(-0.111571775657105, .Names = \"Physics\")";
 		betas = "-0.5";
-		};
-	visual V1 {
-		center = (258, 114);
-		dispform = LABELBOX;
-		height = 13;
 		};
 	};
 
@@ -164,11 +117,6 @@ node LinearMomentum {
 		linkScale = "0.447213595499958";
 		lnAlphas = "structure(c(-0.255412811882995, 0), .Names = c(\"Physics\", \"ForceAndMotion\" ))";
 		betas = "-0.2";
-		};
-	visual V1 {
-		center = (378, 222);
-		dispform = LABELBOX;
-		height = 16;
 		};
 	};
 
@@ -205,11 +153,6 @@ node Energy {
 			\"ForceAndMotion\"))";
 		betas = "0";
 		};
-	visual V1 {
-		center = (240, 330);
-		dispform = LABELBOX;
-		height = 1;
-		};
 	};
 
 node Torque {
@@ -244,11 +187,6 @@ node Torque {
 			\"ForceAndMotion\"))";
 		betas = "0.5";
 		};
-	visual V1 {
-		center = (180, 402);
-		dispform = LABELBOX;
-		height = 14;
-		};
 	};
 
 node IterativeD {
@@ -274,11 +212,6 @@ node IterativeD {
 		linkScale = "0.447213595499958";
 		lnAlphas = "structure(-0.111571775657105, .Names = \"ScienceAndEngineeringPractices\")";
 		betas = "-0.2";
-		};
-	visual V1 {
-		center = (540, 24);
-		dispform = LABELBOX;
-		height = 9;
 		};
 	};
 
@@ -309,11 +242,6 @@ node NFL {
 		lnAlphas = "structure(-0.111571775657105, .Names = \"ForceAndMotion\")";
 		betas = "-0.3";
 		};
-	visual V1 {
-		center = (462, 72);
-		dispform = LABELBOX;
-		height = 5;
-		};
 	};
 
 node NSL {
@@ -321,7 +249,7 @@ node NSL {
 	discrete = TRUE;
 	chance = CHANCE;
 	states = (High, Medium, Low);
-	levels = (33.3, 33.33, 33.3);
+	levels = (0.967421566101701, 0, -0.967421566101701);
 	parents = (ForceAndMotion);
 	probs = 
 		// High         Medium       Low           // ForceAndMotion 
@@ -339,11 +267,6 @@ node NSL {
 		linkScale = "0.447213595499958";
 		lnAlphas = "structure(-0.111571775657105, .Names = \"ForceAndMotion\")";
 		betas = "0";
-		};
-	visual V1 {
-		center = (468, 102);
-		dispform = LABELBOX;
-		height = 6;
 		};
 	};
 
@@ -370,14 +293,6 @@ node NTL {
 		linkScale = "0.447213595499958";
 		lnAlphas = "structure(-0.111571775657105, .Names = \"ForceAndMotion\")";
 		betas = "0.3";
-		};
-	visual V1 {
-		center = (462, 132);
-		dispform = LABELBOX;
-		height = 4;
-		link 1 {
-			path = ((317, 119), (397, 127));
-			};
 		};
 	};
 
@@ -406,11 +321,6 @@ node POfMom {
 		linkScale = "0.447213595499958";
 		lnAlphas = "structure(-0.111571775657105, .Names = \"LinearMomentum\")";
 		betas = "0";
-		};
-	visual V1 {
-		center = (582, 186);
-		dispform = LABELBOX;
-		height = 8;
 		};
 	};
 
@@ -445,11 +355,6 @@ node ConOfMom {
 			))";
 		betas = "0.3";
 		};
-	visual V1 {
-		center = (582, 234);
-		dispform = LABELBOX;
-		height = 7;
-		};
 	};
 
 node EnergyTransfer {
@@ -474,14 +379,6 @@ node EnergyTransfer {
 		linkScale = "0.447213595499958";
 		lnAlphas = "structure(-0.111571775657105, .Names = \"Energy\")";
 		betas = "0";
-		};
-	visual V1 {
-		center = (384, 288);
-		dispform = LABELBOX;
-		height = 15;
-		link 1 {
-			path = ((270, 322), (354, 297));
-			};
 		};
 	};
 
@@ -508,14 +405,6 @@ node EnergyDissipate {
 		lnAlphas = "structure(-0.111571775657105, .Names = \"Energy\")";
 		betas = "0.2";
 		};
-	visual V1 {
-		center = (384, 366);
-		dispform = LABELBOX;
-		height = 10;
-		link 1 {
-			path = ((270, 337), (349, 357));
-			};
-		};
 	};
 
 node PropertiesofTorque {
@@ -541,11 +430,6 @@ node PropertiesofTorque {
 		lnAlphas = "structure(-0.111571775657105, .Names = \"Torque\")";
 		betas = "-0.4";
 		};
-	visual V1 {
-		center = (402, 432);
-		dispform = LABELBOX;
-		height = 11;
-		};
 	};
 
 node StaticEquilibrium {
@@ -570,11 +454,6 @@ node StaticEquilibrium {
 		linkScale = "0.447213595499958";
 		lnAlphas = "structure(-0.111571775657105, .Names = \"Torque\")";
 		betas = "-0.1";
-		};
-	visual V1 {
-		center = (402, 498);
-		dispform = LABELBOX;
-		height = 12;
 		};
 	};
 NodeSet HighLevel {Nodes = (Torque, Energy, LinearMomentum, ForceAndMotion, ScienceAndEngineeringPractices);};

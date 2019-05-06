@@ -196,9 +196,16 @@ setupDefaultSR <- function (eng) {
   dsr <- updateStats(eng,dsr)
   dsr <- baselineHist(eng,dsr)
   eng$srs$defaultSR <- dsr
+  saveSR(eng$srs,dsr)
   announceStats(eng,dsr)
 }
 
+getRecordForUser <- function(eng,uid) {
+  rec <- getSR(eng$StudentRecords(),uid)
+  if (seqno(rec)==0L)
+    announceStats(eng,dsr)
+  rec
+}
 
 ################
 ## Big Update Function
