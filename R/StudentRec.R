@@ -9,18 +9,36 @@ setClassUnion("BNSession",c("NeticaSession","NULL"))
 setClassUnion("EmptyWarehouse",c("BNWarehouse","NULL"))
 
 setClass("StudentRecord",
-         slots=c(evidence="list",
+         slots=c("_id"="character",
+                 app="character",
+                 uid="character",
+                 context="character",
+                 evidence="list",
+                 timestamp="POSIXt",      #Date of last update.
                  sm="BayesianNetwork",
                  smser="character",
                  seqno="integer",
+                 stats="list",
                  hist="list",
-                 prev_id="character"),
-         contains="P4Message")
+                 prev_id="character"))
+
 
 setMethod("app","StudentRecord", function(x) x@app)
 setMethod("uid","StudentRecord", function(x) x@uid)
 setMethod("context","StudentRecord", function(x) x@context)
 setMethod("timestamp","StudentRecord", function(x) x@timestamp)
+
+setMethod("seqno","StudentRecord", function(x) x@seqno)
+setMethod("seqno<-","StudentRecord", function(x,value) {
+  x@seqno <- value
+})
+
+setGeneric("seqno",function(x) standardGeneric("seqno"))
+setMethod("seqno","EvidenceSet", function(x) x@seqno)
+setGeneric("seqno<-",function(x,value) standardGeneric("seqno<-"))
+setMethod("seqno<-","EvidenceSet", function(x,value) {
+  x@seqno <- value
+})
 
 
 setGeneric("stats",function(x) standardGeneric("stats"))
@@ -29,7 +47,7 @@ setGeneric("histNames",function (sr) standardGeneric("histNames"))
 setGeneric("stat",function (sr,name) standardGeneric("stat"))
 setGeneric("history",function (sr,name) standardGeneric("history"))
 
-setMethod("stats","StudentRecord", function(x) x@data)
+setMethod("stats","StudentRecord", function(x) x@stats)
 setMethod("statNames","StudentRecord", function (sr) names(stats(sr)))
 setMethod("stat",c("StudentRecord","character"),
           function (sr, name) stats(sr)[[name]])
@@ -40,26 +58,38 @@ setMethod("history",c("StudentRecord","character"),
 
 setGeneric("sm",function(x) standardGeneric("sm"))
 setMethod("sm","StudentRecord", function(x) x@sm)
+fetchSM <- function (sr, warehouse) {
+  sr@sm <- WarehouseFetch(warehouse,as.IDname(name(sr),"S"))
+  if (is.null(sm(sr)) || !is.active(sm(sr))) {
+    sr@sm <- unpackSM(sr,warehouse)
+  }
+  sr
+}
+
 unpackSM <- function (sr, warehouse) {
   if (length(sr@smser))
-    stop("No serialized version to unpack.")
-  sr@sm <- WarehouseUnpack(warehouse,list(name(sr),sr@smser))
-  sm
+    stop("No serialized version of sm to unpack.")
+  WarehouseUnpack(warehouse,list(as.IDname(name(sr),"S"),sr@smser))
 }
 
 StudentRecord <- function(uid,context="",timestamp=Sys.time(),
-                          evidence=list(),evidence_id=character(),
+                          evidence_id=character(),
                           smser=character(),sm=NULL,stats=list(),hist=list(),
                           app="default") {
   new("StudentRecord",app=app,uid=uid,context=context,
-      timestamp=timestamp,evidence=evidence,smser=smser,
-      sm=sm,data=stats,hist=hist,
+      timestamp=timestamp,evidence=evidence_id,smser=smser,
+      sm=sm,stats=stats,hist=hist,
       seqno=NA_integer_,"_id"=NA_character_,
       prev_id=NA_character_)
 }
 
 setGeneric("evidence",function(x) standardGeneric("evidence"))
 setMethod("evidence","StudentRecord", function(x) x@evidence)
+setGeneric("evidence<-",function(x,value) standardGeneric("evidence<-"))
+setMethod("evidence<-","StudentRecord",
+          function(x,value) {
+            x@evidence <- value
+            x})
 
 setMethod("toString","StudentRecord", function(x, ...) {
   paste('StudentRecord:{uid:',x@uid,', context:',x@context,
@@ -79,8 +109,8 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
   ml$timestamp <- unboxer(ml$timestamp) # Auto_unbox bug.
 
   ## Serialize SM if necessary.
-  if (!is.null(x@sm)) {
-    smo <- PnetSerialize(x@sm)
+  if (!is.null(obj@sm)) {
+    smo <- PnetSerialize(obj@sm)
     smo$data <- base64_enc(smo$data)
     ml$sm <- smo
   } else {
@@ -88,14 +118,15 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
   }
   ## Normalize Evidence Sets
   ml$evidence <- NULL
-  if (length(x@evidence)>0L) {
-    ml$evidence <- unboxer(x@evidence)
+  if (length(obj@evidence)>0L) {
+    ml$evidence <- unboxer(obj@evidence)
   }
   ## Normalize Prev_id
   ml$"prev_id" <- NULL
-  if (!is.na(x@"prev_id")) {
-    ml$prev <- unboxer(x@"prev_id")
+  if (!is.na(obj@"prev_id")) {
+    ml$prev <- unboxer(obj@"prev_id")
   }
+  ml$stats <- unparseStats(ml$stats)
   ml$hist <- serializeJSON(ml$hist)
   ml
 })
@@ -109,15 +140,32 @@ parseStudentRecord <- function (rec) {
   elist <- list()
   smo <- NULL
   smser <- rec$sm
-  slist <- list()
+  slist <- parseStats(rec$stats)
   hist <- unserializeJSON(rec$hist)
   new("StudentRecord","_id"=ununboxer(rec$"_id"),
       app=ununboxer(rec$app), context=ununboxer(rec$context),
       uid=ununboxer(rec$uid),
       timestamp=as.POSIXlt(ununboxer(rec$timestamp)),
       evidence_id=ununboxer(rec$evidence_id),evidence=elist,
-      sm=smo,smser=smser, stats=slist,prev_id=ununboxer(rec$prev_id))
+      sm=smo,smser=smser, stats=slist,hist=hist,
+      prev_id=ununboxer(rec$prev_id))
 }
+
+unparseStats <- function (slist) {
+  lapply(slist,function (s)
+    if (length(s)==1L)
+      unboxer(s)
+    else
+      lapply(as.list(s),unboxer)
+    )
+}
+stats2json <- function (slist) {
+  toJSON(unparseStats(slist))
+}
+parseStats <- function (slist) {
+  lapply(slist,function(s) do.call(c,as.list(s)))
+}
+
 
 ###########
 ## Evidence Lists
@@ -165,60 +213,53 @@ StudentRecordSet <-
                              db = NULL,warehouse=NULL,
                              ...)
                       callSuper(app=app,db=db,dbname=dbname,dburi=dburi,
-                                warehouse=NULL,defaultSR=NULL,...)
-              ))
+                                warehouse=warehouse,defaultSR=NULL,...),
+                  recorddb = function () {
+                    if (is.null(db)) {
+                      db <<- mongo("States",dbname,dburi)
+                    }
+                    db
+                  },
+                  clearAll = function(clearDefault=FALSE) {
+                    flog.info("Clearing Student Records for %s",app)
+                    if (clearDefault)
+                      recorddb()$remove(buildJQuery(app=app))
+                    else
+                      recorddb()$remove(buildJQuery(app=app,
+                                                    uid=c("ne"="*DEFAULT*")))
+                  }
+                  ))
+
+setMethod("app","StudentRecordSet", function(x) x$app)
+defaultSR <- function(x) x$defaultSR
+
 
 
 ## Student Record Methods
-StudentRecordSet$methods(
-             recorddb = function () {
-               if (is.null(db)) {
-                 db <<- mongo("States",dbname,dburi)
-               }
-               db
-             },
-             getSR = function (uid) {
-               result <- getOneRec(buildJQuery(app=app,uid=uid),recorddb(),
-                                   parseStudentRecord)
-               if (is.null(result)) {
-                 result <- getOneRec(buildJQuery(app=app,uid="*DEFAULT*"),
-                                                 recorddb(),parseStudentRecord)
-                 result@uid <- uid
-                 result@timestamp <- Sys.time()
-                 result@"_id" <- NA_character_
+getSR <- function (srs,uid) {
+  rec <- getOneRec(buildJQuery(app=app(srs),uid=uid),srs$recorddb(),
+                      parseStudentRecord)
+  if (is.null(rec)) {
+    rec <- newSR(srs,uid)
+  } else {
+    rec <- fetchSM(rec,warehouse)
+  }
+  rec
+}
 
-               }
-               result
-             },
-             saveStatus = function (state) {
-               saveRec(state,recorddb())
-             },
-             newStudent = function (uid) {
-               rec <- getStatus(uid)
-               if (!is.null(rec)) {
-                 flog.debug("Found existing student record for  %s", uid)
-                 return (rec)
-               }
-               rec <- getStatus("*DEFAULT*")
-               if(!is.null(rec)) {
-                 flog.debug("Found default student record for  %s", uid)
-                 rec@uid <- uid
-                 rec@timestamp <- Sys.time()
-                 saveRec(rec,recorddb())
-                 return(rec)
-               }
-               flog.debug("Making blank student record for  %s", uid)
-               rec <- Status(uid=uid,context="*INITIAL*",timestamp=Sys.time(),
-                             app=app)
-               rec <- saveRec(rec,recorddb())
-               rec
-             },
-             clearAll = function(clearDefault=FALSE) {
-               flog.info("Clearing Student Records for %s",app)
-               if (clearDefault)
-                 recorddb()$remove(buildJQuery(app=app))
-               else
-                 recorddb()$remove(buildJQuery(app=app,uid=c("ne"="*DEFAULT*")))
-             }
-             )
+saveSR <- function (srs,rec) {
+  saveRec(rec,srs$recorddb())
+}
+
+newSR <- function (srs,uid) {
+  flog.debug("Making new student record for  %s", uid)
+  dsr <- srs$defaultSR
+  rec <- StudentRecord(uid=uid,context(dsr),timestamp=Sys.time(),
+                      sm=CopyNetworks(sm(dsr),as.IDname(uid,"S")),
+                      stats=stats(dsr),hist=dsr@hist)
+  saveRec(rec,srs$recorddb())
+  rec
+}
+
+
 

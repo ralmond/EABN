@@ -77,7 +77,7 @@ BNEngine <-
                   },
                   evidenceSets = function() {
                     if (is.null(evidenceDB)) {
-                      evidenceDB <<- mongo("EvidenceSets",dbname,dburi)
+                      evidenceDB <<- mongo("Observables",dbname,dburi)
                     }
                     evidenceDB
                   },
@@ -121,13 +121,8 @@ BNEngine <-
                     warehouseObj
                   },
                   setManifest = function(manifest) {
-                    if (is.null(warehouseObj)) {
-                      warehouseObj <<-BNWarehouse(manifest=manifest,
-                                                  session=session,
-                                                  key="Name")
-                    } else {
-                      WarehouseManifest(warehouseObj) <<- manifest
-                    }
+                    warehouse()         # Initialize Warehouse
+                    WarehouseManifest(warehouseObj) <<- manifest
                   },
                   show = function() {
                     methods::show(paste("<EABN: ",app,">"))
@@ -201,18 +196,53 @@ setupDefaultSR <- function (eng) {
   dsr <- updateStats(eng,dsr)
   dsr <- baselineHist(eng,dsr)
   eng$srs$defaultSR <- dsr
+  announceStats(eng,dsr)
 }
 
 
 ################
 ## Big Update Function
 
-newSR <- function(eng){}
-
-logEvidence <- function (eng,rec,evidMess) {}
+logEvidence <- function (eng,rec,evidMess) {
+  seqno(evidMess) <- seqno(rec)+1L
+  evidMess
+}
 
 accumulateEvidence <- function(eng,rec,evidMess) {
+  rec1 <- StudentRecord(app=app(eng),uid=uid(rec),
+                        context=context(evidMess),
+                        timestamp=timestamp(evidMess),
+                        evidence_id=c(evidence(rec),m_id(evidMess)),
+                        sm=sm(rec),stats=stats(sm),hist=rec@hist,
+                        seqno=seqno(evidMess),prev_id=m_id(eng))
+  rec1 <- updateSM(eng,rec1,evidMess)
+  rec1 <- updateStats(eng,rec1)
+  rec1 <- updateHist(eng,rec,evidMess)
+  announceStats(eng,rec1)
+  saveSR(eng$StudentRecords(),rec1)
+  rec1
 }
+
+updateSM <- function (eng,rec,evidMess) {
+  manf <-WarehouseManifest(eng$warehouse())
+  emName <-manf[manf$Title==context(evidMess),"Name"]
+  em <- WarehouseSupply(eng$warehouse(),emName)
+  obs <- AdjoinNetwork(sm(rec),em)
+  CompileNetwork(sm(rec))
+
+  for (oname in names(observables(evidMess))) {
+    oval <- observables(evidMess)[[oname]]
+    if (is.numeric(oval)) {
+      NodeValue(obs[[oname]]) <- oval
+    } else {
+      NodeFinding(obs[[oname]]) <- oval
+    }
+  }
+  AbsorbNodes(obs)
+  CompileNetwork(sm(rec))
+  rec
+}
+
 
 #############################################
 ## Statistics
@@ -240,9 +270,9 @@ registerStats <- function(eng,statmat) {
 
 
 updateStats <- function(eng,rec) {
-  rec@data <- lapply(eng$stats(),
+  rec@stats <- lapply(eng$stats(),
                       function (stat) calcStat(stat,sm(rec)))
-  names(rec@data) <- sapply(eng$stats(),name)
+  names(rec@stats) <- sapply(eng$stats(),name)
   rec
 }
 
