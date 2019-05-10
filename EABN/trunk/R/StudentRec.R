@@ -30,13 +30,7 @@ setMethod("timestamp","StudentRecord", function(x) x@timestamp)
 setMethod("seqno","StudentRecord", function(x) x@seqno)
 setMethod("seqno<-","StudentRecord", function(x,value) {
   x@seqno <- value
-})
-
-setGeneric("seqno",function(x) standardGeneric("seqno"))
-setMethod("seqno","EvidenceSet", function(x) x@seqno)
-setGeneric("seqno<-",function(x,value) standardGeneric("seqno<-"))
-setMethod("seqno<-","EvidenceSet", function(x,value) {
-  x@seqno <- value
+  x
 })
 
 
@@ -66,13 +60,15 @@ fetchSM <- function (sr, warehouse) {
 }
 
 unpackSM <- function (sr, warehouse) {
-  if (length(sr@smser))
+  if (length(sr@smser)==0L) {
+    flog.error("No serialized verison of sm for %s",uid(sr))
     stop("No serialized version of sm to unpack.")
-  WarehouseUnpack(warehouse,list(as.IDname(name(sr),"S"),sr@smser))
+  }
+  WarehouseUnpack(warehouse,sr@smser)
 }
 
 StudentRecord <- function(uid,context="",timestamp=Sys.time(),
-                          smser=NULL,sm=NULL,stats=list(),hist=list(),
+                          smser=list(),sm=NULL,stats=list(),hist=list(),
                           evidence=character(),
                           app="default",seqno=-1L) {
   new("StudentRecord",app=app,uid=uid,context=context,
@@ -141,8 +137,15 @@ parseStudentRecord <- function (rec) {
   if (is.null(rec$prev_id)) rec$prev_id <- NA_character_
   if (is.null(rec$seqno)) rec$seqno <- NA_integer_
   else rec$seqno <- as.integer(ununboxer(rec$seqno))
-  smo <- NULL
-  smser <- rec$sm
+  if (!is.null(rec$sm)) {
+    smo <- rec$sm
+    smo$name <- smo$name[[1]]
+    smo$data <- base64_dec(smo$data[[1]])
+    smo$factory <- smo$factory[[1]]
+  } else {
+    smo <- NULL
+  }
+
   slist <- parseStats(rec$stats)
   hist <- lapply(rec$hist,parseHist)
   new("StudentRecord","_id"=ununboxer(rec$"_id"),
@@ -150,7 +153,7 @@ parseStudentRecord <- function (rec) {
       uid=ununboxer(rec$uid),
       timestamp=as.POSIXlt(ununboxer(rec$timestamp)),
       evidence=as.character(rec$evidence),
-      sm=smo,smser=smser,stats=slist,hist=hist,
+      sm=NULL,smser=smo,stats=slist,hist=hist,
       seqno=rec$seqno,
       prev_id=ununboxer(rec$prev_id))
 }
@@ -172,16 +175,15 @@ parseStats <- function (slist) {
 }
 
 unparseHist <- function(histo) {
-  hlist <- as.list(as.data.frame(histo))
-  names(hlist) <- colnames(histo)
-  hlist$rownames <- rownames(histo)
-  hlist
+  list(rownames=rownames(histo),colnames=colnames(histo),
+       data=as.vector(histo))
 }
 
 parseHist <- function(hlist) {
-  rn <- names(hlist)=="row.names"
-  hdf <- as.data.frame(hlist[!rn],row.names=hlist$rownames)
-  as.matrix(hdf)
+  rnames <- hlist$rownames
+  cnames <- hlist$colnames
+  matrix(hlist$data,length(rnames),length(cnames),
+         dimnames=list(Events=rnames,States=cnames))
 }
 
 

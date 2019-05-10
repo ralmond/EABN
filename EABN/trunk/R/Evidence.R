@@ -18,6 +18,7 @@ setMethod("seqno","EvidenceSet", function(x) x@seqno)
 setGeneric("seqno<-",function(x,value) standardGeneric("seqno<-"))
 setMethod("seqno<-","EvidenceSet", function(x,value) {
   x@seqno <- value
+  x
 })
 
 

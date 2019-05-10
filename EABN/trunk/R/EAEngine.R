@@ -219,21 +219,31 @@ accumulateEvidence <- function(eng,rec,evidMess) {
   rec1 <- StudentRecord(app=app(eng),uid=uid(rec),
                         context=context(evidMess),
                         timestamp=timestamp(evidMess),
-                        evidence_id=c(evidence(rec),m_id(evidMess)),
+                        evidence=c(evidence(rec),m_id(evidMess)),
                         sm=sm(rec),stats=stats(sm),hist=rec@hist,
                         seqno=seqno(evidMess),prev_id=m_id(eng))
   rec1 <- updateSM(eng,rec1,evidMess)
   rec1 <- updateStats(eng,rec1)
   rec1 <- updateHist(eng,rec,evidMess)
   announceStats(eng,rec1)
-  saveSR(eng$StudentRecords(),rec1)
+  rec1 <- saveSR(eng$studentRecords(),rec1)
   rec1
 }
 
 updateSM <- function (eng,rec,evidMess) {
   manf <-WarehouseManifest(eng$warehouse())
   emName <-manf[manf$Title==context(evidMess),"Name"]
+  flog.debug("Evidence Model for level %s is %s",context(evidMess),
+             paste(emName, collapse=", "))
+  if (length(emName) != 1L) {
+    flog.warn("No evidence model for context %s",context(evidMess))
+    stop("No evidence model for context ",context(evidMess))
+  }
   em <- WarehouseSupply(eng$warehouse(),emName)
+  if (is.null(em)) {
+    flog.error("No evidence model net for context %s",context(evidMess))
+    stop("No evidence model net for context %s",context(evidMess))
+  }
   obs <- AdjoinNetwork(sm(rec),em)
   CompileNetwork(sm(rec))
 
