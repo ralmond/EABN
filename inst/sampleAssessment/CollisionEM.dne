@@ -1,10 +1,11 @@
 // ~->[DNET-1]->~
 
-// File created by AlmondR at FloridaStateU using Netica 5.05 on Apr 17, 2019 at 17:04:22.
+// File created by AlmondR_2 at FLStateU using Netica 5.10 on May 07, 2019 at 15:33:33.
 
-bnet CollisionEM {
+bnet Collusion {
 autoupdate = TRUE;
-whenchanged = 1555535062;
+title = "Collusion";
+whenchanged = 1557257613;
 
 visual V1 {
 	defdispform = BELIEFBARS;
@@ -13,6 +14,7 @@ visual V1 {
 	nodefont = font {shape= "Arial"; size= 9;};
 	linkfont = font {shape= "Arial"; size= 9;};
 	windowposn = (451, 0, 902, 545);
+	scrollposn = (0, 286);
 	resolution = 72;
 	drawingbounds = (1515, 782);
 	showpagebreaks = FALSE;
@@ -43,30 +45,24 @@ user U1 {
 	priorWeight = "10";
 	};
 
-param X_NTL_3 {
-	kind = DISCONNECTED;
-	discrete = TRUE;
-	chance = CHANCE;
-	states = (High, Medium, Low);
-	levels = (0.967421566101701, 0, -0.967421566101701);
-	probs = 
-		// High         Medium       Low          
-		  (0.3421381,   0.3821831,   0.2756789);
-	title = "NTL";
-	whenchanged = 1555535033;
-	};
-
 param X_ConOfMom_3 {
 	kind = DISCONNECTED;
 	discrete = TRUE;
 	chance = CHANCE;
 	states = (High, Medium, Low);
 	levels = (0.967421566101701, 0, -0.967421566101701);
-	probs = 
-		// High         Medium       Low          
-		  (0.4496083,   0.2344603,   0.3159315);
 	title = "ConOfMom";
-	whenchanged = 1555535010;
+	whenchanged = 1557257613;
+	};
+
+param X_NTL_3 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "NTL";
+	whenchanged = 1557257613;
 	};
 
 node Slider {
@@ -88,32 +84,19 @@ node Slider {
 		   0.06702895,  0.2187935,   0.7141776,    // Low    Medium   
 		   0.01285922,  0.1064208,   0.88072);     // Low    Low      ;
 	title = "Slider";
-	whenchanged = 1555535033;
+	whenchanged = 1557257613;
 	visual V1 {
-		center = (948, 246);
-		height = 7;
+		center = (74, 33);
+		height = 15;
 		link 1 {
-			labelposn = (744, 163, 767, 178);
-			path = ((744, 180), (852, 215));
+			labelposn = (40, 2, 62, 17);
+			path = ((40, 0), (40, 0));
 			};
 		link 2 {
-			labelposn = (738, 217, 800, 232);
-			path = ((738, 234), (852, 241));
+			labelposn = (107, 2, 169, 17);
+			path = ((107, 0), (107, 0));
 			};
 		};
-	};
-
-param X_NTL_2 {
-	kind = DISCONNECTED;
-	discrete = TRUE;
-	chance = CHANCE;
-	states = (High, Medium, Low);
-	levels = (0.967421566101701, 0, -0.967421566101701);
-	probs = 
-		// High         Medium       Low          
-		  (0.3421381,   0.3821831,   0.2756789);
-	title = "NTL";
-	whenchanged = 1555535030;
 	};
 
 param X_ConOfMom_2 {
@@ -122,18 +105,26 @@ param X_ConOfMom_2 {
 	chance = CHANCE;
 	states = (High, Medium, Low);
 	levels = (0.967421566101701, 0, -0.967421566101701);
-	probs = 
-		// High         Medium       Low          
-		  (0.4496083,   0.2344603,   0.3159315);
 	title = "ConOfMom";
-	whenchanged = 1555535005;
+	whenchanged = 1557257613;
+	};
+
+param X_NTL_2 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "NTL";
+	whenchanged = 1557257613;
 	};
 
 node SliderAdjust {
 	kind = NATURE;
-	discrete = TRUE;
+	discrete = FALSE;
 	chance = CHANCE;
 	states = (Zero, One, Two, MorethanTwo);
+	levels = (0, 0.1, 1.1, 2.1, INFINITY);
 	inputs = (NTL, ConOfMom);
 	parents = (X_NTL_2, X_ConOfMom_2);
 	probs = 
@@ -147,33 +138,20 @@ node SliderAdjust {
 		   0.1645005,   0.2117871,   0.2726665,   0.351046,     // Low    High     
 		   0.02012161,  0.06568022,  0.214391,    0.6998072,    // Low    Medium   
 		   0.001551418, 0.01283927,  0.1062557,   0.8793536);   // Low    Low      ;
-	title = "Number of Slider Adjustment";
-	whenchanged = 1555535030;
+	title = "Number of slider adjustment";
+	whenchanged = 1557257613;
 	visual V1 {
-		center = (948, 378);
-		height = 6;
+		center = (83, 50);
+		height = 16;
 		link 1 {
-			labelposn = (672, 295, 695, 310);
-			path = ((672, 312), (852, 356));
+			labelposn = (40, 2, 62, 17);
+			path = ((40, 0), (40, 0));
 			};
 		link 2 {
-			labelposn = (774, 289, 836, 304);
-			path = ((774, 306), (852, 338));
+			labelposn = (126, 2, 188, 17);
+			path = ((126, 0), (126, 0));
 			};
 		};
-	};
-
-param X_NTL_1 {
-	kind = DISCONNECTED;
-	discrete = TRUE;
-	chance = CHANCE;
-	states = (High, Medium, Low);
-	levels = (0.967421566101701, 0, -0.967421566101701);
-	probs = 
-		// High         Medium       Low          
-		  (0.3421381,   0.3821831,   0.2756789);
-	title = "NTL";
-	whenchanged = 1555535026;
 	};
 
 param X_ConOfMom_1 {
@@ -182,11 +160,18 @@ param X_ConOfMom_1 {
 	chance = CHANCE;
 	states = (High, Medium, Low);
 	levels = (0.967421566101701, 0, -0.967421566101701);
-	probs = 
-		// High         Medium       Low          
-		  (0.4496083,   0.2344603,   0.3159315);
 	title = "ConOfMom";
-	whenchanged = 1555534998;
+	whenchanged = 1557257613;
+	};
+
+param X_NTL_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "NTL";
+	whenchanged = 1557257613;
 	};
 
 node TrophyLevel {
@@ -208,17 +193,17 @@ node TrophyLevel {
 		   0.06702895,  0.2187935,   0.7141776,    // Low    Medium   
 		   0.01285922,  0.1064208,   0.88072);     // Low    Low      ;
 	title = "Level solving status";
-	whenchanged = 1555535026;
+	whenchanged = 1557257613;
 	visual V1 {
-		center = (978, 498);
-		height = 5;
+		center = (74, 33);
+		height = 17;
 		link 1 {
-			labelposn = (690, 379, 713, 394);
-			path = ((690, 396), (904, 472));
+			labelposn = (40, 2, 62, 17);
+			path = ((40, 0), (40, 0));
 			};
 		link 2 {
-			labelposn = (714, 445, 776, 460);
-			path = ((714, 462), (904, 488));
+			labelposn = (107, 2, 169, 17);
+			path = ((107, 0), (107, 0));
 			};
 		};
 	};

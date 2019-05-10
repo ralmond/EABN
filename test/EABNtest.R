@@ -4,7 +4,7 @@ flog.threshold(DEBUG)
 
 tapp <- "ecd://epls.coe.fsu.edu/P4test"
 
-source("~/Netica.R")
+source("~/.Netica.R")
 sess <- NeticaSession(LicenseKey=NeticaLicenseKey)
 startSession(sess)
 
@@ -53,10 +53,25 @@ srs<- EAeng$studentRecords()
 fsr <- getSR(srs,"Phred")
 fsr0 <- getSR(srs,"Phred")
 
-es1 <- EvidenceSet(uid="Phred",context="ArountTheTree",
+es1 <- EvidenceSet(uid="Phred",context="Around the Tree",
                    obs=list(Duration=39.5,Agent="Ramp",
                             NumberAttempts=2,
                             TrophyLevel="Gold"),
                    app=app(EAeng),mess="Observables")
 
 es1 <- logEvidence(EAeng,fsr,es1)
+
+fsr0a <- EABN:::updateSM(EAeng,fsr0,es1)
+fsr0a <- updateStats(EAeng,fsr0a)
+
+pstat <- EAeng$stats()$Physics_EAP
+
+  ## manf <-WarehouseManifest(EAeng$warehouse())
+  ## emName <-manf[manf$Title==context(es1),"Name"]
+  ## em <- WarehouseSupply(EAeng$warehouse(),emName)
+  ## obs <- AdjoinNetwork(sm(fsr),em)
+
+
+fsr0a <- updateHist(EAeng,fsr0a,es1)
+announceStats(EAeng,fsr0a)
+fsr0a <- saveSR(EAeng$studentRecords(),fsr0a)

@@ -1,10 +1,11 @@
 // ~->[DNET-1]->~
 
-// File created by an unlicensed user using Netica 6.05 on Apr 20, 2019 at 05:08:50 UTC.
+// File created by AlmondR_2 at FLStateU using Netica 5.10 on May 07, 2019 at 15:32:27.
 
-bnet PP_OrangeNodes_6 {
+bnet Bowtie {
 autoupdate = TRUE;
-whenchanged = 1555736912;
+title = "Bowtie";
+whenchanged = 1557257547;
 
 visual V1 {
 	defdispform = BELIEFBARS;
@@ -12,30 +13,30 @@ visual V1 {
 	NodeMaxNumEntries = 50;
 	nodefont = font {shape= "Arial"; size= 9;};
 	linkfont = font {shape= "Arial"; size= 9;};
-	ShowLinkStrengths = 1;
 	windowposn = (451, 0, 902, 545);
+	scrollposn = (0, 286);
 	resolution = 72;
 	drawingbounds = (1515, 782);
 	showpagebreaks = FALSE;
 	usegrid = TRUE;
 	gridspace = (6, 6);
-	NodeSet Node {BuiltIn = 1; Color = 0x00e1e1e1;};
-	NodeSet Nature {BuiltIn = 1; Color = 0x00f8eed2;};
-	NodeSet Deterministic {BuiltIn = 1; Color = 0x00d3caa6;};
-	NodeSet Finding {BuiltIn = 1; Color = 0x00c8c8c8;};
-	NodeSet Constant {BuiltIn = 1; Color = 0x00ffffff;};
-	NodeSet ConstantValue {BuiltIn = 1; Color = 0x00ffffb4;};
-	NodeSet Utility {BuiltIn = 1; Color = 0x00ffbdbd;};
-	NodeSet Decision {BuiltIn = 1; Color = 0x00dee8ff;};
-	NodeSet Documentation {BuiltIn = 1; Color = 0x00f0fafa;};
-	NodeSet Title {BuiltIn = 1; Color = 0x00ffffff;};
-	NodeSet HighLevel {Color = 0x00ff8080;};
-	NodeSet Proficiency {Disabled = 1; Color = 0x00c8c8c8;};
-	NodeSet LowLevel {Color = 0x00ff8000;};
-	NodeSet pnode {Disabled = 1; Color = 0x00c8c8c8;};
-	NodeSet pnodes {Disabled = 1; Color = 0x00c8c8c8;};
-	NodeSet Proficiencies {Disabled = 1; Color = 0x00c8c8c8;};
-	NodeSet Observable {Disabled = 1; Color = 0x00c8c8c8;};
+	NodeSet Node {BuiltIn = 1; Color = 0x00E1E1E1;};
+	NodeSet Nature {BuiltIn = 1; Color = 0x00F8EED2;};
+	NodeSet Deterministic {BuiltIn = 1; Color = 0x00D3CAA6;};
+	NodeSet Finding {BuiltIn = 1; Color = 0x00C8C8C8;};
+	NodeSet Constant {BuiltIn = 1; Color = 0x00FFFFFF;};
+	NodeSet ConstantValue {BuiltIn = 1; Color = 0x00FFFFB4;};
+	NodeSet Utility {BuiltIn = 1; Color = 0x00FFBDBD;};
+	NodeSet Decision {BuiltIn = 1; Color = 0x00DEE8FF;};
+	NodeSet Documentation {BuiltIn = 1; Color = 0x00F0FAFA;};
+	NodeSet Title {BuiltIn = 1; Color = 0x00FFFFFF;};
+	NodeSet HighLevel {Color = 0x00FF8080;};
+	NodeSet Proficiency {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet LowLevel {Color = 0x00FF8000;};
+	NodeSet pnode {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet pnodes {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet Proficiencies {Disabled = 1; Color = 0x00C8C8C8;};
+	NodeSet Observable {Disabled = 1; Color = 0x00C8C8C8;};
 	PrinterSetting A {
 		margins = (1270, 1270, 1270, 1270);
 		};
@@ -44,242 +45,220 @@ user U1 {
 	priorWeight = "10";
 	};
 
-param X_StaticEquilibrium_4 {
+param X_NFL_4 {
+	kind = DISCONNECTED;
 	discrete = TRUE;
+	chance = CHANCE;
 	states = (High, Medium, Low);
 	levels = (0.967421566101701, 0, -0.967421566101701);
-	kind = DISCONNECTED;
-	chance = CHANCE;
-	probs = 
-		// High         Medium       Low          
-		  (0.3960412,   0.4159444,   0.1880144);
-	title = "StaticEquilibrium";
-	whenchanged = 1555736907;
+	title = "NFL";
+	whenchanged = 1557257547;
 	};
 
-param X_NFL_1 {
+param X_StaticEquilibrium_4 {
+	kind = DISCONNECTED;
 	discrete = TRUE;
+	chance = CHANCE;
 	states = (High, Medium, Low);
 	levels = (0.967421566101701, 0, -0.967421566101701);
-	kind = DISCONNECTED;
-	chance = CHANCE;
-	probs = 
-		// High         Medium       Low          
-		  (0.4035915,   0.2498169,   0.3465917);
-	title = "NFL";
-	whenchanged = 1555736835;
+	title = "StaticEquilibrium";
+	whenchanged = 1557257547;
 	};
 
 node Slider {
-	discrete = TRUE;
-	states = (Mass, Gravity, AirResistence);
 	kind = NATURE;
+	discrete = TRUE;
 	chance = CHANCE;
+	states = (Mass, Gravity, AirResistence);
 	inputs = (StaticEquilibrium, NFL);
-	parents = (X_StaticEquilibrium_4, X_NFL_1);
+	parents = (X_StaticEquilibrium_4, X_NFL_4);
 	probs = 
 		// Mass         Gravity      AirResistence  // StaticEquilibrium NFL    
-		  (0.3563367,   0.1454283,   0.4982349,    // High              High   
-		   0.1457652,   0.8496896,   0.004545148,  // High              Medium 
-		   0.2751333,   0.3507746,   0.3740921,    // High              Low    
-		   0.2467055,   0.4602273,   0.2930672,    // Medium            High   
-		   0.2733611,   0.3256782,   0.4009608,    // Medium            Medium 
-		   0.1087962,   0.1132459,   0.7779579,    // Medium            Low    
-		   0.1161608,   0.6249188,   0.2589205,    // Low               High   
-		   0.3976753,   0.3591523,   0.2431725,    // Low               Medium 
-		   0.2601488,   0.03603731,  0.7038139);   // Low               Low    ;
+		  (0.8476231,   0.1318632,   0.02051371,   // High              High   
+		   0.6970182,   0.2282425,   0.07473928,   // High              Medium 
+		   0.4620339,   0.3184623,   0.2195038,    // High              Low    
+		   0.5879641,   0.2793309,   0.132705,     // Medium            High   
+		   0.3333333,   0.3333333,   0.3333333,    // Medium            Medium 
+		   0.132705,    0.2793309,   0.5879641,    // Medium            Low    
+		   0.2195038,   0.3184623,   0.4620339,    // Low               High   
+		   0.07473928,  0.2282425,   0.6970182,    // Low               Medium 
+		   0.02051371,  0.1318632,   0.8476231);   // Low               Low    ;
 	title = "Slider";
-	whenchanged = 1555736907;
+	whenchanged = 1557257547;
 	visual V1 {
-		center = (918, 78);
-		height = 8;
+		center = (74, 33);
+		height = 15;
 		link 1 {
-			labelposn = (660, 296, 753, 311);
-			path = ((660, 294), (879, 112));
+			labelposn = (40, 2, 130, 17);
+			path = ((40, 0), (40, 0));
 			};
 		link 2 {
-			labelposn = (702, 61, 725, 76);
-			path = ((702, 78), (821, 78));
+			labelposn = (107, 2, 129, 17);
+			path = ((107, 0), (107, 0));
 			};
 		};
-	};
-
-param X_StaticEquilibrium_3 {
-	discrete = TRUE;
-	states = (High, Medium, Low);
-	levels = (0.967421566101701, 0, -0.967421566101701);
-	kind = DISCONNECTED;
-	chance = CHANCE;
-	probs = 
-		// High         Medium       Low          
-		  (0.3960412,   0.4159444,   0.1880144);
-	title = "StaticEquilibrium";
-	whenchanged = 1555736900;
-	};
-
-param X_NFL_2 {
-	discrete = TRUE;
-	states = (High, Medium, Low);
-	levels = (0.967421566101701, 0, -0.967421566101701);
-	kind = DISCONNECTED;
-	chance = CHANCE;
-	probs = 
-		// High         Medium       Low          
-		  (0.4035915,   0.2498169,   0.3465917);
-	title = "NFL";
-	whenchanged = 1555736860;
-	};
-
-node SliderAdjust {
-	discrete = TRUE;
-	states = (Zero, One, Two, MorethanTwo);
-	kind = NATURE;
-	chance = CHANCE;
-	inputs = (StaticEquilibrium, NFL);
-	parents = (X_StaticEquilibrium_3, X_NFL_2);
-	probs = 
-		// Zero         One          Two          MorethanTwo   // StaticEquilibrium NFL    
-		  (0.03891854,  0.2319083,   0.1467906,   0.5823826,    // High              High   
-		   0.5384957,   0.2429361,   0.1078352,   0.110733,     // High              Medium 
-		   0.370994,    0.3111217,   0.0556588,   0.2622255,    // High              Low    
-		   0.2792676,   0.3589619,   0.1454846,   0.2162859,    // Medium            High   
-		   0.4392665,   0.412594,    0.0575834,   0.09055619,   // Medium            Medium 
-		   0.09907304,  0.1135407,   0.07735275,  0.7100335,    // Medium            Low    
-		   0.3060653,   0.1899,      0.03582224,  0.4682125,    // Low               High   
-		   0.1943188,   0.02338113,  0.06638115,  0.7159189,    // Low               Medium 
-		   0.005541341, 0.2477834,   0.4230133,   0.3236619);   // Low               Low    ;
-	title = "Number of Slider Adjustment";
-	whenchanged = 1555736900;
-	visual V1 {
-		center = (900, 186);
-		height = 7;
-		link 1 {
-			labelposn = (696, 332, 789, 347);
-			path = ((696, 330), (844, 227));
-			};
-		link 2 {
-			labelposn = (720, 121, 743, 136);
-			path = ((720, 138), (804, 161));
-			};
-		};
-	};
-
-param X_StaticEquilibrium_2 {
-	discrete = TRUE;
-	states = (High, Medium, Low);
-	levels = (0.967421566101701, 0, -0.967421566101701);
-	kind = DISCONNECTED;
-	chance = CHANCE;
-	probs = 
-		// High         Medium       Low          
-		  (0.3960412,   0.4159444,   0.1880144);
-	title = "StaticEquilibrium";
-	whenchanged = 1555736897;
 	};
 
 param X_NFL_3 {
+	kind = DISCONNECTED;
 	discrete = TRUE;
+	chance = CHANCE;
 	states = (High, Medium, Low);
 	levels = (0.967421566101701, 0, -0.967421566101701);
-	kind = DISCONNECTED;
-	chance = CHANCE;
-	probs = 
-		// High         Medium       Low          
-		  (0.4035915,   0.2498169,   0.3465917);
 	title = "NFL";
-	whenchanged = 1555736872;
+	whenchanged = 1557257547;
 	};
 
-node PufferClicks {
+param X_StaticEquilibrium_3 {
+	kind = DISCONNECTED;
 	discrete = TRUE;
-	states = (Zero, One, Two, MorethanTwo);
-	kind = NATURE;
 	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "StaticEquilibrium";
+	whenchanged = 1557257547;
+	};
+
+node SliderAdjust {
+	kind = NATURE;
+	discrete = FALSE;
+	chance = CHANCE;
+	states = (Zero, One, Two, MorethanTwo);
+	levels = (0, 0.1, 1.1, 2.1, INFINITY);
 	inputs = (StaticEquilibrium, NFL);
-	parents = (X_StaticEquilibrium_2, X_NFL_3);
+	parents = (X_StaticEquilibrium_3, X_NFL_3);
 	probs = 
 		// Zero         One          Two          MorethanTwo   // StaticEquilibrium NFL    
-		  (0.2861772,   0.6051052,   0.04730373,  0.06141387,   // High              High   
-		   0.1172247,   0.1570304,   0.379887,    0.345858,     // High              Medium 
-		   0.2613459,   0.2478825,   0.0937995,   0.3969722,    // High              Low    
-		   0.1410579,   0.2096753,   0.2083431,   0.4409237,    // Medium            High   
-		   0.2739378,   0.4623913,   0.1974896,   0.06618129,   // Medium            Medium 
-		   0.009240005, 0.2368879,   0.2319123,   0.5219598,    // Medium            Low    
-		   0.03521938,  0.1373925,   0.3695614,   0.4578267,    // Low               High   
-		   0.1458579,   0.1311038,   0.441664,    0.2813744,    // Low               Medium 
-		   0.4636208,   0.09055424,  0.1486841,   0.2971408);   // Low               Low    ;
-	title = "Number of Puffer Clicks";
-	whenchanged = 1555736897;
+		  (0.8449267,   0.1314437,   0.02044845,  0.003181128,  // High              High   
+		   0.6803671,   0.22279,     0.07295383,  0.02388914,   // High              Medium 
+		   0.4013165,   0.2766121,   0.1906581,   0.1314133,    // High              Low    
+		   0.5530939,   0.2627648,   0.1248347,   0.05930669,   // Medium            High   
+		   0.25,        0.25,        0.25,        0.25,         // Medium            Medium 
+		   0.05930669,  0.1248347,   0.2627648,   0.5530939,    // Medium            Low    
+		   0.1314133,   0.1906581,   0.2766121,   0.4013165,    // Low               High   
+		   0.02388914,  0.07295383,  0.22279,     0.6803671,    // Low               Medium 
+		   0.003181128, 0.02044845,  0.1314437,   0.8449267);   // Low               Low    ;
+	title = "Number of slider adjustment";
+	whenchanged = 1557257547;
 	visual V1 {
-		center = (960, 324);
-		height = 6;
+		center = (83, 50);
+		height = 16;
 		link 1 {
-			labelposn = (678, 422, 771, 437);
-			path = ((678, 420), (864, 356));
+			labelposn = (40, 2, 130, 17);
+			path = ((40, 0), (40, 0));
 			};
 		link 2 {
-			labelposn = (732, 199, 755, 214);
-			path = ((732, 216), (876, 284));
+			labelposn = (126, 2, 148, 17);
+			path = ((126, 0), (126, 0));
 			};
 		};
 	};
 
-param X_StaticEquilibrium_1 {
+param X_NFL_2 {
+	kind = DISCONNECTED;
 	discrete = TRUE;
+	chance = CHANCE;
 	states = (High, Medium, Low);
 	levels = (0.967421566101701, 0, -0.967421566101701);
-	kind = DISCONNECTED;
-	chance = CHANCE;
-	probs = 
-		// High         Medium       Low          
-		  (0.3960412,   0.4159444,   0.1880144);
-	title = "StaticEquilibrium";
-	whenchanged = 1555736894;
+	title = "NFL";
+	whenchanged = 1557257547;
 	};
 
-param X_NFL_4 {
+param X_StaticEquilibrium_2 {
+	kind = DISCONNECTED;
 	discrete = TRUE;
+	chance = CHANCE;
 	states = (High, Medium, Low);
 	levels = (0.967421566101701, 0, -0.967421566101701);
-	kind = DISCONNECTED;
+	title = "StaticEquilibrium";
+	whenchanged = 1557257547;
+	};
+
+node PufferClicks {
+	kind = NATURE;
+	discrete = FALSE;
 	chance = CHANCE;
+	states = (Zero, One, Two, MorethanTwo);
+	levels = (0, 0.1, 1.1, 2.1, INFINITY);
+	inputs = (StaticEquilibrium, NFL);
+	parents = (X_StaticEquilibrium_2, X_NFL_2);
 	probs = 
-		// High         Medium       Low          
-		  (0.4035915,   0.2498169,   0.3465917);
+		// Zero         One          Two          MorethanTwo   // StaticEquilibrium NFL    
+		  (0.8449267,   0.1314437,   0.02044845,  0.003181128,  // High              High   
+		   0.6803671,   0.22279,     0.07295383,  0.02388914,   // High              Medium 
+		   0.4013165,   0.2766121,   0.1906581,   0.1314133,    // High              Low    
+		   0.5530939,   0.2627648,   0.1248347,   0.05930669,   // Medium            High   
+		   0.25,        0.25,        0.25,        0.25,         // Medium            Medium 
+		   0.05930669,  0.1248347,   0.2627648,   0.5530939,    // Medium            Low    
+		   0.1314133,   0.1906581,   0.2766121,   0.4013165,    // Low               High   
+		   0.02388914,  0.07295383,  0.22279,     0.6803671,    // Low               Medium 
+		   0.003181128, 0.02044845,  0.1314437,   0.8449267);   // Low               Low    ;
+	title = "Number of puffer clicks";
+	whenchanged = 1557257547;
+	visual V1 {
+		center = (83, 50);
+		height = 17;
+		link 1 {
+			labelposn = (40, 2, 130, 17);
+			path = ((40, 0), (40, 0));
+			};
+		link 2 {
+			labelposn = (126, 2, 148, 17);
+			path = ((126, 0), (126, 0));
+			};
+		};
+	};
+
+param X_NFL_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
 	title = "NFL";
-	whenchanged = 1555736878;
+	whenchanged = 1557257547;
+	};
+
+param X_StaticEquilibrium_1 {
+	kind = DISCONNECTED;
+	discrete = TRUE;
+	chance = CHANCE;
+	states = (High, Medium, Low);
+	levels = (0.967421566101701, 0, -0.967421566101701);
+	title = "StaticEquilibrium";
+	whenchanged = 1557257547;
 	};
 
 node TrophyLevel {
-	discrete = TRUE;
-	states = (Gold, Silver, None);
 	kind = NATURE;
+	discrete = TRUE;
 	chance = CHANCE;
+	states = (Gold, Silver, None);
 	inputs = (StaticEquilibrium, NFL);
-	parents = (X_StaticEquilibrium_1, X_NFL_4);
+	parents = (X_StaticEquilibrium_1, X_NFL_1);
 	probs = 
 		// Gold         Silver       None          // StaticEquilibrium NFL    
-		  (0.08711491,  0.4241258,   0.4887594,    // High              High   
-		   0.1791996,   0.3492596,   0.4715408,    // High              Medium 
-		   0.5082408,   0.06610202,  0.4256572,    // High              Low    
-		   0.154262,    0.4814484,   0.3642896,    // Medium            High   
-		   0.58214,     0.2017601,   0.2161,       // Medium            Medium 
-		   0.3027659,   0.366297,    0.3309371,    // Medium            Low    
-		   0.5074072,   0.2109372,   0.2816556,    // Low               High   
-		   0.3699562,   0.2952656,   0.3347781,    // Low               Medium 
-		   0.1295547,   0.06988505,  0.8005603);   // Low               Low    ;
+		  (0.8476231,   0.1318632,   0.02051371,   // High              High   
+		   0.6970182,   0.2282425,   0.07473928,   // High              Medium 
+		   0.4620339,   0.3184623,   0.2195038,    // High              Low    
+		   0.5879641,   0.2793309,   0.132705,     // Medium            High   
+		   0.3333333,   0.3333333,   0.3333333,    // Medium            Medium 
+		   0.132705,    0.2793309,   0.5879641,    // Medium            Low    
+		   0.2195038,   0.3184623,   0.4620339,    // Low               High   
+		   0.07473928,  0.2282425,   0.6970182,    // Low               Medium 
+		   0.02051371,  0.1318632,   0.8476231);   // Low               Low    ;
 	title = "Level solving status";
-	whenchanged = 1555736894;
+	whenchanged = 1557257547;
 	visual V1 {
-		center = (972, 480);
-		height = 5;
+		center = (74, 33);
+		height = 18;
 		link 1 {
-			labelposn = (636, 494, 729, 509);
-			path = ((636, 492), (898, 482));
+			labelposn = (40, 2, 130, 17);
+			path = ((40, 0), (40, 0));
 			};
 		link 2 {
-			labelposn = (774, 397, 797, 412);
-			path = ((774, 414), (898, 456));
+			labelposn = (107, 2, 129, 17);
+			path = ((107, 0), (107, 0));
 			};
 		};
 	};
