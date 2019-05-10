@@ -70,12 +70,12 @@ unpackSM <- function (sr, warehouse) {
 StudentRecord <- function(uid,context="",timestamp=Sys.time(),
                           smser=list(),sm=NULL,stats=list(),hist=list(),
                           evidence=character(),
-                          app="default",seqno=-1L) {
+                          app="default",seqno=-1L, prev_id=NA_character_) {
   new("StudentRecord",app=app,uid=uid,context=context,
       timestamp=timestamp,smser=smser,evidence=evidence,
       sm=sm,stats=stats,hist=hist,
       seqno=seqno,"_id"=NA_character_,
-      prev_id=NA_character_)
+      prev_id=prev_id)
 }
 
 setGeneric("evidence",function(x) standardGeneric("evidence"))
