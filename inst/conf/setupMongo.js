@@ -13,7 +13,7 @@
 // ];
 // Then load that file.  Change the next line
 // To reflect the name of that path.
-load("/home/ralmond/.Proc4.js")
+load("/usr/local/share/Proc4/Proc4.js")
 
 eapUser = pwds.filter(function(u) {return u.user == "EAP";})[0];
 
