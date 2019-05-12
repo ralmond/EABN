@@ -1,4 +1,6 @@
+library(R.utils)
 library(EABN)
+
 if (interactive()) {
   app <- "ecd://epls.coe.fsu.edu/P4test"
   loglevel <- "DEBUG"
@@ -48,10 +50,10 @@ if (!is.null(evidenceFile)) {
   system2("mongoimport",
           sprintf('-d %s -c EvidenceSets --jsonArray', eng$dbname),
           stdin=evidenceFile)
-  NN <- eng$evidenceSets()$count(buildJQuery(app=app(eng)))
+  NN <- eng$evidenceSets()$count(buildJQuery(app=app(eng),processed=FALSE))
 }
 
-if (interactive() && !is.null(evidenceFile) {
+if (interactive() && !is.null(evidenceFile)) {
   eng$processN <- NN
 }
 
