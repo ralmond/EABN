@@ -20,11 +20,11 @@ eapUser = pwds.filter(function(u) {return u.user == "EAP";})[0];
 con = new Mongo();
 db=con.getDB("EARecords");                 
 db.auth(eapUser.user,eapUser.pwd);
-db.createCollection("Observables", {
+db.createCollection("EvidenceSets", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["app","uid","context","timestamp","seqno"],
+            required: ["app","uid","context","timestamp"],
             properties: {
                 _id: {
                     bsonType: "string",

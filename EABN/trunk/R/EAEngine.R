@@ -372,7 +372,7 @@ updateSM <- function (eng,rec,evidMess) {
     if(!is.null(obs[[oname]])) {
       flog.trace("Processing observable %s.")
       oval <- observables(evidMess)[[oname]]
-      if (is.null(oval) || is.na(oval)) {
+      if (is.null(oval) || is.na(oval) || length(oval)==0L) {
         flog.trace("Observable %s is null/NA, skipping.", oname)
       } else if (is.numeric(oval)) {
         NodeValue(obs[[oname]]) <- as.numeric(oval)
