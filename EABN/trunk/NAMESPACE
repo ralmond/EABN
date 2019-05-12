@@ -26,7 +26,8 @@ exportMethods(seqno, "seqno<-")
 exportClass(BNEngine)
 export(BNEngine, loadManifest, setupDefaultSR,
        logEvidence, accumulateEvidence, configStats, updateStats,
-       announceStats, baselineHist, updateHist, getRecordForUser)
+       announceStats, baselineHist, updateHist, getRecordForUser,
+       handleEvidence, mainLoop, updateSM)
 exportMethods(notifyListeners)
 
 
