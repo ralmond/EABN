@@ -119,7 +119,7 @@ BNEngine <-
                     histNodes <<- nodenames
                     oldrec <- histNodesdb()$find(buildJQuery(app=app))
                     nodestring <- paste('"',nodenames,'"', sep="", collapse=",")
-                    if (is.null(oldrec))
+                    if (is.null(oldrec) || nrow(oldrec)==0L)
                       histNodesdb()$insert(
                                        sprintf('{"app":"%s", "Nodes":[%s]}',
                                                app, nodestring))
