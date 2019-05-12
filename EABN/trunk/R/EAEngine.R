@@ -375,7 +375,7 @@ updateSM <- function (eng,rec,evidMess) {
       if (is.null(oval) || is.na(oval)) {
         flog.trace("Observable %s is null/NA, skipping.", oname)
       } else if (is.numeric(oval)) {
-        NodeValue(obs[[oname]]) <- oval
+        NodeValue(obs[[oname]]) <- as.numeric(oval)
       } else {
         ## Need to check for capitalization issues.
         ov1 <- oval
