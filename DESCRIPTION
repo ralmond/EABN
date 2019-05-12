@@ -1,6 +1,6 @@
 Package: EABN
-Version: 0.1-2
-Date: 2019/04/22
+Version: 0.4-1
+Date: 2019/05/12
 Title: Evidence Accumulation Bayes Net Engine
 Author: Russell Almond
 Maintainer: Russell Almond <ralmond@fsu.edu>

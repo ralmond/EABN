@@ -274,6 +274,8 @@ saveSR <- function (srs,rec) {
 newSR <- function (srs,uid) {
   flog.debug("Making new student record for  %s", uid)
   dsr <- srs$defaultSR
+  oldnet <- WarehouseFetch(srs$warehouse,as.IDname(uid,"S"))
+  if (isTRUE(is.active(oldnet))) DeleteNetwork(oldnet)
   rec <- StudentRecord(uid=uid,context(dsr),timestamp=Sys.time(),
                       sm=CopyNetworks(sm(dsr),as.IDname(uid,"S")),
                       stats=stats(dsr),hist=dsr@hist,app=app(srs),
