@@ -6,6 +6,7 @@ if (interactive()) {
   loglevel <- "DEBUG"
   cleanFirst <- TRUE
   evidenceFile <- "/home/ralmond/Projects/EvidenceAc/Evidence10.json"
+  evidenceFile <- NULL
 } else {
   app <- cmdArg("app",NULL)
   if (is.null(app) || !grepl("^ecd://",app))
@@ -18,7 +19,11 @@ if (interactive()) {
 
 source("/usr/local/share/Proc4/EAini.R")
 
-flog.appender(appender.tee(logfile))
+if (interactive()) {
+  flog.appender(appender.tee(logfile))
+} else {
+  flog.appender(appender.file(logfile))
+}
 flog.threshold(loglevel)
 
 sess <- NeticaSession(LicenseKey=NeticaLicenseKey)
@@ -27,6 +32,10 @@ startSession(sess)
 listeners <- lapply(names(EA.listenerSpecs),
                     function (ll) do.call(ll,EA.listenerSpecs[[ll]]))
 names(listeners) <- names(EA.listenerSpecs)
+if (interactive()) {
+  cl <- new("CaptureListener")
+  listeners <- c(listeners,cl=cl)
+}
 
 eng <- do.call(BNEngine,c(EAeng.params,list(session=sess,listeners=listeners),
                           EAeng.common))
@@ -55,6 +64,7 @@ if (!is.null(evidenceFile)) {
 
 if (interactive() && !is.null(evidenceFile)) {
   eng$processN <- NN
+  eng$processN <- 48
 }
 
 

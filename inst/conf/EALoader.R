@@ -33,7 +33,7 @@ mantab$Pathname <- file.path(config.dir,mantab$Pathname)
 stattab <- read.csv(file.path(config.dir, statFile),as.is=TRUE)
 
 
-variants <- c("ecd:epls.coe.fsu.edu/P4test",
+variants <- c("ecd://epls.coe.fsu.edu/P4test",
               file.path(file.path(dirname(app),c("userContorl","linear","adaptive"))))
 
 elist <- list()

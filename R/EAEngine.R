@@ -383,7 +383,7 @@ updateSM <- function (eng,rec,evidMess) {
         if (!(ov1 %in% sts)) {
           ov1 <- sts[toupper(sts)==toupper(ov1)]
         }
-        if (length(oval) > 0L) {
+        if (length(ov1) > 0L) {
           flog.trace("Setting observable %s to %s.",oname,ov1)
           NodeFinding(obs[[oname]]) <- ov1
         } else {
