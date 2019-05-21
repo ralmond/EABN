@@ -1,0 +1,34 @@
+[
+    {
+        "app" : "default",
+        "uid" : "Phred",
+        "context" : "Task1",
+        "mess" : "Accumulate",
+        "timestamp" : ISODate("2018-08-08T20:13:05.068Z"),
+        "obs" : {
+            "isCorrect" : true,
+            "selection" : "B"
+        }
+    },
+    {
+        "app" : "default",
+        "uid" : "Phred",
+        "context" : "Task2",
+        "mess" : "Accumulate",
+        "timestamp" : ISODate("2018-08-08T20:13:05.081Z"),
+        "obs" : {
+            "isCorrect" : false,
+            "selection" : "D"
+        }
+    },
+    { "app" : "default",
+      "uid" : "Fred",
+      "context" : "Task1",
+      "mess" : "Accumulate",
+      "timestamp" : ISODate("2018-08-08T20:13:05.086Z"),
+      "obs" : {
+          "isCorrect" : false,
+          "selection" : "C"
+      }
+    }
+]

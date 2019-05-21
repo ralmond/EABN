@@ -1,0 +1,37 @@
+import(methods)
+import(Proc4)
+import(Peanut)
+import(PNetica)
+import(futile.logger)
+## Use explict imports from RNetica so we can keep track of dependencies.
+#import(RNetica)
+importFrom("mongolite","mongo")
+importFrom("jsonlite", "toJSON", "fromJSON","base64_enc","base64_dec")
+
+export(StudentRecord, sm, stats, evidence, "evidence<-",
+       statNames, histNames, stat,
+       history, parseStudentRecord,parseStats,stats2json,unparseStats,
+       fetchSM, unpackSM, markEvidence, getSR, saveSR, newSR,
+       parseHist, unparseHist)
+exportClasses(StudentRecord)
+exportMethods(evidence, "evidence<-",
+              sm, stats, app, uid, context, timestamp, mess,
+              as.jlist, toString, show, statNames, histNames, stat,
+              history)
+
+export(EvidenceSet, parseEvidence, seqno, "seqno<-", observables)
+exportClasses(EvidenceSet)
+exportMethods(seqno, "seqno<-")
+
+exportClass(BNEngine)
+export(BNEngine, loadManifest, setupDefaultSR,
+       logEvidence, accumulateEvidence, configStats, updateStats,
+       announceStats, baselineHist, updateHist, getRecordForUser,
+       handleEvidence, mainLoop, updateSM)
+exportMethods(notifyListeners)
+
+
+
+
+
+
