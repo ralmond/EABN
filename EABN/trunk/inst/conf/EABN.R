@@ -5,7 +5,8 @@ if (interactive()) {
   app <- "ecd://epls.coe.fsu.edu/P4test"
   loglevel <- "DEBUG"
   cleanFirst <- TRUE
-  evidenceFile <- "/home/ralmond/Projects/EvidenceAc/Evidence10.json"
+  evidenceFile <- "/home1/ralmond/ownCloud/Projects/NSFCyberlearning/FSUSSp2019Data/EvidenceSets.Sp2019.json"
+  evidenceFileb <- "/home1/ralmond/ownCloud/Projects/NSFCyberlearning/FSUSSp2019Data/EvidenceSets.Sp2019b.json"
   evidenceFile <- NULL
 } else {
   app <- cmdArg("app",NULL)
@@ -64,7 +65,6 @@ if (!is.null(evidenceFile)) {
 
 if (interactive() && !is.null(evidenceFile)) {
   eng$processN <- NN
-  eng$processN <- 48
 }
 
 
@@ -78,3 +78,15 @@ if (interactive() && FALSE) {
   rec1 <- handleEvidence(eng,eve)
   eng$setProcessed(eve)
 }
+
+cat("[",file="out/c081c3.srs.json")
+for (n in 1:NN) {
+  eve <- eng$fetchNextEvidence()
+  flog.info("Level %d: %s",n,context(eve))
+  sr <- getRecordForUser(eng,uid(eve))
+  rec1 <- handleEvidence(eng,eve)
+  WriteNetworks(sm(sr),sprintf("out/Net%s-%s-%d.dne",uid(eve),context(eve),n))
+  cat(as.json(sr),",",file="out/c081c3.srs.json",append=TRUE)
+  eng$setProcessed(eve)
+}
+cat("{}]",file="out/c081c3.srs.json",append=TRUE)

@@ -396,6 +396,12 @@ updateSM <- function (eng,rec,evidMess) {
       flog.trace("Skipping observable %s:  not a node.")
     }
   }
+  if (flog.threshold()=="TRACE") {
+    for (ob in obs) {
+      flog.trace("Observable %s has value %s.",PnodeName(ob),
+                 NodeFinding(ob))
+    }
+  }
   AbsorbNodes(obs)
   CompileNetwork(sm(rec))
   rec
