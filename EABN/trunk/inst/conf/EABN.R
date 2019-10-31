@@ -38,10 +38,14 @@ if (interactive()) {
   listeners <- c(listeners,cl=cl)
 }
 
-eng <- do.call(BNEngine,c(EAeng.params,list(session=sess,listeners=listeners),
+eng <- do.call(BNEngine,c(EAeng.params,
+                          list(session=sess,listeners=listeners,
+                               netDirectory=config.dir),
                           EAeng.common))
-loadManifest(eng)
-configStats(eng)
+loadManifest(eng,read.csv(file.path(config.dir,manifestFile),
+                          stringsAsFactors=FALSE))
+configStats(eng,read.csv(file.path(config.dir,statFile),
+                          stringsAsFactors=FALSE))
 
 if (cleanFirst) {
   eng$evidenceSets()$remove(buildJQuery(app=app(eng)))
@@ -66,6 +70,7 @@ if (!is.null(evidenceFile)) {
 if (interactive() && !is.null(evidenceFile)) {
   eng$processN <- NN
 }
+cat("Processing ",NN," records for application ",app(eng),".\n")
 
 
 ## Activate engine (if not already activated.)

@@ -20,6 +20,7 @@ BNEngine <-
                   statistics="list",
                   histNodes="character",
                   warehouseObj="EmptyWarehouse",
+                  netDirectory="character",
                   waittime="numeric",
                   processN="numeric"
               ),
@@ -30,7 +31,7 @@ BNEngine <-
                              port="",dbname="EARecords",P4dbname="Proc4",
                              profModel=character(),waittime=.25,
                              statistics=list(), histNodes=character(),
-                             processN=Inf,
+                             processN=Inf,netDirectory=".",
                              ...) {
 
                       ## Setup DB URI
@@ -52,8 +53,7 @@ BNEngine <-
                       ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
                                         dbname=dbname, dburi=dburl,
                                         listeners=listeners,
-                                        colname="Messages",
-                                        ...)
+                                        colname="Messages",...)
                       callSuper(app=app,dburi=dburl,dbname=dbname,
                                 session=session,statDB=NULL,
                                 manifestDB=NULL, evidenceDB=NULL,
@@ -63,6 +63,7 @@ BNEngine <-
                                 statistics=statistics,
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
+                                netDirectory=netDirectory,
                                 ...)
                   },
                   manifestdb = function() {
@@ -140,6 +141,7 @@ BNEngine <-
                     if (is.null(warehouseObj)) {
                       warehouseObj <<- BNWarehouse(manifest=data.frame(),
                                                    session=session,
+                                                   address=netDirectory,
                                                    key="Name")
                       loadManifest(.self)
                     }
@@ -176,10 +178,11 @@ BNEngine <- function(app="default",session=NULL,listeners=list(),
                      username="",password="",host="localhost",
                      port="",dbname="EARecords",processN=Inf,
                      P4dbname="Proc4", waittime=.25, profModel=character(),
-                     ...) {
+                     netDirectory=".",...) {
  new("BNEngine",app=app,session=session,listeners=listeners,username=username,
      password=password,host=host,port=port,dbname=dbname,processN=processN,
-     P4dbname=P4dbname,waittime=waittime,profModel=profModel,...)
+     P4dbname=P4dbname,waittime=waittime,profModel=profModel,
+     netDirectory=netDirectory,...)
 }
 
 setMethod("app","BNEngine",function (x) x$app)
@@ -282,7 +285,7 @@ registerStats <- function(eng,statmat) {
 }
 
 
-updateStats <- function(eng,rec) {
+updateStats <- function(eng,rec,debug=0) {
   rec@stats <- lapply(eng$stats(),
                       function (stat) calcStat(stat,sm(rec)))
   names(rec@stats) <- sapply(eng$stats(),name)
@@ -306,18 +309,19 @@ baselineHist <- function(eng,rec) {
   rec
 }
 
-uphist <- function (sm,vname,past,eventname) {
+uphist <- function (sm,vname,past,eventname, debug=0) {
   node <- PnetFindNode(sm,vname)
   marg <- PnodeMargin(sm,node)
   hist <- rbind(past,marg)
   rownames(hist)[nrow(hist)] <- eventname
+  if (interactive() && debug>2) recover()
   hist
 }
 
-updateHist <- function(eng,rec,evidMess) {
+updateHist <- function(eng,rec,evidMess, debug=0) {
   eventname <- toString(evidMess)
   rec@hist <- lapply(eng$getHistNodes(), function (nd)
-    uphist(sm(rec),nd,history(rec,nd),eventname))
+    uphist(sm(rec),nd,history(rec,nd),eventname, debug))
   names(rec@hist) <- eng$getHistNodes()
   rec
 }
@@ -332,7 +336,7 @@ logEvidence <- function (eng,rec,evidMess) {
   evidMess
 }
 
-accumulateEvidence <- function(eng,rec,evidMess) {
+accumulateEvidence <- function(eng,rec,evidMess, debug=0) {
   withFlogging({
     rec1 <- StudentRecord(app=app(eng),uid=uid(rec),
                           context=context(evidMess),
@@ -340,18 +344,21 @@ accumulateEvidence <- function(eng,rec,evidMess) {
                           evidence=c(evidence(rec),m_id(evidMess)),
                           sm=sm(rec),stats=stats(rec),hist=rec@hist,
                           seqno=seqno(evidMess),prev_id=m_id(rec))
-    rec1 <- updateSM(eng,rec1,evidMess)
-    rec1 <- updateStats(eng,rec1)
-    rec1 <- updateHist(eng,rec1,evidMess)
+    rec1 <- updateSM(eng,rec1,evidMess, debug)
+    if (interactive() && debug>1) recover()
+    rec1 <- updateStats(eng,rec1, debug)
+    if (interactive() && debug>1) recover()
+    rec1 <- updateHist(eng,rec1,evidMess, debug)
+    if (interactive() && debug>1) recover()
     announceStats(eng,rec1)
     rec1 <- saveSR(eng$studentRecords(),rec1)
     rec1
   },evidence=evidMess,
   context=sprintf("Proccesing %s for user %s, seqno %d",
-                  uid(evidMess),context(evidMess),seqno(evidMess)))
+                  context(evidMess),uid(evidMess),seqno(evidMess)))
 }
 
-updateSM <- function (eng,rec,evidMess) {
+updateSM <- function (eng,rec,evidMess, debug=0) {
   manf <-WarehouseManifest(eng$warehouse())
   emName <-manf[manf$Title==context(evidMess),"Name"]
   flog.debug("Evidence Model for level %s is %s",context(evidMess),
@@ -366,15 +373,21 @@ updateSM <- function (eng,rec,evidMess) {
     stop("No evidence model net for context %s",context(evidMess))
   }
   obs <- AdjoinNetwork(sm(rec),em)
+  names(obs) <- sapply(obs,PnodeName)   #Use the (long) truenames!
   CompileNetwork(sm(rec))
+  flog.trace("Evidence:",details(evidMess),capture=TRUE)
+  if (interactive() && debug>1) recover()
 
   for (oname in names(observables(evidMess))) {
     if(!is.null(obs[[oname]])) {
-      flog.trace("Processing observable %s.")
+      flog.trace("Processing observable %s.",oname)
       oval <- observables(evidMess)[[oname]]
       if (is.null(oval) || is.na(oval) || length(oval)==0L) {
         flog.trace("Observable %s is null/NA, skipping.", oname)
       } else if (is.numeric(oval)) {
+        NodeValue(obs[[oname]]) <- as.numeric(oval)
+      } else if (is(oval,"difftime")) {
+        units(oval) <- "secs"
         NodeValue(obs[[oname]]) <- as.numeric(oval)
       } else {
         ## Need to check for capitalization issues.
@@ -385,15 +398,17 @@ updateSM <- function (eng,rec,evidMess) {
         }
         if (length(ov1) > 0L) {
           flog.trace("Setting observable %s to %s.",oname,ov1)
+          if (interactive() && debug>1) recover()
           NodeFinding(obs[[oname]]) <- ov1
         } else {
           flog.warn("Processing observables for %s for %s:",context(evidMess),
                     uid(evidMess))
           flog.warn("Observable %s has unknown value %s, skipping.",oname,oval)
+          if (interactive() && debug>1) recover()
         }
       }
     } else {
-      flog.trace("Skipping observable %s:  not a node.")
+      flog.trace("Skipping observable %s:  not a node.",oname)
     }
   }
   if (flog.threshold()=="TRACE") {
@@ -402,20 +417,21 @@ updateSM <- function (eng,rec,evidMess) {
                  NodeFinding(ob))
     }
   }
+  if (interactive() && debug>0) recover()
   AbsorbNodes(obs)
   CompileNetwork(sm(rec))
   rec
 }
 
-handleEvidence <- function (eng, evidMess) {
+handleEvidence <- function (eng, evidMess,debug=0) {
   uid <- uid(evidMess)
   context <- context(evidMess)
   flog.debug("Processing Record for user %s, context: %s",uid,context)
   rec <- getRecordForUser(eng,uid)
   evidMess <- logEvidence(eng,rec,evidMess)
-  if (interactive() && FALSE) recover()
-  out <- accumulateEvidence(eng,rec,evidMess)
-  if (interactive() && FALSE) recover()
+  if (interactive() && debug>1) recover()
+  out <- accumulateEvidence(eng,rec,evidMess,debug)
+  if (interactive() && debug>1) recover()
   eng$setProcessed(evidMess)
   if (is(out,'try-error')) {
     flog.warn("Processing %s for user %s generated error: %s",
