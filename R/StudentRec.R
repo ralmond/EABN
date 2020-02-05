@@ -4,9 +4,6 @@
 
 ## This doesn't work because Pnet is an abstract class.
 ## setClassUnion("PnetOrNull",c("Pnet","NULL"))
-setClassUnion("BayesianNetwork",c("NeticaBN","NULL"))
-setClassUnion("BNSession",c("NeticaSession","NULL"))
-setClassUnion("EmptyWarehouse",c("BNWarehouse","NULL"))
 
 setClass("StudentRecord",
          slots=c("_id"="character",
@@ -15,7 +12,7 @@ setClass("StudentRecord",
                  context="character",
                  evidence="character",
                  timestamp="POSIXt",      #Date of last update.
-                 sm="BayesianNetwork",
+                 sm="Pnet",
                  smser="list",
                  seqno="integer",
                  stats="list",
@@ -253,10 +250,14 @@ StudentRecordSet <-
 setMethod("app","StudentRecordSet", function(x) x$app)
 defaultSR <- function(x) x$defaultSR
 
+setGeneric("getSR", function (srs,uid) standardGeneric("getSR"))
+setGeneric("saveSR", function (srs,rec) standardGeneric("saveSR"))
+setGeneric("newSR", function (srs,uid) standardGeneric("newSR"))
+setGeneric("clearSRs", function(srs) standardGeneric("clearSRs"))
 
 
 ## Student Record Methods
-getSR <- function (srs,uid) {
+setMethod("getSR", c("StudentRecordSet","ANY"), function (srs,uid) {
   rec <- getOneRec(buildJQuery(app=app(srs),uid=uid),srs$recorddb(),
                       parseStudentRecord)
   if (is.null(rec)) {
@@ -265,13 +266,13 @@ getSR <- function (srs,uid) {
     rec <- fetchSM(rec,srs$warehouse)
   }
   rec
-}
+})
 
-saveSR <- function (srs,rec) {
+setMethod("saveSR", c("StudentRecordSet","ANY"), function (srs,uid) {
   saveRec(rec,srs$recorddb())
-}
+})
 
-newSR <- function (srs,uid) {
+setMethod("newSR", c("StudentRecordSet","ANY"), function (srs,uid) {
   flog.debug("Making new student record for  %s", uid)
   dsr <- srs$defaultSR
   oldnet <- WarehouseFetch(srs$warehouse,as.IDname(uid,"S"))
@@ -282,7 +283,11 @@ newSR <- function (srs,uid) {
                       seqno=0L)
   saveRec(rec,srs$recorddb())
   rec
-}
+})
 
+setMethod("clearSRs", c("StudentRecordSet"), function (srs) {
+  if (srs$recorddb()$count(buildJQuery(app=app(dsr),uid=uid(dsr))) > 0L)
+    srs$recorddb()$remove(buildJQuery(app=app(dsr),uid=uid(dsr)))
+})
 
 
