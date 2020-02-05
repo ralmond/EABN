@@ -1,7 +1,6 @@
 import(methods)
 import(Proc4)
 import(Peanut)
-import(PNetica)
 import(futile.logger)
 ## Use explict imports from RNetica so we can keep track of dependencies.
 #import(RNetica)
@@ -23,12 +22,15 @@ export(EvidenceSet, parseEvidence, seqno, "seqno<-", observables)
 exportClasses(EvidenceSet)
 exportMethods(seqno, "seqno<-")
 
-exportClass(BNEngine)
-export(BNEngine, loadManifest, setupDefaultSR,
+exportClass(BNMongoEngine)
+export(BNMongoEngine, loadManifest, setupDefaultSR,
        logEvidence, accumulateEvidence, configStats, updateStats,
        announceStats, baselineHist, updateHist, getRecordForUser,
        handleEvidence, mainLoop, updateSM)
 exportMethods(notifyListeners)
+
+exportClass(BNSQLEngine)
+export(BNSQLEngine)
 
 
 
