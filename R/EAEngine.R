@@ -1,17 +1,18 @@
 setClassUnion("NullRecordSet",c("StudentRecordSet","NULL"))
+setClassUnion("NullListenerSet",c("ListenerSet","NULL"))
 
 
 BNEngine <-
   setRefClass("BNEngine",
               c(
                   app = "character",
-                  session="Psession",
                   srs = "NullRecordSet",
                   profModel = "character",
-                  listenerSet="ListenerSet",
+                  listenerSet="NullListenerSet",
                   statistics="list",
                   histNodes="character",
                   warehouseObj="PnetWarehouse",
+                  netDirectory="character",
                   waittime="numeric",
                   processN="numeric"
               ),
@@ -24,7 +25,7 @@ BNEngine <-
                   fetchStats = function() {
                     stop("Abstract method.")
                   },
-                  saveStats = function(statmat) {
+                  saveStats = function(stats) {
                     stop("Abstract method.")
                   },
                   evidenceSets = function() {
@@ -33,9 +34,11 @@ BNEngine <-
                   setProcessed= function (mess) {
                     mess@processed <- TRUE
                     saveRec(mess,evidenceSets())
+                    mess
                   },
                   setError= function (mess,e) {
                     markAsError(mess,evidenceSets(),e)
+                    mess
                   },
                   fetchNextEvidence = function() {
                     stop("Abstract Method")
@@ -65,7 +68,7 @@ BNEngine <-
                   fetchManifest = function() {
                     stop("Abstract method.")
                   },
-                  saveManifest = function(manifest) {
+                  saveManifest = function(manif) {
                     stop("Abstract method.")
                   },
                   isActivated = function() {
@@ -83,10 +86,8 @@ BNEngine <-
 ##                              key="Name")
 
 
-BNEngine <- function(app="default",warehouse,listeners=list(),
-                     username="",password="",host="localhost",
-                     port="",dbname="EARecords",processN=Inf,
-                     P4dbname="Proc4", waittime=.25, profModel=character(),
+BNEngine <- function(app="default",session,listenerSet=NULL,
+                     netDirectory=".", waittime=.25, profModel=character(),
                      ...) {
   stop("BNEngine now abstract, use BNMongoEngine or BNSQLEngine.")
 }
@@ -97,7 +98,8 @@ setMethod("app","BNEngine",function (x) x$app)
 ## Listener notification.
 setMethod("notifyListeners","BNEngine",
            function(sender,mess) {
-             sender$listenerSet$notifyListeners(mess)
+             if (!is.null(sender$listenerSet))
+               sender$listenerSet$notifyListeners(mess)
            })
 
 

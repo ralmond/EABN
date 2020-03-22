@@ -1,0 +1,37 @@
+Missing link or links in documentation object 'StudentRecord-class.Rd':
+  ‘SRorNull-class’ ‘EvidenceSet’ ‘StudentRecordSet’
+
+Missing link or links in documentation object 'StudentRecordSet-class.Rd':
+  ‘getSR’ 'NullRecordSet-class’
+  ‘StudentRecordSet’ ‘EAEninge-class’
+   
+Missing link or links in documentation object 'history.Rd':
+  ‘EvidenceSet-class’ ‘baselineHist’ ‘BNEngine-class’ ‘handleEvidence’
+  ‘updateHist’ ‘CPTtools-package’ ‘StudentRecode-class’ ‘BNEngine’
+
+* checking for missing documentation entries ... WARNING
+Undocumented code objects:
+   ‘BNEngineNDB’
+   ‘EvidenceSet’ ‘observables’
+   ‘parseEvidence’
+   ‘evidence’ ‘evidence<-’
+   ‘accumulateEvidence’ ‘handleEvidence’
+   ‘announceStats’
+   ‘baselineHist’
+   ‘clearSRs’ ‘getSR’‘newSR’ ‘saveSR' <<HERE>>
+   ‘configStats’ 
+   ‘getRecordForUser’  
+   ‘loadManifest’
+   ‘logEvidence’
+   ‘mainLoop’
+   ‘markEvidence’ 
+   ‘parseStudentRecord’
+   ‘seqno’ ‘seqno<-’
+   ‘setupDefaultSR’
+   'updateHist’
+   ‘updateSM’
+   ‘updateStats’
+Undocumented S4 methods:
+
+
+* Add tests with Mongo.

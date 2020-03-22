@@ -41,7 +41,7 @@ setMethod("as.jlist",c("EvidenceSet","list"), function(obj,ml,serialize=TRUE) {
   if (is.na(ml$seqno)) {
     ml$seqno <- NULL
   } else {
-    ml$seqno <- unbox(ml$seqno)
+    ml$seqno <- unboxer(ml$seqno)
   }
   ml
 })

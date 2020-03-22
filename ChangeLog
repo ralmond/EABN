@@ -1,3 +1,57 @@
+2020-03-21  Russell Almond  <ralmond@Cherry>
+
+	* R/EAEngineNDB.R (BNEngineNDB): Changed listeners to listenerSet.
+
+	* R/EAEngineMongo.R (BNEngineMongo): Changed listeners to
+	listenerSet. 
+
+	* R/EAEngine.R: Changed protocol so that ListenerSet is created
+	before engine.  This allows more flexibility in configurion
+	(with/without database).  
+
+2020-03-15  Russell Almond  <ralmond@Cherry>
+
+	* R/StudentRec.R (StudentRecordSet$recorddb): Make sure that "" is
+	intepreted as no database.
+
+2020-03-02  Russell Almond  <ralmond@Cherry>
+
+	* R/StudentRec.R (unparseHist, parseHist): killing these functions
+	as they are not being used.
+	(unparseStats, stats2json, parseStats): Added flattening features
+	which allows for either nested, or unested JSON.
+	(strsplit2, unflattenNames): Auxiliary functions used in
+	flattening and unflattening stat lists.
+
+2020-03-01  Russell Almond  <ralmond@Cherry>
+
+	* R/StudentRec.R (parseStudentRecord): Addes some as.characters to
+	get rid of excessive listiness.
+
+2020-02-19  Russell Almond  <ralmond@Cherry>
+
+	* R/StudentRec.R (parseStudentRecord, as.jlist): History list is
+	delicate, need to protect with serialization.
+
+	* R/EngineGears.R (configStats): saveStats is an R6 method of
+	eng.  This needs to be moved onto the working branch.
+	
+
+2020-02-15  Russell Almond  <ralmond@Cherry>
+
+	* R/EngineGears.R: Regular functions and S4 generics and methods
+	moved to this file.
+
+	* R/EAEngineNDB.R (BNEngineNDB): No database version of the EA
+	engine.
+
+	* R/EAEngineMongo.R (BNMongoEngine): Split off Mongo-dependent
+	pieces. 
+
+	* R/EAEngine.R (BNEngine): Split the main engine up into a core
+	engine and the peices that use Mongo, and a Mongo-free piece for
+	the DataArcade link.
+
 2018-08-14  Rusell Almond  <ralmond@Cherry>
 
 	* DESCRIPTION (Depends): Renamed package EABN, as this version is
