@@ -11,26 +11,17 @@ Missing link or links in documentation object 'history.Rd':
 
 * checking for missing documentation entries ... WARNING
 Undocumented code objects:
-   ‘BNEngineNDB’
-   ‘EvidenceSet’ ‘observables’
-   ‘parseEvidence’
-   ‘evidence’ ‘evidence<-’
-   ‘accumulateEvidence’ ‘handleEvidence’
-   ‘announceStats’
-   ‘baselineHist’
    ‘clearSRs’ ‘getSR’‘newSR’ ‘saveSR' <<HERE>>
-   ‘configStats’ 
-   ‘getRecordForUser’  
-   ‘loadManifest’
-   ‘logEvidence’
-   ‘mainLoop’
-   ‘markEvidence’ 
-   ‘parseStudentRecord’
-   ‘seqno’ ‘seqno<-’
-   ‘setupDefaultSR’
-   'updateHist’
+   ‘getRecordForUser’  <<HERE>>
+   ‘logEvidence’ <<HERE>>
+   ‘accumulateEvidence’ ‘handleEvidence’
+   ‘parseStudentRecord’ <<HERE>>
+   ‘evidence’ ‘evidence<-’ <<HERE>>
+   ‘baselineHist’ 'updateHist’
    ‘updateSM’
-   ‘updateStats’
+   ‘updateStats’ ‘announceStats’
+   ‘markEvidence’
+   ‘mainLoop’
 Undocumented S4 methods:
 
 

@@ -64,7 +64,7 @@ BNEngineNDB <-
                     manifest
                   },
                   saveManifest = function(manif) {
-                    manifest$app <<- app(eng)
+                    manif$app <- app(eng)
                     manifest <<- manif
                   },
                   P4db = function () {

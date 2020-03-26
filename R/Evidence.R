@@ -7,17 +7,17 @@ setClass("EvidenceSet",
 
 EvidenceSet <- function(uid,context,timestamp=Sys.time(),
                         obs=list(),app="default",mess="Accumulate",
-                        sender="EI") {
+                        sender="EI", processed=FALSE) {
   new("EvidenceSet",app=app,uid=uid,context=context,mess=mess,
       timestamp=timestamp,data=obs,sender=sender,"_id"=NA_character_,
-      seqno=NA_integer_ )
+      seqno=NA_integer_ , processed=processed)
 }
 
 setGeneric("seqno",function(x) standardGeneric("seqno"))
 setMethod("seqno","EvidenceSet", function(x) x@seqno)
 setGeneric("seqno<-",function(x,value) standardGeneric("seqno<-"))
 setMethod("seqno<-","EvidenceSet", function(x,value) {
-  x@seqno <- value
+  x@seqno <- as.integer(value)
   x
 })
 
@@ -55,7 +55,7 @@ parseEvidence<- function (rec) {
       context=as.vector(ununboxer(rec$context)),
       mess=as.vector(ununboxer(rec$mess)),
       timestamp=as.POSIXlt(ununboxer(rec$timestamp)),
-      processed=ununboxer(rec$processed),
+      processed=as.logical(ununboxer(rec$processed)),
       pError=rec$pError,
       data=parseData(ununboxer(rec$data)),
       seqno=as.vector(rec$seqno))

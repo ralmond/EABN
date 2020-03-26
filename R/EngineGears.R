@@ -4,10 +4,14 @@
 loadManifest <- function(eng,manifest=data.frame()) {
   if (missing(manifest)) {
     manifest <- eng$fetchManifest()
+    if (nrow(manifest) == 0L) return(eng)
   } else {
     eng$saveManifest(manifest)
   }
-  eng$setManifest(manifest)
+  if (nrow(manifest) > 0L) {
+    eng$setManifest(manifest)
+    WarehouseManifest(eng$warehouseObj) <- manifest
+  }
   eng
 }
 

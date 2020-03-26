@@ -2,7 +2,6 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{EvidenceSet-class}
-\alias{as.jlist,EvidenceSet,list-method}
 \alias{observables,EvidenceSet-method}
 \alias{seqno,EvidenceSet-method}
 \alias{seqno<-,EvidenceSet-method}

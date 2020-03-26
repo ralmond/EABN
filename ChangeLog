@@ -1,3 +1,15 @@
+2020-03-25  Russell Almond  <ralmond@Cherry>
+
+	* R/EngineGears.R (loadManifest): Need to assign to
+	eng$warehouseObj, not eng$warehouse() as latter does not have
+	assignment method.
+
+	* R/EAEngine.R: (eng$setManifest) Killed call to warehouse() in
+	setManifest method, again, circular loading pattern.
+
+	* R/EngineGears.R (loadManifest): Added test for zero row manifest
+	to avoid circular loading.
+
 2020-03-21  Russell Almond  <ralmond@Cherry>
 
 	* R/EAEngineNDB.R (BNEngineNDB): Changed listeners to listenerSet.

@@ -62,8 +62,10 @@ BNEngine <-
                     warehouseObj
                   },
                   setManifest = function(manifest) {
-                    warehouse()         # Initialize Warehouse
-                    WarehouseManifest(warehouseObj) <<- manifest
+                    if (nrow(manifest) > 0L) {
+                      ## warehouse()         # Warehouse is now pre-installed.
+                      WarehouseManifest(warehouseObj) <<- manifest
+                    }
                   },
                   fetchManifest = function() {
                     stop("Abstract method.")

@@ -3,7 +3,6 @@
 \docType{class}
 \alias{StudentRecord-class}
 \alias{app,StudentRecord-method}
-\alias{as.jlist,StudentRecord,list-method}
 \alias{context,StudentRecord-method}
 \alias{evidence,StudentRecord-method}
 \alias{evidence<-,StudentRecord-method}

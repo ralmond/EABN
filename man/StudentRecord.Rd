@@ -40,6 +40,7 @@ StudentRecord(uid, context = "", timestamp = Sys.time(), smser = list(), sm = NU
 }
 \examples{
 
+%\dontrun{
 library(PNetica)
 
 ##Start with manifest
@@ -99,7 +100,7 @@ stopifnot(
  PnetName(sm(dsr)) == PnetName(sm(dsr))
 )
 
-
+%}
 }
 \keyword{ graph }
 

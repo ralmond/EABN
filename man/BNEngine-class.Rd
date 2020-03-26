@@ -72,7 +72,6 @@ All reference classes extend and inherit methods from \code{"\linkS4class{envRef
     Networks in Educational Assessment}.  Springer.  Especially Chapter
   13. 
 
-
 }
 \author{Russell Almond}
 \seealso{
