@@ -14,7 +14,7 @@
 }
 \usage{
 parseStudentRecord(rec)
-\method{as.jlist}{StudentRecord,list}(obj, ml, serialize=TRUE)
+\S4method{as.jlist}{StudentRecord,list}(obj, ml, serialize=TRUE)
 }
 \arguments{
   \item{rec}{A list which comes from running
@@ -38,14 +38,14 @@ parseStudentRecord(rec)
 
   The \code{as.jlist} method for the \code{\linkS4class{StudentRecord}}
   serializes the \code{\link{sm}} field using the
-  \code{\link[Proc4]{PnetSerialize}} method.  This produces a slob
+  \code{\link[Peanut]{PnetSerialize}} method.  This produces a slob
   (string large object) which is stored in the \code{smser} field of the
   \code{\linkS4class{StudentRecord}}.
 
   The \code{parseStudentRecord} function restores the \code{smser}
   field, but not the \code{sm} field.  This must be done in the context
   of the \code{\linkS4class{StudentRecordSet}}, or equivalently the
-  \code{\link[Proc4]{PnetWarehouse}}, which is currently managing 
+  \code{\link[Peanut]{PnetWarehouse}}, which is currently managing 
   the networks.  To finish the process, call \code{\link{fetchSM}} to
   restore the student model network.
 
@@ -109,10 +109,35 @@ setupDefaultSR(eng)
 
 recset <- eng$studentRecords()
 
-rec1 <- newSR(recset,"Student1")
+sr0 <- getRecordForUser(eng,"S1")
+eap0 <- stat(sr0,"Physics_EAP")
 
-%%<<HERE>>
+sr0.ser <- as.json(sr0)
+sr0a <- parseStudentRecord(fromJSON(sr0.ser))
+sr0a <- fetchSM(sr0a,recset$warehouse)
+## This should relink to the same student model
+stopifnot(sm(sr0a)==sm(sr0),abs(eap0-stat(sr0a,"Physics_EAP")) <.0001)
 
+## Next add some evidence and test again.
+
+e1 <- EvidenceSet(uid="S1",app="Test",context="PPcompEM",
+                  obs=list("CompensatoryObs"="Right"))
+
+e1 <- logEvidence(eng,sr0,e1)
+sr1 <- accumulateEvidence(eng,sr0,e1)
+eap1 <- stat(sr1,"Physics_EAP")
+sr1.ser <- as.json(sr1)
+
+## Force delete student model to make sure that it is properly
+## recovered. 
+WarehouseFree(Nethouse,PnetName(sm(sr1)))
+stopifnot(!is.active(sm(sr1)))  # No longer active.
+
+sr1a <- parseStudentRecord(fromJSON(sr1.ser))
+sr1a <- fetchSM(sr1a,recset$warehouse)
+eap1a <- stat(sr1a,"Physics_EAP")
+stopifnot(all(evidence(sr1)==evidence(sr1a)),
+          abs(eap1-eap1a) <.001)
 
 %}
 

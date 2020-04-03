@@ -32,7 +32,6 @@ BNEngineMongo <-
                                 statistics=statistics,
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
-                                netDirectory=netDirectory,
                                 ...)
                   },
                   manifestdb = function() {
@@ -141,10 +140,10 @@ BNEngineMongo <- function(app="default",warehouse,listenerSet=NULL,
                      dburi="mongodb://localhost", dbname="EARecords",
                      processN=Inf,
                      admindbname="Proc4", waittime=.25, profModel=character(),
-                     netDirectory=".",...) {
+                     ...) {
   new("BNEngineMongo",app=app,listenerSet=listenerSet,
       warehouse=warehouse,dburi=dburi, dbname=dbname,processN=processN,
       admindbname=admindbname,waittime=waittime,profModel=profModel,
-      netDirectory=netDirectory,...)
+      ...)
 }
 

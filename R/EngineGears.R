@@ -27,7 +27,8 @@ loadManifest <- function(eng,manifest=data.frame()) {
 
 setupDefaultSR <- function (eng) {
   eng$studentRecords()                  #Make sure initialized
-  dsr <- StudentRecord("*DEFAULT*",app=app(eng),context="*Baseline*")
+  dsr <- StudentRecord("*DEFAULT*",app=app(eng),context="*Baseline*",
+                       seqno=0L)
   ## If an old record exists, clear it out.
   clearSRs(eng$studentRecords())
   if (length(eng$profModel) > 0L) {
@@ -57,10 +58,11 @@ setupDefaultSR <- function (eng) {
 
 getRecordForUser <- function(eng,uid,srser=NULL) {
   rec <- getSR(eng$studentRecords(),uid,srser)
-  if (is.null(rec))
-    stop("Could not find or generate student record for ",uid)
-  if (isTRUE(seqno(rec)==0L))
+  if (is.null(rec)) {
+    rec <- newSR(eng$studentRecords(),uid)
+    rec <- saveSR(eng$studentRecords(),rec)
     announceStats(eng,rec)
+  }
   rec
 }
 
@@ -135,17 +137,16 @@ updateHist <- function(eng,rec,evidMess, debug=0) {
 
 logEvidence <- function (eng,rec,evidMess) {
   seqno(evidMess) <- seqno(rec)+1L
+  if (length(m_id(evidMess)) == 0L || is.na(m_id(evidMess))) {
+    ## NDB need to generate an ID.
+    evidMess@"_id" <- paste(uid(evidMess),seqno(evidMess),sep="+")
+  }
   evidMess
 }
 
 accumulateEvidence <- function(eng,rec,evidMess, debug=0) {
   withFlogging({
-    rec1 <- StudentRecord(app=app(eng),uid=uid(rec),
-                          context=context(evidMess),
-                          timestamp=timestamp(evidMess),
-                          evidence=c(evidence(rec),m_id(evidMess)),
-                          sm=sm(rec),stats=stats(rec),hist=rec@hist,
-                          seqno=seqno(evidMess),prev_id=m_id(rec))
+    rec1 <- updateRecord(rec,evidMess)
     rec1 <- updateSM(eng,rec1,evidMess, debug)
     if (interactive() && debug>1) utils::recover()
     rec1 <- updateStats(eng,rec1, debug)
@@ -162,7 +163,11 @@ accumulateEvidence <- function(eng,rec,evidMess, debug=0) {
 
 updateSM <- function (eng,rec,evidMess, debug=0) {
   manf <-WarehouseManifest(eng$warehouse())
-  emName <-manf[manf$Title==context(evidMess),"Name"]
+  if (context(evidMess) %in% manf$Name) {
+    emName <- context(evidMess)
+  } else { # Check title
+    emName <-manf[manf$Title==context(evidMess),"Name"]
+  }
   flog.debug("Evidence Model for level %s is %s",context(evidMess),
              paste(emName, collapse=", "))
   if (length(emName) != 1L) {
@@ -229,7 +234,7 @@ mainLoop <- function(eng) {
     flog.info("Evidence AccumulationEngine %s starting.", app(eng))
     active <- eng$isActivated()
     while (active) {
-      eve <- eng$fetchNextEvidence()
+      eve <- fetchNextEvidence(eng)
       if (is.null(eve)) {
         ## Queue is empty, wait and check again.
         Sys.sleep(eng$waittime)
@@ -237,7 +242,7 @@ mainLoop <- function(eng) {
         active <- eng$isActivated()
       } else {
         handleEvidence(eng,eve)
-        eng$setProcessed(eve)
+        markProcessed(eng,eve)
         eng$processN <- eng$processN -1
         active <- eng$processN > 0
       }

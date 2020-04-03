@@ -10,7 +10,8 @@
 
 }
 \usage{
-StudentRecordSet(app = "default", warehouse = NULL, dburi = "mongodb://localhost:271017", dbname = "EARecords", ...)
+StudentRecordSet(app = "default", warehouse = NULL,
+  dburi = "mongodb://localhost", dbname = "EARecords", ...)
 }
 \arguments{
   \item{app}{A character scalar providing a guid for the application.}
@@ -31,7 +32,7 @@ StudentRecordSet(app = "default", warehouse = NULL, dburi = "mongodb://localhost
 
   The \code{StudentRecordSet} operates in two modes, depending on the
   value of \code{dburi}.  If \code{dburi} references a
-  \code{\link[Proc4]{MongoDB}} database, then the
+  \code{\link[Proc4]{MongoDB-class}} database, then the
   \code{StudentRecordSet} set will save student records (including
   serialized Bayes nets) to the database and restore them on demmand.
   This facilitates scoring across several sessions.

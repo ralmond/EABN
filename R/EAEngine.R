@@ -12,7 +12,6 @@ BNEngine <-
                   statistics="list",
                   histNodes="character",
                   warehouseObj="PnetWarehouse",
-                  netDirectory="character",
                   waittime="numeric",
                   processN="numeric"
               ),
@@ -89,7 +88,7 @@ BNEngine <-
 
 
 BNEngine <- function(app="default",session,listenerSet=NULL,
-                     netDirectory=".", waittime=.25, profModel=character(),
+                     waittime=.25, profModel=character(),
                      ...) {
   stop("BNEngine now abstract, use BNMongoEngine or BNSQLEngine.")
 }
@@ -104,6 +103,15 @@ setMethod("notifyListeners","BNEngine",
                sender$listenerSet$notifyListeners(mess)
            })
 
+setGeneric("fetchNextEvidence",
+           function (eng) standardGeneric("fetchNextEvidence"))
+setMethod("fetchNextEvidence","BNEngine",
+          function(eng) eng$fetchNextEvidence())
+
+setGeneric("markProcessed",
+           function(eng,eve) standardGeneric("markProcessed"))
+setMethod("markProcessed","BNEngine",
+          function(eng,eve) eng$setProcessed(eve))
 
 
 

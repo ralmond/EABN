@@ -98,9 +98,6 @@ showClass("BNEngineMongo")
       \code{\link[Peanut]{PnetWarehouse}} 
       which stores the Bayes nets, both evidence models and student
       models are stored here.}
-    \item{\code{netDirectory}:}{Object of class \code{character} giving
-      the pathname from which proficiency and evidence models should be
-      loaded on demand. }
     \item{\code{waittime}:}{Object of class \code{numeric} giving the
       time in seconds the main event loop should wait before checking
       again for messages. }
@@ -112,11 +109,11 @@ showClass("BNEngineMongo")
     \item{\code{dbname}:}{Object of class \code{character} giving the
       name of the database to be used. }
     \item{\code{manifestDB}:}{Object of class
-      \code{\link[Proc4]{MongoDB}} giving the collection used to store
+      \code{\link[Proc4]{MongoDB-class}} giving the collection used to store
       the manifest.  This object may not be initialized so it should be
       accessed through the class-based function \code{manifestdb()}.}
     \item{\code{evidenceDB}:}{Object of class
-      \code{\link[Proc4]{MongoDB}} accessing the evidence set
+      \code{\link[Proc4]{MongoDB-class}} accessing the evidence set
       collection. This object may not be initialized so it should be
       accessed through the class-based function \code{evidenceSets()}.}
     \item{\code{statDB}:}{Object of class \code{MongoDB} giving the
@@ -146,16 +143,16 @@ showClass("BNEngineMongo")
     \item{\code{initialize(app, warehouse, listeners, username,
         password, host, port, dbname, P4dbname, profModel, waittime,
         statistics, histNodes, processN, ...)}:}{ initializes the class.
-     Note that some initialization is done in the various \code{XXXdb()}
-     functions, so these should be called instead of directly accessing
-     the fields.}
+      Note that some initialization is done in the various \code{XXXdb()}
+      functions, so these should be called instead of directly accessing
+      the fields.}
     \item{\code{manifestdb()}:}{ Returns the
-      \code{\link[Proc4]{MongoDB}} handle to the manifest information
+      \code{\link[Proc4]{MongoDB-class}} handle to the manifest information
       collection.  }
-    \item{\code{admindb()}:}{ Returns the \code{\link[Proc4]{MongoDB}}
+    \item{\code{admindb()}:}{ Returns the \code{\link[Proc4]{MongoDB-class}}
       handle to the \dQuote{AuthorizedApps} collection.}
     \item{\code{histNodesdb()}:}{ Returns the
-      \code{\link[Proc4]{MongoDB}} handle to the hist nodes collection. }
+      \code{\link[Proc4]{MongoDB-class}} handle to the hist nodes collection. }
     \item{\code{saveManifest(manifest)}:}{ Saves the current
       \code{\link[Peanut]{PnetWarehouse}} manifest to the
       \code{manifestdb()} collection } 
@@ -173,7 +170,7 @@ showClass("BNEngineMongo")
     \item{\code{setError(mess, e)}:}{ Added an error message to an
       evidence set. }
     \item{\code{evidenceSets()}:}{ Returns a
-      \code{\link[Proc4]{MongoDB}} handle to the collection/queue of
+      \code{\link[Proc4]{MongoDB-class}} handle to the collection/queue of
       evidence sets. }
     \item{\code{getHistNodes()}:}{ Fetches the history nodes from the
       \code{histNodesdb()} collection. }

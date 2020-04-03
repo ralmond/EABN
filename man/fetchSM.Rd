@@ -22,7 +22,7 @@ unpackSM(sr, warehouse)
 }
 \details{
 
-  The \code{\linkS4class{StudentModel}} object has two fields related to
+  The \code{\linkS4class{StudentRecord}} object has two fields related to
   student models:  \code{sm} and \code{smser}.  The former contains the
   actual student model or \code{NULL} if it has not yet been initialized
   or restored from the database.  The latter contains a character string

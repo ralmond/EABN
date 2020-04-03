@@ -4,6 +4,8 @@
 \alias{BNEngine-class}
 \alias{app,BNEngine-method}
 \alias{notifyListeners,BNEngine-method}
+\alias{fetchNextEvidence,BNEngine-method}
+\alias{markProcessed,BNEngine-method}
 \alias{BNEngine}
 \title{Class \code{"BNEngine"}}
 \description{
@@ -23,6 +25,10 @@ All reference classes extend and inherit methods from \code{"\linkS4class{envRef
       identifying the application that this engine is handling. }
     \item{notifyListeners}{\code{signature(sender = "BNEngine")}:
       Notifies other processes that student records have been updated.  }
+    \item{fetchNextEvidence}{\code{signature(eng = "BNEngine")}: Returns
+      the next unprocessed \code{\linkS4class{EvidenceSet}} in the queue.}
+    \item{markProcessed}{\code{signature(eng = "BNEngine", eve =
+        "EvidenceSet")}: marks the \code{eve} argument as processed.}
   }
 }
 \details{
@@ -31,7 +37,7 @@ All reference classes extend and inherit methods from \code{"\linkS4class{envRef
   process.  This is actually an abstract class, there are two
   subclasses:  \code{\linkS4class{BNEngineMongo}}, which uses the Mongo
   database to store student records and as a message queue, and
-  \code{\linkS4class{BNEningeNDB}}, which operates without a database.
+  \code{\linkS4class{BNEngineNDB}}, which operates without a database.
   Note that the \code{BNEngine} constructor generates an error.
 
   The following functions form the core of the Engine Protocol:
@@ -80,7 +86,7 @@ All reference classes extend and inherit methods from \code{"\linkS4class{envRef
   \code{\linkS4class{BNEngineMongo}}, \code{\linkS4class{BNEngineNDB}}
 
   Constituent parts:
-  \code{\link{StudentRecordSet}}, \code{\link[Peanut]{PnetWarehouse}}
+  \code{\linkS4class{StudentRecordSet}}, \code{\link[Peanut]{PnetWarehouse}}
   
   Setup Functions:
   \code{\link{loadManifest}},
@@ -90,10 +96,11 @@ All reference classes extend and inherit methods from \code{"\linkS4class{envRef
 
   Main Loop Functions:
   \code{\link{mainLoop}},
-  \code{\link{accumulateEvidence}},
   \code{\link{handleEvidence}},
   \code{\link{getRecordForUser}},
   \code{\link{logEvidence}},
+  \code{\link{accumulateEvidence}},
+  \code{\link{updateRecord}},
   \code{\link{updateSM}},
   \code{\link{updateStats}},
   \code{\link{updateHist}},
@@ -127,9 +134,6 @@ showClass("BNEngine")
       \code{\link[Peanut]{PnetWarehouse}} 
       which stores the Bayes nets, both evidence models and student
       models are stored here.}
-    \item{\code{netDirectory}:}{Object of class \code{character} giving
-      the pathname from which proficiency and evidence models should be
-      loaded on demand. }
     \item{\code{waittime}:}{Object of class \code{numeric} giving the
       time in seconds the main event loop should wait before checking
       again for messages. }
@@ -174,7 +178,7 @@ showClass("BNEngine")
     \item{\code{setProcessed(mess)}:}{ Sets an evidence set message as
       processed.  }
     \item{\code{warehouse()}:}{ Returns the
-      \code{\link[Peanut]{PnetWarehous}} associated with this
+      \code{\link[Peanut]{PnetWarehouse}} associated with this
       engine. Again, this function should be called in preference to
       directly accessing the field as it forces initialization when necessary.}
     \item{\code{evidenceSets()}:}{ A reference to the collection of

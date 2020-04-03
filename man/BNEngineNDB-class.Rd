@@ -2,11 +2,13 @@
 \Rdversion{1.1}
 \docType{class}
 \alias{BNEngineNDB-class}
+\alias{evidence,BNEngineNDB-method}
+\alias{evidence<-,BNEngineNDB-method}
 
 \title{Class \code{"BNEngineNDB"}}
 \description{
 
-  A \code{\linkS4class{BNEninge}} instance which is \emph{not} connected
+  A \code{\linkS4class{BNEngine}} instance which is \emph{not} connected
   to a database.
 
 }
@@ -16,6 +18,14 @@ Class \code{"\linkS4class{BNEngine}"}, directly.
 All reference classes extend and inherit methods from
 \code{"\linkS4class{envRefClass}"}. 
 
+}
+\section{Methods}{
+  \describe{
+    \item{evidence}{\code{signature(x = "BNEngineNDB")}: Returns list of
+      \code{\linkS4class{EvidenceSet}}s in the queue.}
+    \item{evidence}{\code{signature(x = "BNEngineNDB", value="list")}:
+      Sets the list of \code{\linkS4class{EvidenceSet}}s in the queue.}
+  }
 }
 \references{
 
@@ -95,9 +105,6 @@ showClass("BNEngineNDB")
       \code{\link[Peanut]{PnetWarehouse}} 
       which stores the Bayes nets, both evidence models and student
       models are stored here.}
-    \item{\code{netDirectory}:}{Object of class \code{character} giving
-      the pathname from which proficiency and evidence models should be
-      loaded on demand. }
     \item{\code{waittime}:}{Object of class \code{numeric} giving the
       time in seconds the main event loop should wait before checking
       again for messages. }
@@ -118,7 +125,7 @@ showClass("BNEngineNDB")
       considered active.}
   }
 }
-\section{Methods}{
+\section{Class-Based Methods}{
   \describe{
     \item{\code{studentRecords()}:}{ Returns the
       \code{\linkS4class{StudentRecordSet}} associated with this engine. }
@@ -128,18 +135,29 @@ showClass("BNEngineNDB")
       activate the engine.}
     \item{\code{fetchStats()}:}{ Fetches the statistics or information in
       the \code{statmat} field.}
-    \item{\code{activate()}:}{ ~~ }
-    \item{\code{initialize(app, warehouse, listeners, profModel, waittime, statistics, histNodes, evidenceQueue, processN, statmat, ...)}:}{ ~~ }
-    \item{\code{P4db()}:}{ ~~ }
-    \item{\code{saveManifest(manifest)}:}{ ~~ }
-    \item{\code{fetchManifest()}:}{ ~~ }
-    \item{\code{fetchNextEvidence()}:}{ ~~ }
-    \item{\code{saveStats(statmat)}:}{ ~~ }
-    \item{\code{isActivated()}:}{ ~~ }
-    \item{\code{evidenceSets()}:}{ ~~ }
-    \item{\code{show()}:}{ ~~ }
+    \item{\code{initialize(app, warehouse, listeners, profModel,
+        waittime, statistics, histNodes, evidenceQueue, processN,
+        statmat, ...)}:}{ Initializes this class }
+    \item{\code{saveManifest(manifest)}:}{ This sets the internal
+      manifest field. }
+    \item{\code{fetchManifest()}:}{ This returns the internal manifest field. }
+    \item{\code{fetchNextEvidence()}:}{ This returns the first evidence set
+      from the \code{evidenceQueue} field, and removes that element from
+      the queue.}
+    \item{\code{saveStats(statmat)}:}{ This saves the statistic table to
+      the internal field.}
+    \item{\code{isActivated()}:}{ This checks for the existance of the
+      field in the \code{activeTets} field.}
+    \item{\code{evidenceSets()}:}{ This returns NULL }
+    \item{\code{show()}:}{ This produces a printable summary. }
   }
 
-The following methods are inherited (from the corresponding class):
-evidenceSets ("BNEngine"), stats ("BNEngine"), setProcessed ("BNEngine"), setManifest ("BNEngine"), activate ("BNEngine"), isActivated ("BNEngine"), saveManifest ("BNEngine"), setHistNodes ("BNEngine"), studentRecords ("BNEngine"), saveStats ("BNEngine"), fetchNextEvidence ("BNEngine"), setError ("BNEngine"), getHistNodes ("BNEngine"), warehouse ("BNEngine"), show ("BNEngine"), fetchManifest ("BNEngine"), fetchStats ("BNEngine")
+The following methods are inherited (from the corresponding class): 
+evidenceSets ("BNEngine"), stats ("BNEngine"), setProcessed
+("BNEngine"), setManifest ("BNEngine"), activate ("BNEngine"),
+isActivated ("BNEngine"), saveManifest ("BNEngine"), setHistNodes
+("BNEngine"), studentRecords ("BNEngine"), saveStats ("BNEngine"),
+fetchNextEvidence ("BNEngine"), setError ("BNEngine"), getHistNodes
+("BNEngine"), warehouse ("BNEngine"), show ("BNEngine"), fetchManifest
+("BNEngine"), fetchStats ("BNEngine") 
 }

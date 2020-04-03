@@ -84,7 +84,7 @@ All reference classes extend and inherit methods from
   \code{\link[Peanut]{PnetWarehouse}} and \code{\link[Peanut]{Pnet}} for
   information about the contained Bayesian networks.
   
-  \code{\linkS4class{EAEninge}} for the engine that holds it.
+  \code{\linkS4class{BNEngine}} for the engine that holds it.
 }
 \examples{
 showClass("StudentRecordSet")

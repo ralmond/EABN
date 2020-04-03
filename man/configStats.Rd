@@ -18,7 +18,7 @@ configStats(eng, statmat = data.frame())
 }
 \details{
 
-  A \code{\link[Peanut]{Statitic}} is a functional that is applied to
+  A \code{\link[Peanut]{Statistic}} is a functional that is applied to
   the student model (\code{\link{sm}}) of a
   \code{\linkS4class{StudentRecord}}. At the end of the evidence
   processing cycle, the function \code{\link{updateStats}} is called to

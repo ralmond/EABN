@@ -13,7 +13,7 @@
 }
 \usage{
 parseEvidence(rec)
-\method{as.jlist}{EvidenceSet,list}(obj, ml, serialize=TRUE)
+\S4method{as.jlist}{EvidenceSet,list}(obj, ml, serialize=TRUE)
 }
 \arguments{
   \item{rec}{A list which comes from running
@@ -33,13 +33,13 @@ parseEvidence(rec)
   description of the JSON conversion prototocl.
 
   The \code{parseEvidence} method is designed to be used with the
-  \code{\link[Proc4]{getOneRec}} and \code{\link[Proc4]{getManyRec}}
+  \code{\link[Proc4]{getOneRec}} and \code{\link[Proc4]{getManyRecs}}
   functions for fetching information from the database.
 }
 \value{
 
   The function \code{parseEvidence} returns an object of class
-  \code{\link[Proc4]{EvidenceSet}}.
+  \code{\linkS4class{EvidenceSet}}.
 
   The \code{as.jlist} method returns a list which can be passed to
   \code{\link[jsonlite]{toJSON}} to produce legible JSON from the R
@@ -48,7 +48,7 @@ parseEvidence(rec)
 \author{Russell Almond}
 \seealso{
 
-  \code{\linkS4class{EvidneceSet}}, \code{\link[Proc4]{as.json}},
+  \code{\linkS4class{EvidenceSet}}, \code{\link[Proc4]{as.json}},
   \code{\link[Proc4]{getOneRec}}, \code{\link[Proc4]{getManyRecs}}
 
 }

@@ -9,8 +9,8 @@ importFrom("jsonlite", "toJSON", "fromJSON","base64_enc","base64_dec")
 
 export(StudentRecord, sm, "sm<-", stats, evidence, "evidence<-",
        statNames, histNames, stat,
-       history, parseStudentRecord,parseStats,stats2json,unparseStats,
-       fetchSM, unpackSM, markEvidence,
+       history, parseStudentRecord, parseStats, stats2json, unparseStats,
+       fetchSM, unpackSM, updateRecord,
        StudentRecordSet, getSR, saveSR, newSR, clearSRs)
 exportClasses(StudentRecord,StudentRecordSet)
 exportMethods(evidence, "evidence<-",
@@ -26,8 +26,8 @@ exportClass(BNEngine,BNEngineMongo)
 export(BNEngine,BNEngineMongo, loadManifest, setupDefaultSR,
        logEvidence, accumulateEvidence, configStats, updateStats,
        announceStats, baselineHist, updateHist, getRecordForUser,
-       handleEvidence, mainLoop, updateSM)
-exportMethods(notifyListeners)
+       handleEvidence, mainLoop, updateSM, fetchNextEvidence, markProcessed)
+exportMethods(notifyListeners,fetchNextEvidence,markProcessed)
 
 exportClass(BNEngineNDB)
 export(BNEngineNDB)

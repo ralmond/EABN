@@ -26,7 +26,7 @@ setMethod("timestamp","StudentRecord", function(x) x@timestamp)
 
 setMethod("seqno","StudentRecord", function(x) x@seqno)
 setMethod("seqno<-","StudentRecord", function(x,value) {
-  x@seqno <- value
+  x@seqno <- as.integer(value)
   x
 })
 
@@ -247,12 +247,14 @@ setGeneric("evidence",function(x) standardGeneric("evidence"))
 setMethod("evidence","StudentRecord", function(x) x@evidence)
 
 
-
-markEvidence <- function (rec, evidMess) {
+## This is not currently being used.  The functionality is used
+updateRecord <- function (rec, evidMess) {
   rec@prev_id <- m_id(rec)
   rec@"_id" <- NA_character_
-  rec@evidence <- c(m_id(evidMess),rec@evidence)
-  rec@seqno <- rec@seqno+1
+  evidence(rec) <- c(m_id(evidMess),evidence(rec))
+  seqno(rec) <- seqno(rec)+1
+  rec@context <- context(evidMess)
+  rec@timestamp <- timestamp(evidMess)
   rec
 }
 
@@ -282,7 +284,7 @@ StudentRecordSet <-
               methods = list(
                   initialize =
                     function(app="default",dbname="EARecords",
-                             dburi="mongodb://localhost:271017",
+                             dburi="mongodb://localhost",
                              db = NULL,warehouse=NULL,
                              ...)
                       callSuper(app=app,db=db,dbname=dbname,dburi=dburi,
@@ -322,8 +324,8 @@ StudentRecordSet <-
 
 
 StudentRecordSet <- function(app="default",warehouse=NULL,
-                             dburi="mongodb://localhost:271017",
-                             dbname="EIRecords",
+                             dburi="mongodb://localhost",
+                             dbname="EARecords",
                              ...)
   new("StudentRecordSet",app=app, dbname=dbname, dburi=dburi,
       db=NULL, warehouse=warehouse, ...)
@@ -344,31 +346,40 @@ setMethod("getSR", c("StudentRecordSet","ANY"),
 function (srs,uid,ser=NULL) {
   if (length(ser) > 0L) {
     rec <- parseStudentRecord(ser)
+    if (length(m_id(rec))==0L || is.na(m_id(rec))) {
+      rec@"_id" <- paste(uid(rec),seqno(rec),sep="@")
+    }
   } else if (!is.null(srs$recorddb())) {
     rec <- getOneRec(buildJQuery(app=app(srs),uid=uid),srs$recorddb(),
                      parseStudentRecord)
   } else {
     rec <- NULL
   }
-  if (is.null(rec)) {
-    rec <- newSR(srs,uid)
-  } else {
+  if (!is.null(rec)) {
     rec <- fetchSM(rec,srs$warehouse)
   }
   rec
 })
 
 setMethod("saveSR", c("StudentRecordSet","ANY"), function (srs,rec) {
-  if (!is.null(srs$recorddb()))
+  if (!is.null(srs$recorddb())) {
     saveRec(rec,srs$recorddb())
+  } else {
+    if (length(m_id(rec))==0L || is.na(m_id(rec))) {
+      rec@"_id" <- paste(uid(rec),seqno(rec),sep="@")
+    }
+  }
+  rec
 })
 
 setMethod("newSR", c("StudentRecordSet","ANY"), function (srs,uid) {
   flog.debug("Making new student record for  %s", uid)
   dsr <- srs$defaultSR
   oldnet <- WarehouseFetch(srs$warehouse,as.legal.name(srs$warehouse,uid))
-  if (isTRUE(is.valid(srs$warehouse,oldnet)))
+  if (isTRUE(is.valid(srs$warehouse,oldnet))) {
+    flog.warn("Removing old student model named %s.",PnetName(oldnet))
     WarehouseFree(srs$warehouse,PnetName(oldnet))
+  }
   rec <- StudentRecord(uid=uid,context(dsr),timestamp=Sys.time(),
                        sm=WarehouseCopy(srs$warehouse,sm(dsr),
                                         as.legal.name(srs$warehouse,uid)),

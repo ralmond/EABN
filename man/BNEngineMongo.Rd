@@ -5,7 +5,7 @@
 
   The \code{\linkS4class{BNEngineMongo}} is a
   \code{\linkS4class{BNEngine}} which is attached to a
-  \code{\link[Proc4]{MongoDB}} database, which hold both the queue and
+  \code{\link[Proc4]{MongoDB-class}} database, which hold both the queue and
   the \code{\linkS4class{StudentRecordSet}}.  
 
 }
@@ -13,7 +13,7 @@
 BNEngineMongo(app = "default", warehouse, listenerSet = NULL,
 dburi = "mongodb://localhost", dbname = "EARecords", processN = Inf,
 admindbname = "Proc4", waittime = 0.25, profModel = character(),
-netDirectory = ".", ...) 
+...) 
 }
 \arguments{
   \item{app}{A character scalar giving the globally unique identifier
@@ -29,15 +29,12 @@ netDirectory = ".", ...)
   \item{processN}{The number of records to process before stopping.  The
     default value \code{Inf} runs the process until the active flag is
     cleared.}
-  \item{P4dbname}{The name of the admin database used to check for
+  \item{admindbname}{The name of the admin database used to check for
     shutdown requests.}
   \item{waittime}{The amout of time (in seconds) to wait before checking
     again for new evidence sets when the evidence set queue is empty.}
   \item{profModel}{The name of the proficiency model (its ID in the
     warehouse manifest).}
-  \item{netDirectory}{The pathname of the directory which holds the
-    network description files for the
-    \code{\link[Peanut]{PnetWarehouse}}.}
   \item{\dots}{Extra room in case we later think of more things we
     should add.}
 }

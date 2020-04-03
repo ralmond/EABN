@@ -7,8 +7,6 @@ BNEngineNDB <-
               c(
                   manifest = "data.frame",
                   histnodes = "character",
-                  warehouseObj="PnetWarehouse",
-                  netDirectory="character",
                   evidenceQueue="list",
                   statmat="data.frame",
                   activeTest="character"
@@ -49,7 +47,7 @@ BNEngineNDB <-
                   fetchNextEvidence = function() {
                     if (length(evidenceQueue) == 0L)
                       return(NULL)
-                    es <- evidenceQueue[1]
+                    es <- evidenceQueue[[1]]
                     evidenceQueue <<- evidenceQueue[-1]
                     es
                   },
@@ -83,10 +81,21 @@ BNEngineNDB <-
 BNEngineNDB <- function(app="default",warehouse, listenerSet=NULL,
                      manifest=data.frame(),processN=Inf,
                      waittime=.25, profModel=character(),
-                     statmat=data.frame(),
-                     netDirectory=".",activeTest="EAActive.txt",...) {
+                     statmat=data.frame(),evidenceQueue=list(),
+                     activeTest="EAActive.txt",...) {
   new("BNEngineNDB",app=app,warehouse=warehouse,
       listenerSet=listenerSet,manifest=manifest,processN=processN,
       waittime=waittime,profModel=profModel,
-      netDirectory=netDirectory,activeTest=activeTest,...)
+      activeTest=activeTest,...)
 }
+
+setMethod("evidence","BNEngineNDB",
+          function(x) x$evidenceQueue)
+setMethod("evidence<-","BNEngineNDB",
+          function(x,value) {
+            if (!is.list(value) ||
+                !all(sapply(value,is,"EvidenceSet")))
+              stop("Expected a list of evidence sets.")
+            x$evidenceQueue<-value
+            x})
+

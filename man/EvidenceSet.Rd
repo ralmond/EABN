@@ -11,7 +11,7 @@
 }
 \usage{
 EvidenceSet(uid, context, timestamp = Sys.time(), obs = list(), app =
-"default", mess = "Accumulate", sender = "EI") 
+"default", mess = "Accumulate", sender = "EI", processed = FALSE) 
 }
 \arguments{
   \item{uid}{A character scalar giving unique identifier for the student/player.}
@@ -29,12 +29,14 @@ EvidenceSet(uid, context, timestamp = Sys.time(), obs = list(), app =
   \item{sender}{A character scalar giving the identity of the process
     which created the message.  This will usually be an evidence
     identification process.}
+  \item{processed}{A flag that is set when the evidence set has been
+    processed.} 
 }
 \details{
 
   Aside from the \code{\link{seqno}} field, this is pretty much a
   generic \code{\link[Proc4]{P4Message}}.  The \code{data} of the
-  \code{P4Message} is the \code{\link{observable}} value fo the
+  \code{P4Message} is the \code{\link{observables}} value fo the
   \code{\linkS4class{EvidenceSet}}. 
 
 }

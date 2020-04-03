@@ -11,9 +11,12 @@
   
 }
 \usage{
-BNEngineNDB(app = "default", warehouse, listenerSet = NULL, processN =
-Inf, waittime = 0.25, profModel = character(), statmat = data.frame(),
-netDirectory = ".", ...) 
+BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
+  manifest = data.frame(), processN = Inf, waittime = 0.25,
+  profModel = character(), statmat = data.frame(),
+  evidenceQueue = list(), activeTest =
+  "EAActive.txt", ...) 
+
 }
 \arguments{
   \item{app}{A character scalar giving the globally unique identifier
@@ -23,6 +26,8 @@ netDirectory = ".", ...)
     the student models.}
   \item{listenerSet}{A \code{\link[Proc4]{ListenerSet}} which contains the
     listeners for clients of the engine's messages.}
+  \item{manifest}{A data frame providing a manifest for the
+    \code{\link[Peanut]{PnetWarehouse}}.}
   \item{processN}{The number of records to process before stopping.  The
     default value \code{Inf} runs the process until the active flag is
     cleared.}
@@ -32,10 +37,9 @@ netDirectory = ".", ...)
     warehouse manifest).}
   \item{statmat}{A data.frame describing the statistics.  See
     \code{\link{configStats}}.}
-  \item{netDirectory}{The pathname of the directory which holds the
-    network description files for the
-    \code{\link[Peanut]{PnetWarehouse}}.}
-  \item{activetest}{The pathname for the file whose existance will be
+  \item{evidenceQueue}{A list of \code{\linkS4class{EvidenceSet}}
+    objects to be processed.}
+  \item{activeTest}{The pathname for the file whose existance will be
     used to determine when the engine should shut down.}
   \item{\dots}{Extra room in case we later think of more things we
     should add.}
