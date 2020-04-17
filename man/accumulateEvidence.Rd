@@ -103,6 +103,17 @@ handleEvidence(eng, evidMess, srser = NULL, debug = 0)
   batch model.
 
 }
+\section{Known Bugs}{
+
+  There is a bug in version 5.04 of Netica which causes the absorbNodes
+  function when called with a node that does not have display
+  information to generate an internal Netica error.  This has been fixed
+  with version 6.07, which is currently in beta release (Linux only).
+
+  To work around, make sure that either all nodes do not have display
+  information, or that all do.
+
+}
 \seealso{
 
   Classes:
@@ -173,6 +184,7 @@ e1 <- EvidenceSet(uid="S1",app="Test",context="PPcompEM",
 
 e1 <- logEvidence(eng,sr0,e1)
 sr1 <- accumulateEvidence(eng,sr0,e1)
+stopifnot(!is(sr1,'try-error'))
 stopifnot(m_id(sr1)!=m_id(sr0),sr1@prev_id==m_id(sr0))
 stopifnot(seqno(sr1)==1L, seqno(e1)==1L)
 
@@ -186,6 +198,7 @@ e2 <- EvidenceSet(uid="S2",app="Test",context="PPconjEM",
                   obs=list("ConjunctiveObs"="Wrong"))
 
 sr2 <- handleEvidence(eng,e2,fromJSON(sr1.ser))
+stopifnot(!is(sr2,'try-error'))
 eap2 <- stat(sr2,"Physics_EAP")
 stopifnot(uid(sr2)==uid(sr1),
           m_id(sr1)==sr2@prev_id,
