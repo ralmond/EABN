@@ -85,8 +85,8 @@ clearSRs(srs)
 \examples{
 
 %\dontrun{
-## Requires database setup, also PNetica
-library(RNetica)  ## Must load to setup Netica DLL
+## Requires PNetica
+library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
 sess <- RNetica::NeticaSession()
 RNetica::startSession(sess)
@@ -157,7 +157,7 @@ stopifnot(abs(eap1-eap1a) < .001)
 stopifnot(nrow(history(sr1a,"Physcis"))==2L)
 
 
-%}
+%PNetica%}
 
 ##  <<Here>> Need test with Mongo implementation
 

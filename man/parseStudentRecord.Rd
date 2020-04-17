@@ -70,9 +70,9 @@ parseStudentRecord(rec)
 }
 \examples{
 
-%\dontrun{
-## Requires database setup, also PNetica
-library(RNetica)  ## Must load to setup Netica DLL
+%PNetica%\dontrun{
+## Requires PNetica
+library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
 sess <- RNetica::NeticaSession()
 RNetica::startSession(sess)
@@ -139,7 +139,7 @@ eap1a <- stat(sr1a,"Physics_EAP")
 stopifnot(all(evidence(sr1)==evidence(sr1a)),
           abs(eap1-eap1a) <.001)
 
-%}
+%PNetica%}
 
 }
 \keyword{ interface }

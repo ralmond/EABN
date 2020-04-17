@@ -127,7 +127,7 @@ handleEvidence(eng, evidMess, srser = NULL, debug = 0)
 }
 \examples{
 
-%\dontrun{
+%PNetica%\dontrun{
 ## Requires database setup, also PNetica
 library(RNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
@@ -194,7 +194,7 @@ stopifnot(uid(sr2)==uid(sr1),
 
 ## <<HERE>> Need test with Mongo engine.
 
-%}
+%PNetica%}
 
 
 }

@@ -77,12 +77,12 @@ histNames(sr)
 
 }
 \examples{
-%\dontrun{
+%PNetica%\dontrun{# Requires PNetica
 library(PNetica)
 
 ##Start with manifest
-sess <- NeticaSession()
-startSession(sess)
+sess <- RNetica::NeticaSession()
+RNetica::startSession(sess)
 
 ## BNWarehouse is the PNetica Net Warehouse.
 ## This provides an example network manifest.
@@ -119,7 +119,7 @@ names(dsr@hist) <- "Physics"
 stopifnot(histNames(dsr)=="Physics")
 history(dsr,"Physics")
 
-
+%PNetica%}
 }
 \keyword{ manip }
 \keyword{ graphs }

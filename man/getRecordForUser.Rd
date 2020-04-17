@@ -79,12 +79,12 @@ getRecordForUser(eng, uid, srser = NULL)
 }
 \examples{
 
-%\dontrun{
+%PNetica%\dontrun{#Requires PNetica
 library(PNetica)
 
 ##Start with manifest
-sess <- NeticaSession()
-startSession(sess)
+sess <- RNetica::NeticaSession()
+RNetica::startSession(sess)
 
 ## BNWarehouse is the PNetica Net Warehouse.
 ## This provides an example network manifest.
@@ -94,7 +94,7 @@ netman1 <- read.csv(file.path(config.dir,"Mini-PP-Nets.csv"),
 net.dir <- file.path(library(help="PNetica")$path, "testnets")
 stattab <- read.csv(file.path(config.dir, "Mini-PP-Statistics.csv"),
                     as.is=TRUE)
-Nethouse <- BNWarehouse(manifest=netman1,session=sess,key="Name",
+Nethouse <- PNetica::BNWarehouse(manifest=netman1,session=sess,key="Name",
                        address=net.dir)
 
 
@@ -150,7 +150,7 @@ stopifnot(nrow(history(sr1a,"Physcis"))==2L)
 
 ##  <<Here>>  Need test with Mongo engine
 
-%}
+%PNetica%}
 }
 \keyword{ manip }
 

@@ -80,9 +80,9 @@ announceStats(eng, rec)
 
 }
 \examples{
-%\dontrun{
-## Requires database setup, also PNetica
-library(RNetica)  ## Must load to setup Netica DLL
+%PNetica%\dontrun{
+## Requires PNetica
+library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
 sess <- RNetica::NeticaSession()
 RNetica::startSession(sess)
@@ -138,7 +138,7 @@ announceStats(eng,sr1)
 cl$lastMessage()
 details(cl$lastMessage())
 stopifnot(uid(cl$lastMessage())=="S1",context(cl$lastMessage())=="PPcompEM")
-
+%PNetica%}
 }
 \keyword{ manip }
 \keyword{ graph }

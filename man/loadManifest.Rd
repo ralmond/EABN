@@ -82,8 +82,8 @@ loadManifest(eng, manifest = data.frame())
 }
 \examples{
 %\dontrun{
-## Requires database setup, also PNetica
-library(RNetica)  ## Must load to setup Netica DLL
+## Requires PNetica
+library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
 sess <- RNetica::NeticaSession()
 RNetica::startSession(sess)
@@ -119,7 +119,7 @@ stopifnot(nrow(WarehouseManifest(eng$warehouse())) == 0L)
 loadManifest(eng,netman)
 stopifnot(nrow(WarehouseManifest(eng$warehouse())) == 5L)
 
-%}
+%PNetica%}
 }
 \keyword{ interface }
 \keyword{ manip }

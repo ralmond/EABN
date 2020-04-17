@@ -95,7 +95,7 @@ BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
 }
 \examples{
 
-%\dontrun{
+%PNetica%\dontrun{
 ## Requires database setup, also PNetica
 library(RNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
@@ -132,7 +132,7 @@ eng$setHistNodes("Physics")
 configStats(eng,stattab)
 setupDefaultSR(eng)
 
-%}
+%PNetica%}
 
 }
 \keyword{ graphs }

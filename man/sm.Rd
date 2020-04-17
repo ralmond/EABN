@@ -38,11 +38,12 @@ sm(x) <- value
 }
 \examples{
 
+%PNetica%\dontrun{#Requires PNetica
 library(PNetica)
 
 ##Start with manifest
-sess <- NeticaSession()
-startSession(sess)
+sess <- RNetica::NeticaSession()
+RNetica::startSession(sess)
 
 ## BNWarehouse is the PNetica Net Warehouse.
 ## This provides an example network manifest.
@@ -50,13 +51,14 @@ config.dir <- file.path(library(help="Peanut")$path, "auxdata")
 netman1 <- read.csv(file.path(config.dir,"Mini-PP-Nets.csv"),
                     row.names=1, stringsAsFactors=FALSE)
 net.dir <- file.path(library(help="PNetica")$path, "testnets")
-Nethouse <- BNWarehouse(manifest=netman1,session=sess,key="Name",
+Nethouse <- PNetica::BNWarehouse(manifest=netman1,session=sess,key="Name",
                        address=net.dir)
 
 dsr <- StudentRecord("*DEFAULT*",app="ecd://epls.coe.fsu.edu/P4Test",
                      context="*Baseline*")
 sm(dsr) <- WarehouseSupply(Nethouse,"miniPP_CM")
 PnetCompile(sm(dsr))
+%PNetica%}
 
 }
 \keyword{ graphs }

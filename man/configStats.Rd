@@ -65,8 +65,8 @@ configStats(eng, statmat = data.frame())
 }
 \examples{
 
-%\dontrun{
-## Requires database setup, also PNetica
+%PNetica%\dontrun{
+## Requires PNetica
 library(RNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
 sess <- RNetica::NeticaSession()
@@ -102,6 +102,7 @@ stopifnot(all(sapply(stats,StatName)==stattab$Name),
           all(sapply(stats,function(s) s@fun)==stattab$Fun),
           all(sapply(stats,function(s) s@node)==stattab$Node))
 
+%PNetica%}
 }
 \keyword{ manip }
 

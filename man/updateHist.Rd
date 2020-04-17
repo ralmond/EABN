@@ -101,9 +101,9 @@ baselineHist(eng, rec)
 }
 \examples{
 
-%\dontrun{
-## Requires database setup, also PNetica
-library(RNetica)  ## Must load to setup Netica DLL
+%PNetica%\dontrun{
+## Requires PNetica
+library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
 sess <- RNetica::NeticaSession()
 RNetica::startSession(sess)
@@ -165,7 +165,7 @@ history(sr1,"Physics")
 stopifnot(nrow(history(sr1,"Physcis"))==3L)
 woeHist(history(sr1,"Physics"),pos="High",neg=c("Medium","Low"))
 
-%}
+%PNetica%}
 
 }
 \keyword{ manip }

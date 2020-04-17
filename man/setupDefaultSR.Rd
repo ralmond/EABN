@@ -77,9 +77,9 @@ setupDefaultSR(eng)
 }
 \examples{
 
-%\dontrun{
-## Requires database setup, also PNetica
-library(RNetica)  ## Must load to setup Netica DLL
+%PNetica%\dontrun{
+## Requires PNetica
+library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
 sess <- RNetica::NeticaSession()
 RNetica::startSession(sess)
@@ -120,7 +120,7 @@ stopifnot(uid(defrec)=="*DEFAULT*", app(defrec)==app(eng),
           context(defrec)=="*Baseline*",
           PnetName(sm(defrec))==eng$profModel)
 
-%}
+%PNetica%}
 }
 \keyword{ manip }
 

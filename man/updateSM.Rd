@@ -79,9 +79,9 @@ updateSM(eng, rec, evidMess, debug = 0)
 }
 \examples{
 
-%\dontrun{
-## Requires database setup, also PNetica
-library(RNetica)  ## Must load to setup Netica DLL
+%PNetica%%\dontrun{
+## Requires Netica
+library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
 sess <- RNetica::NeticaSession()
 RNetica::startSession(sess)
@@ -128,7 +128,7 @@ eap1a <- PnodeEAP(sm(sr1),PnetFindNode(sm(sr1),"Physics"))
 ## This should have changed.
 stopifnot(abs(eap1-eap1a) > .001)
 
-%}
+%PNetica%}
 
 
 }

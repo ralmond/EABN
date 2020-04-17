@@ -50,7 +50,7 @@ markProcessed(eng, eve)
 }
 \examples{
 
-%\dontrun{
+%PNetica%\dontrun{
 ## Requires database setup, also PNetica
 library(RNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
@@ -111,7 +111,8 @@ stopifnot(length(evidence(eng))==1L)
 eve2 <- fetchNextEvidence(eng)
 stopifnot(m_id(eve2)==m_id(e2))
 
-%}
+
+%PNetica%}
 
 
 }
