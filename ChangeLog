@@ -1,3 +1,109 @@
+2020-04-03  Russell Almond  <ralmond@Cherry>
+
+	* R/EAEngine.R (BNEngine): Removed netDirectory field as this
+	properly belongs in PnetWarehouse.
+
+2020-04-01  Russell Almond  <ralmond@Cherry>
+
+	* R/StudentRec.R (newSR): Added warning when replacing a student model.
+	(getSR): Added code to generate ID in the NDB case.
+
+2020-03-31  Russell Almond  <ralmond@Cherry>
+
+	* R/StudentRec.R (getSR): Changed this protocol so it returns null
+	if the record does not exist.  This way we can test for existance
+	if necessary.
+	(saveSR): Added function to set the _id in no database version.
+	
+
+	* R/EngineGears.R (getRecordForUser): Moved building new record if
+	null functionality to here.
+	
+
+	* R/StudentRec.R (saveSR): Make sure this always returns the recrod.
+
+2020-03-30  Russell Almond  <ralmond@Cherry>
+
+	* R/EngineGears.R (accumulateEvidence): Changed to use the
+	updateRecord function.
+
+	* R/StudentRec.R (updeateRecord): Added this function, as it
+	seemed like burrying it in accumulateEvdience was a bad idea.
+	
+	* R/EAEngine.R (fetchNextEvidence, markEvidence): Added this as a formal
+	function, so we could document it more clearly.
+
+2020-03-29  Russell Almond  <ralmond@Cherry>
+
+	* R/EngineGears.R (updateSM): Modified so that it checks both name
+	and title.
+
+2020-03-25  Russell Almond  <ralmond@Cherry>
+
+	* R/EngineGears.R (loadManifest): Need to assign to
+	eng$warehouseObj, not eng$warehouse() as latter does not have
+	assignment method.
+
+	* R/EAEngine.R: (eng$setManifest) Killed call to warehouse() in
+	setManifest method, again, circular loading pattern.
+
+	* R/EngineGears.R (loadManifest): Added test for zero row manifest
+	to avoid circular loading.
+
+2020-03-21  Russell Almond  <ralmond@Cherry>
+
+	* R/EAEngineNDB.R (BNEngineNDB): Changed listeners to listenerSet.
+
+	* R/EAEngineMongo.R (BNEngineMongo): Changed listeners to
+	listenerSet. 
+
+	* R/EAEngine.R: Changed protocol so that ListenerSet is created
+	before engine.  This allows more flexibility in configurion
+	(with/without database).  
+
+2020-03-15  Russell Almond  <ralmond@Cherry>
+
+	* R/StudentRec.R (StudentRecordSet$recorddb): Make sure that "" is
+	intepreted as no database.
+
+2020-03-02  Russell Almond  <ralmond@Cherry>
+
+	* R/StudentRec.R (unparseHist, parseHist): killing these functions
+	as they are not being used.
+	(unparseStats, stats2json, parseStats): Added flattening features
+	which allows for either nested, or unested JSON.
+	(strsplit2, unflattenNames): Auxiliary functions used in
+	flattening and unflattening stat lists.
+
+2020-03-01  Russell Almond  <ralmond@Cherry>
+
+	* R/StudentRec.R (parseStudentRecord): Addes some as.characters to
+	get rid of excessive listiness.
+
+2020-02-19  Russell Almond  <ralmond@Cherry>
+
+	* R/StudentRec.R (parseStudentRecord, as.jlist): History list is
+	delicate, need to protect with serialization.
+
+	* R/EngineGears.R (configStats): saveStats is an R6 method of
+	eng.  This needs to be moved onto the working branch.
+	
+
+2020-02-15  Russell Almond  <ralmond@Cherry>
+
+	* R/EngineGears.R: Regular functions and S4 generics and methods
+	moved to this file.
+
+	* R/EAEngineNDB.R (BNEngineNDB): No database version of the EA
+	engine.
+
+	* R/EAEngineMongo.R (BNMongoEngine): Split off Mongo-dependent
+	pieces. 
+
+	* R/EAEngine.R (BNEngine): Split the main engine up into a core
+	engine and the peices that use Mongo, and a Mongo-free piece for
+	the DataArcade link.
+
 2018-08-14  Rusell Almond  <ralmond@Cherry>
 
 	* DESCRIPTION (Depends): Renamed package EABN, as this version is

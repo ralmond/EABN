@@ -1,14 +1,14 @@
 setClassUnion("NullRecordSet",c("StudentRecordSet","NULL"))
+setClassUnion("NullListenerSet",c("ListenerSet","NULL"))
 
 
 BNEngine <-
   setRefClass("BNEngine",
               c(
                   app = "character",
-                  session="Psession",
                   srs = "NullRecordSet",
                   profModel = "character",
-                  listenerSet="ListenerSet",
+                  listenerSet="NullListenerSet",
                   statistics="list",
                   histNodes="character",
                   warehouseObj="PnetWarehouse",
@@ -24,7 +24,7 @@ BNEngine <-
                   fetchStats = function() {
                     stop("Abstract method.")
                   },
-                  saveStats = function(statmat) {
+                  saveStats = function(stats) {
                     stop("Abstract method.")
                   },
                   evidenceSets = function() {
@@ -33,9 +33,11 @@ BNEngine <-
                   setProcessed= function (mess) {
                     mess@processed <- TRUE
                     saveRec(mess,evidenceSets())
+                    mess
                   },
                   setError= function (mess,e) {
                     markAsError(mess,evidenceSets(),e)
+                    mess
                   },
                   fetchNextEvidence = function() {
                     stop("Abstract Method")
@@ -59,13 +61,15 @@ BNEngine <-
                     warehouseObj
                   },
                   setManifest = function(manifest) {
-                    warehouse()         # Initialize Warehouse
-                    WarehouseManifest(warehouseObj) <<- manifest
+                    if (nrow(manifest) > 0L) {
+                      ## warehouse()         # Warehouse is now pre-installed.
+                      WarehouseManifest(warehouseObj) <<- manifest
+                    }
                   },
                   fetchManifest = function() {
                     stop("Abstract method.")
                   },
-                  saveManifest = function(manifest) {
+                  saveManifest = function(manif) {
                     stop("Abstract method.")
                   },
                   isActivated = function() {
@@ -83,10 +87,8 @@ BNEngine <-
 ##                              key="Name")
 
 
-BNEngine <- function(app="default",warehouse,listeners=list(),
-                     username="",password="",host="localhost",
-                     port="",dbname="EARecords",processN=Inf,
-                     P4dbname="Proc4", waittime=.25, profModel=character(),
+BNEngine <- function(app="default",session,listenerSet=NULL,
+                     waittime=.25, profModel=character(),
                      ...) {
   stop("BNEngine now abstract, use BNMongoEngine or BNSQLEngine.")
 }
@@ -97,9 +99,19 @@ setMethod("app","BNEngine",function (x) x$app)
 ## Listener notification.
 setMethod("notifyListeners","BNEngine",
            function(sender,mess) {
-             sender$listenerSet$notifyListeners(mess)
+             if (!is.null(sender$listenerSet))
+               sender$listenerSet$notifyListeners(mess)
            })
 
+setGeneric("fetchNextEvidence",
+           function (eng) standardGeneric("fetchNextEvidence"))
+setMethod("fetchNextEvidence","BNEngine",
+          function(eng) eng$fetchNextEvidence())
+
+setGeneric("markProcessed",
+           function(eng,eve) standardGeneric("markProcessed"))
+setMethod("markProcessed","BNEngine",
+          function(eng,eve) eng$setProcessed(eve))
 
 
 

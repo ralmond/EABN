@@ -1,5 +1,5 @@
-BNMongoEngine <-
-  setRefClass("BNMongoEngine",
+BNEngineMongo <-
+  setRefClass("BNEngineMongo",
               c(
                   dburi="character",
                   dbname="character",
@@ -7,49 +7,28 @@ BNMongoEngine <-
                   evidenceDB = "MongoDB",
                   statDB = "MongoDB",
                   histNodesDB = "MongoDB",
-                  P4dbname="character",
-                  p4db="MongoDB",
-                  warehouseObj="PnetWarehouse",
-                  netDirectory="character",
+                  admindbname="character",
+                  adminDB="MongoDB"
               ),
               contains="BNEngine",
               methods = list(
                   initialize =
-                    function(app="default",warehouse=NULL, listeners=list(),
-                             username="",password="", host="localhost",
-                             port="",dbname="EARecords",P4dbname="Proc4",
+                    function(app="default",warehouse=NULL, listenerSet=NULL,
+                             dburi="mongodb://localhost",
+                             dbname="EARecords",admindbname="Proc4",
                              profModel=character(),waittime=.25,
                              statistics=list(), histNodes=character(),
                              processN=Inf,
                              ...) {
                       if (is.null(warehouse))
                         stop("Null warehouse.")
-                      ## Setup DB URI
-                      security <- ""
-                      if (nchar(username) > 0L) {
-                        if (nchar(password) > 0L)
-                          security <- paste(username,password,sep=":")
-                        else
-                          security <- username
-                      }
-                      if (nchar(port) > 0L)
-                        host <- paste(host,port,sep=":")
-                      else
-                        host <- host
-                      if (nchar(security) > 0L)
-                        host <- paste(security,host,sep="@")
-                      dburl <- paste("mongodb:/",host,sep="/")
-                      flog.info("Connecting to database %s/%s\n",dburl,dbname)
-                      ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                                        dbname=dbname, dburi=dburl,
-                                        listeners=listeners,
-                                        colname="Messages",...)
-                      callSuper(app=app,dburi=dburl,dbname=dbname,
+                      flog.info("Connecting to database %s/%s\n",dburi,dbname)
+                      callSuper(app=app,dburi=dburi,dbname=dbname,
                                 warehouseObj=warehouse,statDB=NULL,
                                 manifestDB=NULL, evidenceDB=NULL,
-                                srs=NULL,listenerSet=ls,
-                                warehouseObj=NULL,histNodesDB=NULL,
-                                P4dbname=P4dbname,p4db=NULL,
+                                srs=NULL,listenerSet=listenerSet,
+                                histNodesDB=NULL,
+                                admindbname=admindbname,adminDB=NULL,
                                 statistics=statistics,
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
@@ -68,12 +47,12 @@ BNMongoEngine <-
                     statDB
                   },
                   fetchStats = function() {
-                    statdb()$find(buildJQuery(app=app(eng)))
+                    statdb()$find(buildJQuery(app=app))
                   },
-                  saveStats = function(statmat) {
-                    statdb()$remove(buildJQuery(app=app(eng)))
-                    statmat$app <- app(eng)
-                    statdb()$insert(statmat)
+                  saveStats = function(stats) {
+                    statdb()$remove(buildJQuery(app=app))
+                    stats$app <- app
+                    statdb()$insert(stats)
                   },
                   evidenceSets = function() {
                     if (is.null(evidenceDB)) {
@@ -126,45 +105,45 @@ BNMongoEngine <-
                     srs
                   },
                   fetchManifest = function() {
-                    manifestdb()$find(buildJQuery(app=app(eng)))
+                    manifestdb()$find(buildJQuery(app=app))
                   },
-                  saveManifest = function(manifest) {
-                    manifestdb()$remove(buildJQuery(app=app(eng)))
-                    manifest$app <- app(eng)
-                    manifestdb()$insert(manifest)
+                  saveManifest = function(manif) {
+                    manifestdb()$remove(buildJQuery(app=app))
+                    manif$app <- app
+                    manifestdb()$insert(manif)
                   },
-                  P4db = function () {
-                    if(is.null(p4db))
-                      p4db <<- mongo("AuthorizedApps",P4dbname,dburi)
-                    p4db
+                  admindb = function () {
+                    if(is.null(adminDB))
+                      adminDB <<- mongo("AuthorizedApps",P4dbname,dburi)
+                    adminDB
                   },
                   isActivated = function() {
-                    rec <- P4db()$find(buildJQuery(app=app(eng)),limit=1)
+                    rec <- admindb()$find(buildJQuery(app=app),limit=1)
                     if (length(rec)==0L) return(FALSE)
                     rec$active
                   },
                   activate = function() {
-                    if (length(P4db()$find(buildJQuery(app=app(eng))))==0L) {
-                      P4db()$insert(buildJQuery(app=app(eng),active=TRUE))
+                    if (length(admindb()$find(buildJQuery(app=app)))==0L) {
+                      admindb()$insert(buildJQuery(app=app,active=TRUE))
                     } else {
-                      P4db()$update(buildJQuery(app=app(eng)),
+                      admindb()$update(buildJQuery(app=app),
                                     '{"$set":{"active":true}}')
                     }
                   },
                   show = function() {
-                    methods::show(paste("<EABN: ",app,">"))
+                    methods::show(paste("<EABN: ",app,", DB:", dbname,">"))
                   }))
 
 
 
-BNMongoEngine <- function(app="default",session=NULL,listeners=list(),
-                     username="",password="",host="localhost",
-                     port="",dbname="EARecords",processN=Inf,
-                     P4dbname="Proc4", waittime=.25, profModel=character(),
-                     netDirectory=".",...) {
- new("BNMongoEngine",app=app,session=session,listeners=listeners,username=username,
-     password=password,host=host,port=port,dbname=dbname,processN=processN,
-     P4dbname=P4dbname,waittime=waittime,profModel=profModel,
-     netDirectory=netDirectory,...)
+BNEngineMongo <- function(app="default",warehouse,listenerSet=NULL,
+                     dburi="mongodb://localhost", dbname="EARecords",
+                     processN=Inf,
+                     admindbname="Proc4", waittime=.25, profModel=character(),
+                     ...) {
+  new("BNEngineMongo",app=app,listenerSet=listenerSet,
+      warehouse=warehouse,dburi=dburi, dbname=dbname,processN=processN,
+      admindbname=admindbname,waittime=waittime,profModel=profModel,
+      ...)
 }
 
