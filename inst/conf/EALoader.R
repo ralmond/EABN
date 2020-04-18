@@ -14,7 +14,6 @@ listeners <- lapply(names(EA.listenerSpecs),
                     function (ll) do.call(ll,EA.listenerSpecs[[ll]]))
 names(listeners) <- names(EA.listenerSpecs)
 
-
 mantab <- read.csv(file.path(config.dir, manifestFile),as.is=TRUE)
 if (is.null(mantab$Name)) stop ("No names in manifest file",
                                 file.path(config.dir, manifestFile))

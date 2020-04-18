@@ -7,12 +7,12 @@ import(futile.logger)
 importFrom("mongolite","mongo")
 importFrom("jsonlite", "toJSON", "fromJSON","base64_enc","base64_dec")
 
-export(StudentRecord, sm, stats, evidence, "evidence<-",
+export(StudentRecord, sm, "sm<-", stats, evidence, "evidence<-",
        statNames, histNames, stat,
-       history, parseStudentRecord,parseStats,stats2json,unparseStats,
-       fetchSM, unpackSM, markEvidence, getSR, saveSR, newSR,
-       parseHist, unparseHist)
-exportClasses(StudentRecord)
+       history, parseStudentRecord, parseStats, stats2json, unparseStats,
+       fetchSM, unpackSM, updateRecord,
+       StudentRecordSet, getSR, saveSR, newSR, clearSRs)
+exportClasses(StudentRecord,StudentRecordSet)
 exportMethods(evidence, "evidence<-",
               sm, stats, app, uid, context, timestamp, mess,
               as.jlist, toString, show, statNames, histNames, stat,
@@ -22,15 +22,15 @@ export(EvidenceSet, parseEvidence, seqno, "seqno<-", observables)
 exportClasses(EvidenceSet)
 exportMethods(seqno, "seqno<-")
 
-exportClass(BNMongoEngine)
-export(BNMongoEngine, loadManifest, setupDefaultSR,
+exportClass(BNEngine,BNEngineMongo)
+export(BNEngine,BNEngineMongo, loadManifest, setupDefaultSR,
        logEvidence, accumulateEvidence, configStats, updateStats,
        announceStats, baselineHist, updateHist, getRecordForUser,
-       handleEvidence, mainLoop, updateSM)
-exportMethods(notifyListeners)
+       handleEvidence, mainLoop, updateSM, fetchNextEvidence, markProcessed)
+exportMethods(notifyListeners,fetchNextEvidence,markProcessed)
 
-exportClass(BNSQLEngine)
-export(BNSQLEngine)
+exportClass(BNEngineNDB)
+export(BNEngineNDB)
 
 
 
