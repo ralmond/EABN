@@ -19,7 +19,7 @@ BNEngineNDB <-
                              statistics=list(), histNodes=character(),
                              evidenceQueue=list(),waittime=0,
                              processN=Inf,statmat=data.frame(),
-                             activeTest="EAActive.txt",
+                             activeTest="EAActive",
                              ...) {
                       if (is.null(warehouse))
                         stop("Null warehouse.")
@@ -68,11 +68,20 @@ BNEngineNDB <-
                   P4db = function () {
                     NULL
                   },
-                  isActivated = function() {
-                    file.exists(activeTest)
+                  shouldHalt = function() {
+                    file.exists(paste(activeTest,"halt",sep="."))
+                  },
+                  stopWhenFinished = function() {
+                    !file.exists(paste(activeTest,"running",sep="."))
                   },
                   activate = function() {
-                    file.create(activeTest)
+                    file.create(paste(activeTest,"running",sep="."))
+                  },
+                  deactivate = function() {
+                    trycatch(file.remove(paste(activeTest,
+                                               c("running","finish","halt"),
+                                               sep=".")),
+                             warning=function(w){})
                   },
                   show = function() {
                     methods::show(paste("<EABN: ",app,", No DB>"))

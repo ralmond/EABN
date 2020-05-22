@@ -231,15 +231,27 @@ handleEvidence <- function (eng, evidMess, srser=NULL, debug=0) {
 
 mainLoop <- function(eng) {
   withFlogging({
-    flog.info("Evidence AccumulationEngine %s starting.", app(eng))
-    active <- eng$isActivated()
+    flog.info("Evidence AccumulationEngine %s starting.", basename(app(eng)))
+    eng$activate()
+    active <- TRUE
     while (active) {
+      if (eng$shouldHalt()) {
+        flog.fatal("EA Engine %s halted because of user request.",
+                   basename(app(eng)))
+        break
+      }
       eve <- fetchNextEvidence(eng)
       if (is.null(eve)) {
         ## Queue is empty, wait and check again.
         Sys.sleep(eng$waittime)
         ## Check for deactivation signal.
-        active <- eng$isActivated()
+        if (eng$stopWhenFinished()) {
+          flog.info("EA Engine %s stopping because queue is empty.",
+                    basename(app(eng)))
+          active <- FALSE
+        } else {
+          active <- TRUE
+        }
       } else {
         handleEvidence(eng,eve)
         markProcessed(eng,eve)
@@ -247,9 +259,8 @@ mainLoop <- function(eng) {
         active <- eng$processN > 0
       }
     }
-  flog.info("EA Engine %s was deactivated.",
-            app(eng))
+  eng$deactivate()
   },
-  context=sprintf("Running EA Application %s",app(eng)))
-  flog.info("Application Engine %s stopping.",app(eng))
+  context=sprintf("Running EA Application %s",basename(app(eng))))
+  flog.info("Application Engine %s stopped.",basename(app(eng)))
 }

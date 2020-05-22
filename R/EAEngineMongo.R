@@ -117,18 +117,38 @@ BNEngineMongo <-
                       adminDB <<- mongo("AuthorizedApps",P4dbname,dburi)
                     adminDB
                   },
-                  isActivated = function() {
-                    rec <- admindb()$find(buildJQuery(app=app),limit=1)
-                    if (length(rec)==0L) return(FALSE)
-                    rec$active
-                  },
                   activate = function() {
                     if (length(admindb()$find(buildJQuery(app=app)))==0L) {
-                      admindb()$insert(buildJQuery(app=app,active=TRUE))
+                      admindb()$insert(buildJQuery(app=app,
+                                                   appStem=basename(app),
+                                                   EAactive=TRUE,
+                                                   EAsignal="Running"))
                     } else {
                       admindb()$update(buildJQuery(app=app),
-                                    '{"$set":{"active":true}}')
+                                    '{"$set":{"EAactive":true,"EAsignal":"Running"}}')
                     }
+                  },
+                  deactivate = function() {
+                    if (length(admindb()$find(buildJQuery(app=app)))==0L) {
+                      admindb()$insert(buildJQuery(app=app,
+                                                   appStem=basename(app),
+                                                   EAactive=FALSE))
+                    } else {
+                      admindb()$update(buildJQuery(app=app),
+                                    '{"$set":{"EAactive":false}}')
+                    }
+                  },
+                  shouldHalt = function() {
+                    rec <- admindb()$find(buildJQuery(app=app),limit=1)
+                    if (length(rec)==0L) return(FALSE)
+                    if (toupper(rec$EAsignal)=="HALT") return(TRUE)
+                    FALSE
+                  },
+                  stopWhenFinished = function() {
+                    rec <- admindb()$find(buildJQuery(app=app),limit=1)
+                    if (length(rec)==0L) return(TRUE)
+                    if (toupper(rec$EAsignal)!="RUNNING") return(TRUE)
+                    FALSE
                   },
                   show = function() {
                     methods::show(paste("<EABN: ",app,", DB:", dbname,">"))

@@ -13,7 +13,11 @@ BNEngine <-
                   histNodes="character",
                   warehouseObj="PnetWarehouse",
                   waittime="numeric",
-                  processN="numeric"
+                  processN="numeric",
+                  ## These fields are included as they are related to the
+                  ## configuration.
+                  manifestFile="character",
+                  statFile="character"
               ),
               methods = list(
                   stats = function() {
@@ -72,10 +76,15 @@ BNEngine <-
                   saveManifest = function(manif) {
                     stop("Abstract method.")
                   },
-                  isActivated = function() {
-                    TRUE
-                  },
                   activate = function() {
+                  },
+                  deactivate = function() {
+                  },
+                  shouldHalt = function() {
+                    FALSE
+                  },
+                  stopWhenFinished = function() {
+                    TRUE
                   },
                   show = function() {
                     methods::show(paste("<EABN: ",app,">"))
