@@ -6,6 +6,8 @@ import(futile.logger)
 #import(RNetica)
 importFrom("mongolite","mongo")
 importFrom("jsonlite", "toJSON", "fromJSON","base64_enc","base64_dec")
+importFrom("utils","read.csv","write.csv")
+importFrom("stats","na.omit")
 
 export(StudentRecord, sm, "sm<-", stats, evidence, "evidence<-",
        statNames, histNames, stat,
@@ -28,6 +30,8 @@ export(BNEngine,BNEngineMongo, loadManifest, setupDefaultSR,
        announceStats, baselineHist, updateHist, getRecordForUser,
        handleEvidence, mainLoop, updateSM, fetchNextEvidence, markProcessed)
 exportMethods(notifyListeners,fetchNextEvidence,markProcessed)
+
+export(trimTable,doBuild,doRunrun)
 
 exportClass(BNEngineNDB)
 export(BNEngineNDB)

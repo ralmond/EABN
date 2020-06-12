@@ -104,7 +104,7 @@ admindbname = "Proc4", waittime = 0.25, profModel = character(),
 \dontrun{%Mongo%
 ## Requires database setup, also PNetica
 library(RNetica)  ## Must load to setup Netica DLL
-app <- "ecd://epls.coe.fsu.edu/EITest"
+app <- "ecd://epls.coe.fsu.edu/EATest"
 sess <- RNetica::NeticaSession()
 RNetica::startSession(sess)
 

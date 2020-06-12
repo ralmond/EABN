@@ -78,6 +78,9 @@ BNEngine <-
                   },
                   activate = function() {
                   },
+                  isActivated = function() {
+                    TRUE
+                  },
                   deactivate = function() {
                   },
                   shouldHalt = function() {

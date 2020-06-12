@@ -114,7 +114,7 @@ BNEngineMongo <-
                   },
                   admindb = function () {
                     if(is.null(adminDB))
-                      adminDB <<- mongo("AuthorizedApps",P4dbname,dburi)
+                      adminDB <<- mongo("AuthorizedApps",admindbname,dburi)
                     adminDB
                   },
                   activate = function() {
@@ -122,10 +122,10 @@ BNEngineMongo <-
                       admindb()$insert(buildJQuery(app=app,
                                                    appStem=basename(app),
                                                    EAactive=TRUE,
-                                                   EAsignal="Running"))
+                                                   EAsignal="running"))
                     } else {
                       admindb()$update(buildJQuery(app=app),
-                                    '{"$set":{"EAactive":true,"EAsignal":"Running"}}')
+                                    '{"$set":{"EAactive":true,"EAsignal":"running"}}')
                     }
                   },
                   deactivate = function() {
@@ -137,6 +137,11 @@ BNEngineMongo <-
                       admindb()$update(buildJQuery(app=app),
                                     '{"$set":{"EAactive":false}}')
                     }
+                  },
+                  isActivated = function() {
+                    rec <- admindb()$find(buildJQuery(app=app),limit=1)
+                    if (length(rec)==0L) return(FALSE)
+                    return (isTRUE(as.logical(rec$EAactive)))
                   },
                   shouldHalt = function() {
                     rec <- admindb()$find(buildJQuery(app=app),limit=1)

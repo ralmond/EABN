@@ -1,3 +1,11 @@
+2020-06-12  Russell Almond  <ralmond@Cherry>
+
+	* R/Runners.R (trimTable): New function for cleanning unwanted
+	columns from downloaded tables.
+	(doBuild): New function for building from online spreadsheet.
+	(doRunrun): New function for Running in reurn and server mode.
+	
+
 2020-05-21  Russell Almond  <ralmond@Cherry>
 
 	* R/EAEngine.R (BNEngine): Added manifestFile and statFile fields

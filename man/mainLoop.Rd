@@ -98,7 +98,7 @@ mainLoop(eng)
   \code{db.AuthorizedApps.update(\{app:\{$regex:"appName"\}\},
     \{$set:\{"EAsignal":"Halt"\}\});}
 
-  \bolde{No Database Engine.} For the Mongo engine
+  \bold{No Database Engine.} For the Mongo engine
   (\code{\linkS4class{BNEngineMongo}}) the 
   communication channel is a file named \code{activeTest}.  The
   name (extension) of this file is changed to produce the signals.

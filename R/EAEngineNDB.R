@@ -77,6 +77,11 @@ BNEngineNDB <-
                   activate = function() {
                     file.create(paste(activeTest,"running",sep="."))
                   },
+                  isActivated = function() {
+                    locks <- list.files(dirname(activeTest),
+                               pattern=paste(basename(activeTest),"*",sep="."))
+                    return (length(locks) > 0L)
+                  },
                   deactivate = function() {
                     trycatch(file.remove(paste(activeTest,
                                                c("running","finish","halt"),
