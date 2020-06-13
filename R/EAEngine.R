@@ -1,5 +1,4 @@
 setClassUnion("NullRecordSet",c("StudentRecordSet","NULL"))
-setClassUnion("NullListenerSet",c("ListenerSet","NULL"))
 
 
 BNEngine <-

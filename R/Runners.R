@@ -117,10 +117,12 @@ doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
   listeners <- lapply(EA.config$listeners, buildListener,app,dburi)
   names(listeners) <- sapply(listeners,listenerName)
 
-  EAeng.params <- c(EA.config$EAEngine,EAeng.local)
+  EAeng.params <-
+    c(EA.config$EAEngine,
+      EAeng.local[setdiff(names(EAeng.local),names(EA.config$EAEngine))])
   EAeng.params$listenerSet <-
     ListenerSet(sender= sub("<app>",sapp,EA.config$sender),
-                dbname=EA.config$dbname, dburi=EAeng.local$dburi,
+                dbname=EAeng.local$dbname, dburi=EAeng.local$dburi,
                 listeners=listeners,
                 colname=EA.config$lscolname)
   netman <- read.csv(file.path(config.dir,netdir,
@@ -148,7 +150,7 @@ doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
 
   flog.info("Preparing Database.")
   if (dburi != "") {
-    if (EA.config$filter$doRemove) {
+    if (isTRUE(EA.config$filter$doRemove)) {
       flog.debug("Clearing old evidence sets.")
       remquery <- EA.config$filter$remove
       if (!is.null(names(remquery)))
@@ -182,7 +184,7 @@ doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
         }
       }
     }
-    if (EA.config$filter$doPurge) {
+    if (isTRUE(EA.config$filter$doPurge)) {
       flog.debug("Purging unwanted evidence sets.")
       purquery <- EA.config$filter$purge
       if (!is.null(names(purquery)))
