@@ -1,0 +1,149 @@
+---
+title: "Launch EA Engine"
+author: "Russell Almond"
+date: "June 17, 2020"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(EABN)
+library(shiny)
+source("/usr/local/share/Proc4/EAini.R")
+```
+## Evidence Accumulation Launcher
+
+This launches evidence Accumulation processes for _Physics Playground_.  This works according to the following steps:
+
+1. The latest configuration information is pulled down from github (https://github.com/ralmond/PP-EA).  The branch listed in the field below is the one which will be checked out.
+
+2. The config.json file is read to pick up the details.
+
+3. The `appStem` field of the configuration file is consulted to find
+   the applications to launch.
+
+4. The EABN process is launched for each script.
+
+## Login 
+
+Only authorized people can make changes to the scoring models.
+
+```{r passwordChecker, echo=FALSE}
+
+checkPassword <- function (uid,passwd) {
+    pwdline <- system2("/bin/grep",
+                       c(sprintf("^%s:",uid),                                   "/usr/local/share/Proc4/p4pwds"),
+                       stdout=TRUE)
+    if (!is.null(attr(pwdline,"status")) || 
+        !is.character(pwdline) || length(pwdline) == 0L || 
+        nchar(pwdline)==0L) 
+      return (FALSE)
+    pwdbits <- strsplit(pwdline,"$",fixed=TRUE)[[1]]
+    method <- sprintf("-%s",pwdbits[2])
+    salt <- pwdbits[3]
+    pwd <- system2("/usr/bin/openssl",
+                     c("passwd",method, 
+                       "-salt",salt, input$adminpwd),
+                     stdout=TRUE)
+    target <- paste("$",paste(pwdbits[-1],collapse="$"),sep="")
+    return (pwd == target)
+}
+
+```
+
+
+```{r login, echo=FALSE}
+tags$head(tags$script(src = "message-handler.js"))
+inputPanel(
+  textInput("adminid", label = "Username:",
+              width = 500),
+  passwordInput("adminpwd", label = "Password:",
+              width = 500),
+  textInput("branch", label = "Vesion Branch:",
+            value="PP-main",width = 500),
+  actionButton("go","Go")
+)
+
+status <- reactiveVal("Ready.")
+nclicks <- reactiveVal(0)
+logstatus <- reactiveVal("")
+
+observeEvent(input$go, {
+  if (!checkPassword(input$adminid,input$adminpwd)) {
+    showNotification("Authentication Error.")
+    return(NULL)
+  }
+  showNotification(sprintf("Logged into application %s.", input$branch))
+  if (nclicks() > 0L) {
+    showNotification("Launch in progress, please try again.")
+    return (NULL)
+  }
+  nclicks(1)
+  status("Updating configuration from github.")
+  setwd(config.dir)
+  cat("Checking out branch ",input$branch,"\n")
+  system2("git","pull")
+  system2("git",c("checkout",input$branch))
+  system2("git","pull")
+    
+  EA.config <-
+    tryCatch(fromJSON(file.path(config.dir,"config.json"),FALSE),
+             error=function(e) {
+               status("Error.")
+               nclicks(0)
+               showNotification("Error parsing config.json")
+               logstatus(Messages=conditionMessage(e))
+               NULL
+             })
+  if (is.null(EA.config)) return (NULL)
+
+  ## Check for net directory
+  netdir <- ifelse(!is.null(EA.config$Tables$netdir),
+                     EA.config$Tables$netdir,"nets")
+  if (!file.exists(file.path(config.dir,netdir))) {
+    status("Error.")
+    nclicks(0)
+    logstatus(sprintf("Error Can't find net directory %s.",netdir))
+    showNotification("Can't find net directory.")
+    return(NULL)
+  }
+    
+  appStem <- as.character(EA.config$appStem)
+  apps <- Proc4.config$apps[appStem]
+  if (length(apps)==0L || any (is.na(apps))) {
+    status("Error.")
+    emess <- sprintf("Could not find apps for %s",
+                     paste(appStem[is.na(apps)],collapse=", "))
+    logstatus(emess)
+    showNotification(emess)
+    nclicks(0)
+    return(NULL)
+  }
+  logfile <- file.path(logpath,EA.config$logname)
+  logstatus("")
+  for (sapp in appStem) {
+    system2("/usr/local/share/Proc4/bin/EABN",
+            c(sapp, sub("<app>",sapp,logfile)),
+            wait=FALSE)
+    logstatus(c(logstatus(),
+                sprintf("Process launched for application %s.",sapp)))
+  }
+  status("Ready.")
+  nclicks(0)
+})
+output$status <- renderText(status())
+output$log <- renderTable(data.frame(Messages=logstatus()),colnames=FALSE)
+p("EA Launcher is ",textOutput("status"))
+p(tableOutput("log"))
+
+  
+```
+
+## Links
+
+Status Page:  (https://pluto.coe.fsu.edu/Proc4/Status.php)
+
+Process Manager:  (https://pluto.coe.fsu.edu/Proc4/Shutdown.php)
+
+

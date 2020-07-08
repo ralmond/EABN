@@ -1,0 +1,179 @@
+---
+title: "Build/Rebuild EA Models from Spreadsheets"
+author: "Russell Almond"
+date: "June 24, 2020"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(EABN)
+library(shiny)
+source("/usr/local/share/Proc4/EAini.R")
+```
+
+This script rebuilds the networks for _Physics Playground_.  This works according to the following steps:
+
+1. The latest configuration information is pulled down from github (https://github.com/ralmond/PP-EA).  The branch listed in the field below is the one which will be checked out.
+
+2. The config.json file is read to pick up the details.
+
+3. The tables are downloaded from the google doc (identified in the configuration file)
+
+4. The Bayes nets are rebuilt using the information from the tables.
+
+
+### Login 
+
+Only authorized people can make changes to the scoring models.
+
+```{r passwordChecker, echo=FALSE}
+
+checkPassword <- function (uid,passwd) {
+    pwdline <- system2("/bin/grep",
+                       c(sprintf("^%s:",uid),                                   "/usr/local/share/Proc4/p4pwds"),
+                       stdout=TRUE)
+    if (!is.null(attr(pwdline,"status")) || 
+        !is.character(pwdline) || length(pwdline) == 0L || 
+        nchar(pwdline)==0L) 
+      return (FALSE)
+    pwdbits <- strsplit(pwdline,"$",fixed=TRUE)[[1]]
+    method <- sprintf("-%s",pwdbits[2])
+    salt <- pwdbits[3]
+    pwd <- system2("/usr/bin/openssl",
+                     c("passwd",method, 
+                       "-salt",salt, input$adminpwd),
+                     stdout=TRUE)
+    target <- paste("$",paste(pwdbits[-1],collapse="$"),sep="")
+    return (pwd == target)
+}
+
+```
+
+
+```{r login, echo=FALSE}
+tags$head(tags$script(src = "message-handler.js"))
+inputPanel(
+  textInput("adminid", label = "Username:",
+              width = 500),
+  passwordInput("adminpwd", label = "Password:",
+              width = 500),
+  textInput("branch", label = "Vesion Branch:",
+            value="PP-main",width = 500),
+  actionButton("go","Go")
+)
+```
+## Results log
+
+
+```{r payload, echo=FALSE}
+status <- reactiveVal("Ready.")
+nclicks <- reactiveVal(0)
+logstatus <- reactiveValues()
+logstatus$logfile <- character()
+logstatus$lockfile <- ""
+logstatus$log <- data.frame(Messages="No log file yet.")
+logtimer <- reactiveTimer(1000)
+readlog <- reactive({
+  logtimer()
+  if (status()=="Working..." &&
+      length(logstatus$logfile) >0L  &&
+      file.exists(logstatus$logfile)) {
+   ## cat("Checking log file:",logstatus$logfile,".\n")
+    if (!file.exists(logstatus$lockfile)) {
+      status("Done.")
+      ##print(status())
+      nclicks(0)
+    }
+    lf <- file(logstatus$logfile)
+    mess <- readLines(lf)
+    close(lf)
+    logstatus$log <- data.frame(Messages=mess)
+  }
+})
+
+observeEvent(input$go, {
+  if (!checkPassword(input$adminid,input$adminpwd)) {
+    showNotification("Authentication Error.")
+    return(NULL)
+  }
+  showNotification(sprintf("Logged into application %s.", input$branch))
+  if (nclicks() > 0L) {
+    showNotification("Already running model builder.")
+    return (NULL)
+  }
+  nclicks(1)
+  status("Updating configuration from github.")
+  setwd(config.dir)
+  system2("git","pull")
+  system2("git",c("checkout",input$branch))
+  system2("git","pull")
+    
+  EA.config <-
+    tryCatch(fromJSON(file.path(config.dir,"config.json"),FALSE),
+             error=function(e) {
+               status("Error.")
+               nclicks(0)
+               showNotification("Error parsing config.json")
+               logstatus$log <- data.frame(Messages=conditionMessage(e))
+               NULL
+             })
+  if (is.null(EA.config)) return (NULL)
+    
+  appStem <- as.character(EA.config$appStem)
+  print(appStem)
+  apps <- Proc4.config$apps[appStem]
+  if (length(apps)==0L || any (is.na(apps))) {
+    emess <- sprintf("Could not find apps for %s",
+                     paste(appStem[is.na(apps)],collapse=", "))
+    logstatus$log<-data.frame(Messages=emess)
+    showNotification(emess)
+    status("Error.")
+    nclicks(0)
+    return(NULL)
+  }
+
+  ## Check for rule directory
+  netdir <- ifelse(!is.null(EA.config$Tables$netdir),
+                     EA.config$Tables$netdir,"nets")
+  if (!file.exists(file.path(config.dir,netdir))) {
+    status("Error.")
+    nclicks(0)
+    logstatus$log <-
+      data.frame(Messages=
+                   sprintf("Error Can't find net directory %s.",netdir))
+    showNotification("Can't find net directory.")
+    return(NULL)
+  }
+
+  logstatus$logfile <- file.path(logpath,sub("<app>","Builder",EA.config$logname))
+  logstatus$lockfile <- file.path(config.dir,netdir,"netbuilder.lock")
+  if (file.exists(logstatus$lockfile)) {
+    showNotification("Rebuild already in progress.")
+    logstatus$log <- data.frame(Messages="Rebuild already in progress.")
+    nclicks(0)
+    status("Error.")
+    return(NULL)
+  }
+  unlink(logstatus$logfile)
+  system2("/usr/local/share/Proc4/bin/EABuild",
+          stdout=FALSE,stderr=FALSE,wait=FALSE)
+  status("Working...")
+  print(status())
+  return(NULL)
+  })
+output$status <- renderText(status())
+output$log <- renderTable({readlog();logstatus$log},colnames=FALSE)
+
+p("Model Builder is ",textOutput("status"))
+p(tableOutput("log"))
+```
+## Links
+
+* Status (https://pluto.coe.fsu.edu/Proc4/dongle/Status.php)
+* Shutdown (https://pluto.coe.fsu.edu/Proc4/dongle/Shutdown.php)
+* EI Loader (https://pluto.coe.fsu.edu/rdemos/Proc4/EILoader.Rmd)
+* EI Launcher (https://pluto.coe.fsu.edu/rdemos/Proc4/EILauncher.Rmd)
+* EA Builder (https://pluto.coe.fsu.edu/rdemos/Proc4/EABuilder.Rmd)
+* EA Launcherr (https://pluto.coe.fsu.edu/rdemos/Proc4/EALauncher.Rmd)

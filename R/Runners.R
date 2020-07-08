@@ -10,7 +10,7 @@ doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
   netdir <- ifelse(!is.null(EA.tables$netdir),EA.tables$netdir,"nets")
   tabdir <- ifelse(!is.null(EA.tables$netdir),EA.tables$tabdir,"tables")
 
-  locks <- list.files(file.path(config.dir,netdir),pattern=".lock")
+  locks <- list.files(file.path(config.dir,netdir),pattern=".lock$")
   if (length(locks) > 0L) {
     flog.warn("Configuration directory locked by other applications: %s",
               paste(locks,collapse=", "))
@@ -41,22 +41,37 @@ doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
   flog.info("Loading tables into R.")
   templateURL <- file.path(config.dir,tabdir,"%s.csv")
 
-  stattab <- read.csv(sprintf(templateURL,EA.tables$StatName),
-                        stringsAsFactors=FALSE,strip.white=TRUE)
-  stattab <- trimTable(stattab,"Node")
-  netman <- read.csv(sprintf(templateURL,EA.tables$NetsName),
-                     stringsAsFactors=FALSE,strip.white=TRUE)
-  netman <- trimTable(netman)
-  nodeman <- read.csv(sprintf(templateURL,EA.tables$NodesName),
-                      stringsAsFactors=FALSE,strip.white=TRUE)
-  nodeman <- trimTable(nodeman,"UpperBound")
-  Omega <- read.csv(sprintf(templateURL,EA.tables$OmegaName),
-                    stringsAsFactors=FALSE,strip.white=TRUE)
-  Omega <- trimTable(Omega,"PriorWeight")
-  QQ <- read.csv(sprintf(templateURL,EA.tables$QName),
-                 stringsAsFactors=FALSE,strip.white=TRUE)
-  QQ <- trimTable(QQ,"PriorWeight")
+  stattab <- withFlogging({
+    trimTable(read.csv(sprintf(templateURL,EA.tables$StatName),
+                       stringsAsFactors=FALSE,strip.white=TRUE),"Node")
+  }, context=sprintf("Loading file %s.csv.",tables$StatName))
 
+  netman <- withFlogging({
+    trimTable(read.csv(sprintf(templateURL,EA.tables$NetsName),
+                       stringsAsFactors=FALSE,strip.white=TRUE))
+  }, context=sprintf("Loading file %s.csv.",tables$NetsName))
+
+  nodeman <- withFlogging({
+    trimTable(read.csv(sprintf(templateURL,EA.tables$NodesName),
+                       stringsAsFactors=FALSE,strip.white=TRUE),"UpperBound")
+  }, context=sprintf("Loading file %s.csv.",tables$NodesName))
+
+  Omega <- withFlogging({
+    trimTable(read.csv(sprintf(templateURL,EA.tables$OmegaName),
+                       stringsAsFactors=FALSE,strip.white=TRUE),"PriorWeight")
+  }, context=sprintf("Loading file %s.csv.",tables$OmegaName))
+
+  QQ <- withFlogging({
+    trimTable(read.csv(sprintf(templateURL,EA.tables$QName),
+                       stringsAsFactors=FALSE,strip.white=TRUE),"PriorWeight")
+  }, context=sprintf("Loading file %s.csv.",tables$QName))
+
+  if (is(stattab,'try-error') || is(netman,'try-error') ||
+      is(nodeman,'try-error') || is(Omega,'try-error') ||
+      is(QQ,'try-error')) {
+    flog.fatal("Failed to read one or more table, giving up.")
+    return(NULL)
+  }
 
   flog.info("Building Models.")
   Nethouse <- PNetica::BNWarehouse(manifest=netman,session=sess,
@@ -70,15 +85,23 @@ doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
   if (is.null(profModel)) {
     profModel <- na.omit(netman$Hub)[1]
   }
-  flog.info("Building proficiency model: %s.",profModel)
+  contex <- sprintf("Building proficiency model: %s.",profModel)
+  flog.info(contex)
   if (any(is.na(Omega$Node))) {
     flog.error("Missing node name in rows: ",
                which(is.na(Omega$Node))+1,capture=TRUE)
   }
-  CM <- WarehouseSupply(Nethouse,profModel)
-  CM <- Omega2Pnet(Omega,CM,Nodehouse,override=TRUE)
+  CM <- withFlogging({
+    CM <- WarehouseSupply(Nethouse,profModel)
+    Omega2Pnet(Omega,CM,Nodehouse,override=TRUE)
+  },context=contex)
+  if (is(CM,'try-error')) {
+    flog.fatal("Failed to build competentcy model, giving up.")
+    return(NULL)
+  }
 
-  flog.info("Building Evidence Models.")
+  contex <- ("Building Evidence Models.")
+  flog.info(contex)
   if (any(is.na(QQ$Model))) {
     flog.error("Missing model name in rows: ",
                which(is.na(QQ$Model))+1,capture=TRUE)
@@ -87,22 +110,25 @@ doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
     flog.error("Missing node name in rows: ",
                which(is.na(QQ$Node))+1,capture=TRUE)
   }
-  Qmat2Pnet(QQ,Nethouse,Nodehouse)
+  withFlogging(
+      Qmat2Pnet(QQ,Nethouse,Nodehouse),
+      context=contex)
 
   flog.info("Writing nets.")
+  withFlogging({
+    manifestFile <- ifelse(!is.null(EA.tables$manifestFile),
+                           EA.tables$manifestFile, "NetManifest.csv")
+    write.csv(netman,file.path(config.dir,netdir,manifestFile))
 
-  manifestFile <- ifelse(!is.null(EA.tables$manifestFile),
-                         EA.tables$manifestFile, "NetManifest.csv")
-  write.csv(netman,file.path(config.dir,netdir,manifestFile))
-
-  for (name in netman$Name) {
-    if (nchar(name)>0L) {
-      net <- WarehouseSave(Nethouse,name)
+    for (name in netman$Name) {
+      if (nchar(name)>0L) {
+        net <- WarehouseSave(Nethouse,name)
+      }
     }
-  }
-  statFile <- ifelse(!is.null(EA.tables$statFile),
-                         EA.tables$statFile, "StatisticList.csv")
-  write.csv(stattab,file.path(config.dir,netdir,statFile))
+    statFile <- ifelse(!is.null(EA.tables$statFile),
+                       EA.tables$statFile, "StatisticList.csv")
+    write.csv(stattab,file.path(config.dir,netdir,statFile))
+  }, context="Writing Nets.")
 
 }
 
@@ -120,6 +146,8 @@ doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
   EAeng.params <-
     c(EA.config$EAEngine,
       EAeng.local[setdiff(names(EAeng.local),names(EA.config$EAEngine))])
+  ## Force to character, JSON leave as list.
+  EAeng.params$histNodes <- as.character(EAeng.params$histNodes)
   EAeng.params$listenerSet <-
     ListenerSet(sender= sub("<app>",sapp,EA.config$sender),
                 dbname=EAeng.local$dbname, dburi=EAeng.local$dburi,

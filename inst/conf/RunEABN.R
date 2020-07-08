@@ -12,8 +12,8 @@ source("/usr/local/share/Proc4/EAini.R")
 EA.config <- fromJSON(file.path(config.dir,"config.json"),FALSE)
 
 app <- as.character(Proc4.config$apps[appStem])
-if (length(apps)==0L || any(apps=="NULL")) {
-  stop("Could not find apps for ",appStem)
+if (length(app)==0L || any(app=="NULL")) {
+  stop("Could not find app for ",appStem)
 }
 if (!(appStem %in% EA.config$appStem)) {
   stop("Configuration not set for app ",appStem)
@@ -29,12 +29,16 @@ if (interactive()) {
 } else {
   flog.appender(appender.file(logfile))
 }
-flog.threshold(EI.config$loglevel)
+flog.threshold(EA.config$loglevel)
 
 ## Load extensions.
 for (ext in EA.config$extensions) {
   if (is.character(ext) && nchar(ext) > 0L) {
-    source(file.path(config.dir,ext))
+    if (file.exists(file.path(config.dir,ext))) {
+      source(file.path(config.dir,ext))
+    } else {
+      flog.error("Can't find extension file %s.", ext)
+    }
   }
 }
 
