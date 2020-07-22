@@ -1,3 +1,12 @@
+2020-07-19  Russell Almond  <ralmond@Cherry>
+
+	* R/Runners.R (doRunrun): Added eng as output, so could debug more
+	easily. 
+
+	* R/StudentRec.R (parseStudentRecord): Added some as.character()
+	wraps inside the sm data as jsonlite seemed to be listing them.
+
+
 2020-06-12  Russell Almond  <ralmond@Cherry>
 
 	* R/Runners.R (trimTable): New function for cleanning unwanted
