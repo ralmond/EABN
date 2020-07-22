@@ -29,7 +29,7 @@ if (interactive()) {
 } else {
   flog.appender(appender.file(logfile))
 }
-flog.threshold(EA.config$loglevel)
+flog.threshold(EA.config$logLevel)
 
 ## Load extensions.
 for (ext in EA.config$extensions) {
@@ -42,5 +42,6 @@ for (ext in EA.config$extensions) {
   }
 }
 
-doRunrun(app,sess,EA.config,EAeng.local,config.dir,outdir)
+eng <- doRunrun(app,sess,EA.config,EAeng.local,config.dir,outdir,
+                logfile=logfile)
 

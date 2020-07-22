@@ -142,9 +142,9 @@ parseStudentRecord <- function (rec) {
   else rec$seqno <- as.integer(rec$seqno)
   if (!is.null(rec$sm)) {
     smo <- list()
-    smo$name <- rec$sm[["name"]]
-    smo$data <- base64_dec(rec$sm[["data"]])
-    smo$factory <- rec$sm[["factory"]]
+    smo$name <- as.character(rec$sm[["name"]])
+    smo$data <- base64_dec(as.character(rec$sm[["data"]]))
+    smo$factory <- as.character(rec$sm[["factory"]])
   } else {
     smo <- NULL
   }

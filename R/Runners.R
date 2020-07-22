@@ -132,16 +132,17 @@ doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
 
 }
 
-doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
-                      outdir=config.dir, override = FALSE) {
+doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
+                      outdir=config.dir, override = FALSE, logfile="") {
 
   netdir <- ifelse(!is.null(EA.config$netdir),EA.config$netdir,"nets")
-  sapp <- basename(app)
+  sappid <- basename(appid)
   dburi <- EAeng.local$dburi
 
   flog.info("Building and configuring engine.")
-  listeners <- lapply(EA.config$listeners, buildListener,app,dburi)
+  listeners <- lapply(EA.config$listeners, buildListener,appid,dburi)
   names(listeners) <- sapply(listeners,listenerName)
+
 
   EAeng.params <-
     c(EA.config$EAEngine,
@@ -149,10 +150,14 @@ doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
   ## Force to character, JSON leave as list.
   EAeng.params$histNodes <- as.character(EAeng.params$histNodes)
   EAeng.params$listenerSet <-
-    ListenerSet(sender= sub("<app>",sapp,EA.config$sender),
+    ListenerSet(sender= sub("<app>",sappid,EA.config$sender),
                 dbname=EAeng.local$dbname, dburi=EAeng.local$dburi,
-                listeners=listeners,
+                listeners=listeners,admindbname=EAeng.local$admindbname,
                 colname=EA.config$lscolname)
+  if (nchar(logfile)>0L) {
+    EAeng.params$listenerSet$registerOutput(basename(logfile),logfile,
+                                              appid,"EA","log")
+  }
   netman <- read.csv(file.path(config.dir,netdir,
                                EA.config$EAEngine$manifestFile),
                      stringsAsFactors=FALSE,strip.white=TRUE)
@@ -160,12 +165,12 @@ doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
     PNetica::BNWarehouse(manifest=netman,
                          session=sess,key="Name",
                          address=file.path(config.dir,netdir))
-  EAeng.params$app <- app
+  EAeng.params$app <- appid
   eng <- do.call(ifelse(EAeng.local$dburi=="",BNEngineNDB,BNEngineMongo),
                  EAeng.params)
   if (eng$isActivated()) {
-    flog.warn("Enging for application %s already active.",sapp)
-    if (!isTRUE(override)) stop("Application ",sapp," already active.")
+    flog.warn("Enging for application %s already active.",sappid)
+    if (!isTRUE(override)) stop("Application ",sappid," already active.")
   }
 
 
@@ -184,7 +189,7 @@ doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
       if (!is.null(names(remquery)))
         remquery <- list(remquery)      #Single query make it multiple.
       for (rq in remquery) {
-        rquery <- do.call(buildJQuery,c(list(app=app),rq))
+        rquery <- do.call(buildJQuery,c(list(app=appid),rq))
         flog.trace("Removing %s",rquery)
         eng$evdienceSets()$remove(rquery)
       }
@@ -218,7 +223,7 @@ doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
       if (!is.null(names(purquery)))
         purquery <- list(purquery)      #Single query make it multiple.
       for (pq in purquery) {
-        pquery <- do.call(buildJQuery,c(list(app=app),pq))
+        pquery <- do.call(buildJQuery,c(list(app=appid),pq))
         flog.trace("Purging %s",pquery)
         eng$evdienceSets()$remove(pquery)
       }
@@ -229,7 +234,7 @@ doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
       if (!is.null(names(repquery)))
         repquery <- list(repquery)      #Single query make it multiple.
       for (rq in repquery) {
-        rquery <- do.call(buildJQuery, c(list(app=app),rq))
+        rquery <- do.call(buildJQuery, c(list(app=appid),rq))
         flog.trace("Reprocessing %s",pquery)
         eng$evidenceSets()$update(rquery,'{"$set":{"processed":false}}',
                                   multiple=TRUE)
@@ -239,28 +244,29 @@ doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
   setupDefaultSR(eng)
   flog.info("Reseting Listners.")
   if (!is.null(EA.config$listenerReset)) {
-    resetListeners(eng$listenerSet,as.character(EA.config$listenerReset),app)
+    resetListeners(eng$listenerSet,as.character(EA.config$listenerReset),appid)
   }
 
   if (EA.config$limitNN=="ALL") {
-    eng$processN <- eng$evidenceSets()$count(buildJQuery(app=app,
+    eng$processN <- eng$evidenceSets()$count(buildJQuery(app=appid,
                                                          processed=FALSE))
   } else {
     eng$processN <- as.numeric(EA.config$limitNN)
   }
 
 
-  flog.info("Beginning EA for application %s.",basename(app))
+  flog.info("Beginning EA for application %s.",basename(appid))
   if (is.finite(eng$processN)) {
     flog.info("%d messages queued.",eng$processN)
   } else {
     flog.info("Running in server mode.")
   }
   tryCatch({
-    file.create(file.path(config.dir,netdir,paste(sapp,"lock",sep=".")))
-    mainLoop(eng)
+    file.create(file.path(config.dir,netdir,paste(sappid,"lock",sep=".")))
+    withFlogging(mainLoop(eng))
   },finally={
-    file.remove(file.path(config.dir,netdir,paste(sapp,"lock",sep=".")))
+    file.remove(file.path(config.dir,netdir,paste(sappid,"lock",sep=".")))
+    eng$deactivate()
   })
 
   if (!is.null(EA.config$statListener)) {
@@ -269,14 +275,22 @@ doRunrun <- function (app, sess, EA.config,  EAeng.local, config.dir,
       flog.warn("Stat listener %s not found, skipping building stat file.",
                  EA.config$statListener)
     } else {
-      stat1 <- sl$messdb()$find(buildJQuery(app=app))
-      sdat <- data.frame(stat1[,c("app","uid","context","timestamp")],
-                         flattenStats(stat1$data))
-      sdat$app <- basename(sdat$app)
-      fname <- gsub("<app>",sapp,EA.config$statfile)
-      write.csv(stat1,file.path(outdir,fname))
+      stat1 <- sl$messdb()$find(buildJQuery(app=appid))
+      if (isTRUE(nrow(stat1) > 0L)) {
+        sdat <- data.frame(stat1[,c("app","uid","context","timestamp")],
+                           flattenStats(stat1$data))
+        sdat$app <- basename(sdat$app)
+        fname <- gsub("<app>",sappid,EA.config$statfile)
+
+        write.csv(sdat,file.path(outdir,fname))
+        EAeng.params$listenerSet$registerOutput(fname,file.path(outdir,fname),
+                                                appid,"EA")
+      } else {
+        flog.warn("No records in statistics file.")
+      }
+
     }
   }
-
+  invisible(eng)
 }
 
