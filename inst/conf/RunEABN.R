@@ -4,7 +4,7 @@ library(PNetica)
 
 appStem <- cmdArg("app",NULL)
 if (FALSE) {
-  appStem <- "SummerCamp"
+  appStem <- "userControl"
 }
 
 source("/usr/local/share/Proc4/EAini.R")

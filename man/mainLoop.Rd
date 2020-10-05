@@ -13,11 +13,13 @@
 
 }
 \usage{
-mainLoop(eng)
+mainLoop(eng, N=NULL)
 }
 \arguments{
   \item{eng}{An \code{\linkS4class{BNEngine}} which will handle the
     evidence sets.}
+  \item{N}{If supplied, this should be an integer.  The loop will then
+    handle that many cycles before quitting.}
 }
 \details{
 

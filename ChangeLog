@@ -1,3 +1,17 @@
+2020-10-04  Russell Almond  <ralmond@Cherry>
+
+	* R/Runners.R (doRunrun): Added history output file.
+
+2020-08-08  Russell Almond  <ralmond@Cherry>
+
+	* R/EngineGears.R (mainLoop): Added N argument to mainLoop
+	(logEvidence): Added debugging.
+
+2020-07-31  Russell Almond  <ralmond@Cherry>
+
+	* R/Runners.R (doRunrun): Wrapped Many operations withFlogging to
+	better capture errors.
+
 2020-07-19  Russell Almond  <ralmond@Cherry>
 
 	* R/Runners.R (doRunrun): Added eng as output, so could debug more

@@ -141,6 +141,8 @@ logEvidence <- function (eng,rec,evidMess) {
     ## NDB need to generate an ID.
     evidMess@"_id" <- paste(uid(evidMess),seqno(evidMess),sep="+")
   }
+  flog.debug("Evidence %d for %s:",seqno(evidMess),uid(evidMess))
+  flog.debug("Data: ",details(evidMess),capture=TRUE)
   evidMess
 }
 
@@ -176,7 +178,7 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
   }
   em <- WarehouseSupply(eng$warehouse(),emName)
   if (is.null(em)) {
-    flog.error("No evidence model net for context %s",context(evidMess))
+    flog.warn("No evidence model net for context %s",context(evidMess))
     stop("No evidence model net for context %s",context(evidMess))
   }
   obs <- PnetAdjoin(sm(rec),em)
@@ -229,7 +231,8 @@ handleEvidence <- function (eng, evidMess, srser=NULL, debug=0) {
   out
 }
 
-mainLoop <- function(eng) {
+mainLoop <- function(eng,N=NULL) {
+  if (!missing(N)) eng$processN <- N
   withFlogging({
     flog.info("Evidence AccumulationEngine %s starting.", basename(app(eng)))
     eng$activate()
