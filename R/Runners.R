@@ -366,7 +366,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
         hist$app <- basename(hist$app)
         fname <- gsub("<app>",sappid,EA.config$histfile)
 
-        write.csv(sdat,file.path(outdir,fname))
+        write.csv(hist,file.path(outdir,fname))
         EAeng.params$listenerSet$registerOutput(fname,file.path(outdir,fname),
                                                 appid,"EA")
       } else {
