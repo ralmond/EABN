@@ -1,4 +1,5 @@
 #!/bin/bash
 ## Typical args app=ecd://epls.coe.fsu.edu/P4test level=DEBUG
 ## Optional args clean=TRUE (default FALSE) evidence=<file>.json
-R  --slave "--args $1" </usr/local/share/Proc4/bin/EABuild.R &
+echo "Rebuilding EA Nets " $1 $2
+R  --slave "--args $1" </usr/local/share/Proc4/bin/EABuild.R >& "$2.Rout" &

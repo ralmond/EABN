@@ -1,6 +1,6 @@
 #!/bin/bash
 ## Typical args app=ecd://epls.coe.fsu.edu/P4test level=DEBUG
 ## Optional args clean=TRUE (default FALSE) evidence=<file>.json
-echo $1 $2
+echo "Starting Evidence Accumulation " $1 $2
 nohup R  --slave "--args app=$1" </usr/local/share/Proc4/bin/RunEABN.R >& "$2.Rout" &
 
