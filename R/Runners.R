@@ -44,27 +44,27 @@ doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
   stattab <- withFlogging({
     trimTable(read.csv(sprintf(templateURL,EA.tables$StatName),
                        stringsAsFactors=FALSE,strip.white=TRUE),"Node")
-  }, context=sprintf("Loading file %s.csv.",tables$StatName))
+  }, context=sprintf("Loading file %s.csv.",EA.tables$StatName))
 
   netman <- withFlogging({
     trimTable(read.csv(sprintf(templateURL,EA.tables$NetsName),
                        stringsAsFactors=FALSE,strip.white=TRUE))
-  }, context=sprintf("Loading file %s.csv.",tables$NetsName))
+  }, context=sprintf("Loading file %s.csv.",EA.tables$NetsName))
 
   nodeman <- withFlogging({
     trimTable(read.csv(sprintf(templateURL,EA.tables$NodesName),
                        stringsAsFactors=FALSE,strip.white=TRUE),"UpperBound")
-  }, context=sprintf("Loading file %s.csv.",tables$NodesName))
+  }, context=sprintf("Loading file %s.csv.",EA.tables$NodesName))
 
   Omega <- withFlogging({
     trimTable(read.csv(sprintf(templateURL,EA.tables$OmegaName),
                        stringsAsFactors=FALSE,strip.white=TRUE),"PriorWeight")
-  }, context=sprintf("Loading file %s.csv.",tables$OmegaName))
+  }, context=sprintf("Loading file %s.csv.",EA.tables$OmegaName))
 
   QQ <- withFlogging({
     trimTable(read.csv(sprintf(templateURL,EA.tables$QName),
                        stringsAsFactors=FALSE,strip.white=TRUE),"PriorWeight")
-  }, context=sprintf("Loading file %s.csv.",tables$QName))
+  }, context=sprintf("Loading file %s.csv.",EA.tables$QName))
 
   if (is(stattab,'try-error') || is(netman,'try-error') ||
       is(nodeman,'try-error') || is(Omega,'try-error') ||
@@ -240,7 +240,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
       impf <- file.path(config.dir,fil)
       if (!file.exists(impf)) {
         flog.warn("File %s does not exist, skipping import.",
-                  EA.confg$importFile)
+                  EA.config$importFile)
       } else {
         status <-
           system2("mongoimport",c("--jsonArray",
@@ -377,6 +377,69 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   }
   invisible(eng)
 }
+
+
+rebuildOutputs <- function (appid, EA.config,  EAeng.local, outdir) {
+
+  sappid <- basename(appid)
+  dburi <- EAeng.local$dburi
+
+  flog.info("Building and configuring engine.")
+  listeners <- lapply(EA.config$listeners, buildListener,appid,dburi)
+  names(listeners) <- sapply(listeners,listenerName)
+  listenerSet <-
+    withFlogging({
+      ListenerSet(sender= sub("<app>",sappid,EA.config$sender),
+                  dbname=EAeng.local$dbname, dburi=EAeng.local$dburi,
+                  listeners=listeners,admindbname=EAeng.local$admindbname,
+                  colname=EA.config$lscolname)
+    }, context="Building listener set.")
+
+  if (!is.null(EA.config$statListener)) {
+    sl <- listeners[[EA.config$statListener]]
+    if (is.null(sl)) {
+      flog.warn("Stat listener %s not found, skipping building stat file.",
+                 EA.config$statListener)
+    } else {
+      stat1 <- sl$messdb()$find(buildJQuery(app=appid))
+      if (isTRUE(nrow(stat1) > 0L)) {
+        sdat <- data.frame(stat1[,c("app","uid","context","timestamp")],
+                           do.call(cbind,stat1$data))
+        sdat$app <- basename(sdat$app)
+        fname <- gsub("<app>",sappid,EA.config$statfile)
+
+        write.csv(sdat,file.path(outdir,fname))
+        listenerSet$registerOutput(fname,file.path(outdir,fname),
+                                                appid,"EA")
+      } else {
+        flog.warn("No records in statistics file.")
+      }
+
+    }
+  }
+  if (!is.null(EA.config$histListener)) {
+    hl <- listeners[[EA.config$histListener]]
+    if (is.null(hl)) {
+      flog.warn("History listener %s not found, skipping building history file.",
+                 EA.config$histListener)
+    } else {
+      hist <- buildAppHist(hl$messdb(),appid)
+      if (isTRUE(nrow(hist) > 0L)) {
+        hist$app <- basename(hist$app)
+        fname <- gsub("<app>",sappid,EA.config$histfile)
+
+        write.csv(hist,file.path(outdir,fname))
+        listenerSet$registerOutput(fname,file.path(outdir,fname),
+                                                appid,"EA")
+      } else {
+        flog.warn("No records in history file.")
+      }
+
+    }
+  }
+}
+
+
 
 buildHistMat <- function (col, app, uid) {
   stat1 <- col$find(buildJQuery(app=app, uid=uid))

@@ -194,14 +194,15 @@ doBuild(sess, EA.tables, config.dir, override = FALSE)
 
   \code{\link{doRunrun}}, \code{\link{configStats}}
 
-  \code{\link[Peanut]{NetWarehouse}},
-  \code{\link[Peanut]{NodeWarehouse}},
+  \code{\link[Peanut]{PnetWarehouse}},
+  \code{\link[Peanut]{PnodeWarehouse}},
   \code{\link[Peanut]{Omega2Pnet}},
   \code{\link[Peanut]{Qmat2Pnet}},
 
 }
 \examples{
-
+## This example is in:
+file.path(help(package="EABN")$path,"conf","EABuild.R")
 \dontrun{
 ## Set up config.dir, logpath and  NeticaLicenseKey
 source("/usr/local/share/Proc4/EAini.R")

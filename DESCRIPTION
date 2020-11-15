@@ -1,10 +1,11 @@
 Package: EABN
-Version: 0.5-3
-Date: 2020/07/30
+Version: 0.5-4
+Date: 2020/11/14
 Title: Evidence Accumulation Bayes Net Engine
 Author: Russell Almond
 Maintainer: Russell Almond <ralmond@fsu.edu>
 Depends: R (>= 3.0), methods, mongolite, jsonlite, Peanut (>= 0.8), Proc4 (>= 0.3), futile.logger
+Suggests:  RNetica, PNetica
 Description: Extracts observables from a sequence of events.
 License: Artistic-2.0 
 URL: http://pluto.coe.fsu.edu/Proc4

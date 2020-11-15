@@ -13,11 +13,12 @@
 
 }
 \usage{
-doRunrun(app, sess, EA.config, EAeng.local, config.dir, outdir=config.dir, override = FALSE)
+doRunrun(appid, sess, EA.config, EAeng.local, config.dir,
+outdir=config.dir, override = FALSE, logfile="")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{app}{A character string giving the global unique identifier for
+  \item{appid}{A character string giving the global unique identifier for
     the application being run.  This is normally formatted like a URL,
     and \code{basename(app)} is used as a short name.}
   \item{sess}{A \code{\link[RNetica]{NeticaSession} object to use for
@@ -36,13 +37,14 @@ doRunrun(app, sess, EA.config, EAeng.local, config.dir, outdir=config.dir, overr
     will be written.}
   \item{override}{A logical flag.  If true, the code will ignore locks
     and restart the run anyway.}
+  \item{logfile}{Name for the file in which to do logging.}
 }
 \details{
 
   The goal is to start a run or scoring an assessment using the 
   \code{\linkS4class{BNEngine}} class.  This function takes care of many
   of the configuration details and preparatory steps and then calls
-  \code{\link{mainloop}} to do the major work.  In particular, the steps
+  \code{\link{mainLoop}} to do the major work.  In particular, the steps
   done by this system are as follows:
 
   \enumerate{
@@ -55,7 +57,7 @@ doRunrun(app, sess, EA.config, EAeng.local, config.dir, outdir=config.dir, overr
       evidence sets into the database and mark selected evidence as 
       unprocessed.} 
     \item{Launch engine using \code{\link{mainLoop}}.}
-    \item{Build a statistics file.}
+    \item{Build and register the statistics and history file.}
   }
 
   Note that this will run in either rerun mode, where it will score an
@@ -111,7 +113,7 @@ doRunrun(app, sess, EA.config, EAeng.local, config.dir, outdir=config.dir, overr
      This should be a character scalar or vector.  The values should be
      names of listeners.  The special value \dQuote{Self} refers to the
      ListenerSet object, and the special value \dQuote{ALL} resets all
-     listeners.  See \code{\link[Proc4]{resetLiseners}}.  Example value
+     listeners.  See \code{\link[Proc4]{resetListeners}}.  Example value
      \code{"ALL"}.} 
     \item{netdir}{The name of the subdirectory of \code{config.dir}
       which contains the nets.   Default value \code{"nets"}.}
@@ -134,6 +136,12 @@ doRunrun(app, sess, EA.config, EAeng.local, config.dir, outdir=config.dir, overr
     \item{statfile}{Name of the file, relative to \code{outdir} where
       the statistcs file should be exported. Example value
       \code{"stats-<app>.csv"}.}
+    \item{histListener}{The name of the listener which should be
+      consulted to gather the history table afterwards. Example value
+      \code{"ToAS"}.} 
+    \item{histfile}{Name of the file, relative to \code{outdir} where
+      the history file should be exported. Example value
+      \code{"hist-<app>.csv"}.}
   }
 
   A number of these values do \dQuote{<app>} substitution, that is they
@@ -191,12 +199,12 @@ doRunrun(app, sess, EA.config, EAeng.local, config.dir, outdir=config.dir, overr
   }
 
   These are controlled by the following elements in the
-  \code{EA.config$filer} list:
+  \code{EA.config$filter} list:
   \describe{
     \item{doRemove}{Logical, should records be removed before import.}
     \item{remove}{Filter to use for removal. The value \code{\{\}}
       will remove all records for the given \code{app}.}
-    \item{importFile}{A list of filenames (in the \code{config.dir}
+    \item{importFile}{A list of filenames (in the \code{config.dir})
       which contain evidence sets to be imported before scoring.}
     \item{doPurge}{Logical, should records be removed after
       import.}
@@ -209,9 +217,6 @@ doRunrun(app, sess, EA.config, EAeng.local, config.dir, outdir=config.dir, overr
       for reprocessing.  The value \code{\{\}} will mark all records
       (for this \code{app}) for reprocessing.}
   }
-
-  The values of the \code{}
-  <<HERE>>
 
 }
 \section{Locking}{
@@ -232,19 +237,38 @@ doRunrun(app, sess, EA.config, EAeng.local, config.dir, outdir=config.dir, overr
   override only with extreme caution.
 
 }
+\section{Data Files}{
+
+  If the value of \code{EA.config$statListener} is not null, then the
+  final statistic values for all users are put into a table which is
+  exported (to the file \code{EA.config$statfile}).  
+
+  If the value of \code{EA.config$histListener} is not null, then the
+  history of all statistic values for all users are put into a table
+  which is exported (to the file \code{EA.config$histfile}).  
+
+  Both the statfile and histfile are registered using the
+  \code{\link[Proc4]{ListenerSet}$registerOutput} method.
+
+}
 \section{Logging}{
 
   Logging is done through the \code{\link{futile.logger}{flog.logger}}
   mechanism. This allows logs to be save to a file.
 
   The \dQuote{logLevel} and \dQuote{logname} fields are put in the
-    configuration specification to assist scripts in configuring the
-    logging system.
+  configuration specification to assist scripts in configuring the
+  logging system.
+
+  Both the log file is registered using the
+  \code{\link[Proc4]{ListnerSet}$registerOutput} method.
 
 }
+  
 \value{
 
-  Good question, what does it return?
+  This returns the engine invisibly, in case the calling program wants
+  to do something with it.
   
 }
 \references{
@@ -257,121 +281,58 @@ doRunrun(app, sess, EA.config, EAeng.local, config.dir, outdir=config.dir, overr
 }
 \author{Russell Almond}
 \note{
-%%  ~~further notes~~
+
+  This function is meant to be called by the \code{EABN.R} script file
+  to do the major work of running the engine.
+
 }
-
-%% ~Make other sections like Warning with \section{Warning }{....} ~
-
 \seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
+
+  \code{\link{doBuild}}, \code{\link{rebuildOutputs}}
+
+  \code{\linkS4class{EAEninge}}, \code{\link{mainLoop}},
+  \code{\link[Proc4]{ListenerSet}}
+
+
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+## This example is in:
+file.path(help(package="EABN")$path,"conf","RunEABN.R")
+\dontrun{
+library(R.utils)
+library(EABN)
+library(PNetica)
 
-## The function is currently defined as
-function (app, sess, EA.config, EAeng.local, config.dir, override = FALSE) 
-{
-    sapp <- basename(app)
-    flog.info("Building and configuring engine.")
-    listeners <- lapply(EA.config$listeners, buildListener, app, 
-        dburi)
-    names(listeners) <- sapply(listeners, listenerName)
-    EAeng.params <- c(EA.config$EAEngine, EAeng.local)
-    EAeng.params$listenerSet <- ListenerSet(sender = sub("<app>", 
-        sapp, EA.config$sender), dbname = EA.config$dbname, dburi = EAeng.local$dburi, 
-        listeners = listeners, colname = EA.config$lscolname)
-    netman <- read.csv(file.path(config.dir, "nets", EA.config$EAEngine$manifestFile), 
-        stringsAsFactors = FALSE, strip.white = TRUE)
-    EAeng.params$warehouse <- PNetica::BNWarehouse(manifest = netman, 
-        session = sess, key = "Name", address = file.path(config.dir, 
-            "nets"))
-    eng <- do.call(ifelse(EAeng.local$dburi == "", BNEngineNDB, 
-        BNEngineMongo), EAeng.params)
-    loadManifest(eng, netman)
-    stattab <- read.csv(file.path(config.dir, "nets", EA.config$EAEngine$statFile), 
-        stringsAsFactors = FALSE, strip.white = TRUE)
-    configStats(eng, stattab)
-    flog.info("Preparing Database.")
-    if (dburi != "") {
-        if (EA.config$filter$doRemove) {
-            flog.debug("Clearing old evidence sets.")
-            rquery <- buildJQuery(c(list(app = app, EA.config$filter$remove)))
-            eng$evdienceSets()$remove(rquery)
-        }
-        if (isTRUE(EA.config$SRreset)) {
-            flog.debug("Clearing old student records.")
-            eng$studentRecords()$clearAll(TRUE)
-        }
-        if (!is.null(EA.config$importFile)) {
-            flog.warn("Importing from file  \%s.", EA.confg$importFile)
-            impf <- file.path(config.dir, EA.config$importFile)
-            if (!file.exists(impf)) {
-                flog.warn("File \%s does not exist, skipping import.", 
-                  EA.confg$importFile)
-            }
-            else {
-                status <- system2("mongoimport", c("--jsonArray", 
-                  "-d", EAeng.local$dbname, "-c", "EvidenceSets", 
-                  impf), stdout = TRUE, stderr = TRUE)
-                if (!is.null(attr(status, "status"))) {
-                  flog.error("Got error when loading import file.")
-                  flog.error("Error:", status, capture = TRUE)
-                }
-            }
-        }
-        if (isTRUE(EA.config$filter$doReprocess)) {
-            flog.debug("Clearing reprocessed flags.")
-            rquery <- buildJQuery(c(list(app = app, EA.config$filter$update)))
-            eng$evidenceSets()$update(rquery, "{\"$set\":{\"processed\":false}}")
-        }
-    }
-    setupDefaultSR(eng)
-    if (EA.config$limitNN == "ALL") {
-        eng$processN <- eng$evidenceSets()$count(buildJQuery(app = app, 
-            processed = FALSE))
-    }
-    else {
-        eng$processN <- as.numeric(EA.config$limitNN)
-    }
-    flog.info("Begining EA for application \%s.", basename(app))
-    if (is.finite(eng$processN)) {
-        flog.info("\%d messages queued.", eng$processN)
-    }
-    else {
-        flog.info("Running in server mode.")
-    }
-    if (eng$isActivated()) {
-        flog.warn("Enging for application \%s already active.", 
-            sapp)
-        if (!isTRUE(override)) 
-            stop("Application ", sapp, " already active.")
-    }
-    tryCatch({
-        file.create(file.path(config.dir, "nets", paste(sapp, 
-            "lock", sep = ".")))
-        mainLoop(eng)
-    }, finally = {
-        file.remove(file.path(config.dir, "nets", paste(sapp, 
-            "lock", sep = ".")))
-    })
-    if (!is.null(EA.config$statListener)) {
-        sl <- listeners[[EA.config$statListener]]
-        if (is.null(sl)) {
-            flog.warn("Stat listener \%s not found, skipping building stat file.", 
-                EA.config$statListener)
-        }
-        else {
-            stat1 <- sl$messdb()$find(buildJQuery(app = app))
-            sdat <- data.frame(stat1[, c("app", "uid", "context", 
-                "timestamp")], flatten(stat1$data))
-            sdat$app <- basename(sdat$app)
-            fname <- gsub("<app>", sapp, EA.config$statfile)
-            write.csv(stat1, fname)
-        }
-    }
-  }
+appStem <- cmdArg("app",NULL)
+if (FALSE) {
+  appStem <- "userControl"
+}
+
+source("/usr/local/share/Proc4/EAini.R")
+
+EA.config <- fromJSON(file.path(config.dir,"config.json"),FALSE)
+
+app <- as.character(Proc4.config$apps[appStem])
+if (length(app)==0L || any(app=="NULL")) {
+  stop("Could not find app for ",appStem)
+}
+
+## Start Netica
+sess <- NeticaSession(LicenseKey=NeticaLicenseKey)
+startSession(sess)
+
+logfile <- (file.path(logpath, sub("<app>",appStem,EA.config$logname)))
+if (interactive()) {
+  flog.appender(appender.tee(logfile))
+} else {
+  flog.appender(appender.file(logfile))
+}
+flog.threshold(EA.config$logLevel)
+
+eng <- doRunrun(app,sess,EA.config,EAeng.local,config.dir,outdir,
+                logfile=logfile)
+
+}
 }
 \keyword{ interface }
 \keyword{ graphs }

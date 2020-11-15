@@ -31,7 +31,7 @@ export(BNEngine,BNEngineMongo, loadManifest, setupDefaultSR,
        handleEvidence, mainLoop, updateSM, fetchNextEvidence, markProcessed)
 exportMethods(notifyListeners,fetchNextEvidence,markProcessed)
 
-export(trimTable,doBuild,doRunrun)
+export(trimTable,doBuild,doRunrun,rebuildOutputs,buildAppHist,buildHistMat)
 
 exportClass(BNEngineNDB)
 export(BNEngineNDB)
