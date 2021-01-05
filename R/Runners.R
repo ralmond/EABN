@@ -93,7 +93,7 @@ doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
   }
   CM <- withFlogging({
     CM <- WarehouseSupply(Nethouse,profModel)
-    Omega2Pnet(Omega,CM,Nodehouse,override=TRUE)
+    Omega2Pnet(Omega,CM,Nodehouse,override=EA.tables$profOverride)
   },context=contex)
   if (is(CM,'try-error')) {
     flog.fatal("Failed to build competentcy model, giving up.")
@@ -111,7 +111,7 @@ doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
                which(is.na(QQ$Node))+1,capture=TRUE)
   }
   withFlogging(
-      Qmat2Pnet(QQ,Nethouse,Nodehouse),
+      Qmat2Pnet(QQ,Nethouse,Nodehouse,override=EA.tables$emOverride),
       context=contex)
 
   flog.info("Writing nets.")
