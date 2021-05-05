@@ -62,7 +62,7 @@ BNEngineNDB <-
                     manifest
                   },
                   saveManifest = function(manif) {
-                    manif$app <- app(eng)
+                    manif$app <- app
                     manifest <<- manif
                   },
                   P4db = function () {
@@ -83,7 +83,7 @@ BNEngineNDB <-
                     return (length(locks) > 0L)
                   },
                   deactivate = function() {
-                    trycatch(file.remove(paste(activeTest,
+                    tryCatch(file.remove(paste(activeTest,
                                                c("running","finish","halt"),
                                                sep=".")),
                              warning=function(w){})
@@ -96,11 +96,12 @@ BNEngineNDB <- function(app="default",warehouse, listenerSet=NULL,
                      manifest=data.frame(),processN=Inf,
                      waittime=.25, profModel=character(),
                      statmat=data.frame(),evidenceQueue=list(),
-                     activeTest="EAActive.txt",...) {
+                     activeTest="EAActive",...) {
+  ## Removed ... from new, so we can silently drop unused arguments.
   new("BNEngineNDB",app=app,warehouse=warehouse,
       listenerSet=listenerSet,manifest=manifest,processN=processN,
       waittime=waittime,profModel=profModel,
-      activeTest=activeTest,...)
+      activeTest=activeTest)
 }
 
 setMethod("evidence","BNEngineNDB",

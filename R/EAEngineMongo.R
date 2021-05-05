@@ -166,9 +166,9 @@ BNEngineMongo <- function(app="default",warehouse,listenerSet=NULL,
                      processN=Inf,
                      admindbname="Proc4", waittime=.25, profModel=character(),
                      ...) {
+  ## Drop ... from new() so we can quietly delete unused arugments.
   new("BNEngineMongo",app=app,listenerSet=listenerSet,
       warehouse=warehouse,dburi=dburi, dbname=dbname,processN=processN,
-      admindbname=admindbname,waittime=waittime,profModel=profModel,
-      ...)
+      admindbname=admindbname,waittime=waittime,profModel=profModel)
 }
 

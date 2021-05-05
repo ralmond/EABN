@@ -2,7 +2,10 @@
 
 trimTable <- function (tab, lastcol="Description") {
     nlcol <- which(colnames(tab)==lastcol)
-    tab[,1:nlcol]
+    result <- tab[,1:nlcol]
+    ## Need this as leading/trailing ws in column names is invivible in Google sheets (& M$ Excel)
+    names(result) <- trimws(names(result),whitespace="[ \t\r\n.]")
+    result
 }
 
 doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
@@ -144,9 +147,9 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   names(listeners) <- sapply(listeners,listenerName)
 
 
-  EAeng.params <-
-    c(EA.config$EAEngine,
-      EAeng.local[setdiff(names(EAeng.local),names(EA.config$EAEngine))])
+  EAeng.params <- c(EA.config$EAEngine,
+                    EAeng.local[setdiff(names(EAeng.local),
+                                        names(EA.config$EAEngine))])
   ## Force to character, JSON leave as list.
   EAeng.params$histNodes <- as.character(EAeng.params$histNodes)
   EAeng.params$listenerSet <-
@@ -165,12 +168,14 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
                                               appid,"EA","log")
   }
   netman <- read.csv(file.path(config.dir,netdir,
-                               EA.config$EAEngine$manifestFile),
-                     stringsAsFactors=FALSE,strip.white=TRUE)
+                             EA.config$EAEngine$manifestFile),
+                   stringsAsFactors=FALSE,strip.white=TRUE)
   EAeng.params$warehouse <-
-    PNetica::BNWarehouse(manifest=netman,
-                         session=sess,key="Name",
-                         address=file.path(config.dir,netdir))
+    withFlogging({
+      PNetica::BNWarehouse(manifest=netman,
+                           session=sess,key="Name",
+                           address=file.path(config.dir,netdir))
+      },context="Building Network Warehouse")
   EAeng.params$app <- appid
   eng <- withFlogging({
     do.call(ifelse(EAeng.local$dburi=="",BNEngineNDB,BNEngineMongo),
@@ -181,9 +186,8 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
     stop(eng)
   }
 
-
   if (eng$isActivated()) {
-    flog.warn("Enging for application %s already active.",sappid)
+    flog.warn("Engine for application %s already active.",sappid)
     if (!isTRUE(override)) stop("Application ",sappid," already active.")
   }
 
@@ -197,8 +201,8 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   },context="Configuring engine.")
   ## Currently continuing anyway.  Is this the right thing to do?
 
-  flog.info("Preparing Database.")
   if (dburi != "") {
+    flog.info("Preparing Database.")
 
     ## Clearning
     if (isTRUE(EA.config$filter$doRemove)) {
@@ -312,8 +316,14 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   }
 
   if (EA.config$limitNN=="ALL") {
-    eng$processN <- eng$evidenceSets()$count(buildJQuery(app=appid,
-                                                         processed=FALSE))
+    es <- eng$evidenceSets()
+    if (!is.null(es)) {
+      eng$processN <- es$count(buildJQuery(app=appid,processed=FALSE))
+    } else {
+      ## Want zero here as in DB-less mode we just want to exit
+      ## returning the engine.  
+      eng$processN <- 0 
+    }
   } else {
     eng$processN <- as.numeric(EA.config$limitNN)
   }
@@ -327,7 +337,8 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   }
   tryCatch({
     file.create(file.path(config.dir,netdir,paste(sappid,"lock",sep=".")))
-    withFlogging(mainLoop(eng))
+    if (eng$processN > 0)
+      withFlogging(mainLoop(eng))
   },finally={
     file.remove(file.path(config.dir,netdir,paste(sappid,"lock",sep=".")))
     eng$deactivate()

@@ -35,8 +35,8 @@ admindbname = "Proc4", waittime = 0.25, profModel = character(),
     again for new evidence sets when the evidence set queue is empty.}
   \item{profModel}{The name of the proficiency model (its ID in the
     warehouse manifest).}
-  \item{\dots}{Extra room in case we later think of more things we
-    should add.}
+  \item{\dots}{Extra arguments are ignored.  This allows arguments for
+    other engine versions to be set in the parameters and ignored.}
 }
 \details{
 

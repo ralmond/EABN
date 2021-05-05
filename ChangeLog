@@ -1,3 +1,23 @@
+2021-04-27  Russell Almond  <ralmond@cherry>
+
+	* R/Runners.R (doRunrun): EAeng.params combines all of the
+	EA.config$EAEngine and EAeng.local parameters.  Changed
+	constructors so that they would quitely drop unused arguments. 
+
+	* R/EAEngineMongo.R (BNEngineMongo): Same change.
+
+	* R/EAEngineNDB.R (BNEngineNDB): Changed constructors to not pass
+	... through.  
+
+2021-04-26  Russell Almond  <ralmond@cherry>
+
+	* R/Runners.R (doRunrun): Added compatability for DB-less operation mode.  
+
+2021-03-08  Russell Almond  <ralmond@cherry>
+
+	* R/Runners.R (trimTable): Added clean up for stray spaces in
+	column names.  
+
 2020-10-04  Russell Almond  <ralmond@Cherry>
 
 	* R/Runners.R (doRunrun): Added history output file.

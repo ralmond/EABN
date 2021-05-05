@@ -41,9 +41,8 @@ BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
     objects to be processed.}
   \item{activeTest}{The pathname for the file whose existance will be
     used to determine when the engine should shut down.}
-  \item{\dots}{Extra room in case we later think of more things we
-    should add.}
-
+  \item{\dots}{Extra arguments are ignored.  This allows arguments for
+    other engine versions to be set in the parameters and ignored.}
 }
 \details{
 
