@@ -14,9 +14,8 @@
 }
 \usage{
 doRunrun(appid, sess, EA.config, EAeng.local, config.dir,
-outdir=config.dir, override = FALSE, logfile="")
+outdir=config.dir, override = FALSE, logfile="", noprep=FALSE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{appid}{A character string giving the global unique identifier for
     the application being run.  This is normally formatted like a URL,
@@ -38,11 +37,15 @@ outdir=config.dir, override = FALSE, logfile="")
   \item{override}{A logical flag.  If true, the code will ignore locks
     and restart the run anyway.}
   \item{logfile}{Name for the file in which to do logging.}
+  \item{noprep}{Logical flag.  If true, then the database and listener
+    preparation steps will be skipped.  This is for forcing a
+    continuation without resetting the configuration.}
 }
 \details{
 
-  The goal is to start a run or scoring an assessment using the 
-  \code{\linkS4class{BNEngine}} class.  This function takes care of many
+  The goal is to start a run for scoring (evidence accumultion step) an
+  assessment using the  \code{\linkS4class{BNEngine}} class.  This
+  function takes care of many 
   of the configuration details and preparatory steps and then calls
   \code{\link{mainLoop}} to do the major work.  In particular, the steps
   done by this system are as follows:
@@ -68,11 +71,11 @@ outdir=config.dir, override = FALSE, logfile="")
 \section{Configuration}{
 
   There are a large number of parameters which can be configured.  These
-  are passed in through the \code{EA.tables} argument, which is a list
+  are passed in through the \code{EA.config} argument, which is a list
   of parameters.  The intention is that this can be read in from a JSON
-  file (using \code{\link[jsonlite]{fromJSON}}).  In the current
-  implementation, the \code{EA.tables} parameter set is a sub-object of
-  the larger \code{EA.config} parameter set.
+  file (using \code{\link[jsonlite]{fromJSON}}).  The \code{RunEABN.R}
+  script loads these from a file called \code{config.json}.  A sample of
+  this file is available on github \url{https://github.com/ralmond/PP-EA}.
 
   The following fields are available:
 
@@ -236,6 +239,10 @@ outdir=config.dir, override = FALSE, logfile="")
   \code{override} parameter is set to \code{TRUE} it stops.  Use the
   override only with extreme caution.
 
+  The \code{\link{EAEngineMongo}} version also checks the database for a
+  running flag.  If it is found, then again the engine will not start
+  unless the \code{override} flag is true.
+
 }
 \section{Data Files}{
 
@@ -273,7 +280,6 @@ outdir=config.dir, override = FALSE, logfile="")
 }
 \references{
 
-
   The Bobs (1983) Psychokiller.  \emph{My I'm Large.}  Rhino Records.
   \url{https://www.youtube.com/watch?v=-Gu4PKnCLDg}.  (Reference is
   about 2:30 minutes into song.)
@@ -282,8 +288,12 @@ outdir=config.dir, override = FALSE, logfile="")
 \author{Russell Almond}
 \note{
 
-  This function is meant to be called by the \code{EABN.R} script file
-  to do the major work of running the engine.
+  This function is meant to be called by the \code{RunEABN.R} script
+  found in the config directory.
+  (\code{file.path(help(package="EABN")$path,"conf","RunEABN.R")})
+
+  The shell script \code{EABN} found in the same directory will run this
+  script.  
 
 }
 \seealso{

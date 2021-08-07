@@ -1,3 +1,7 @@
+2021-08-03  Russell Almond  <ralmond@cherry.local>
+
+	* R/Runners.R (doRunrun): Added noprep flag to the basic script.
+
 2021-04-27  Russell Almond  <ralmond@cherry>
 
 	* R/Runners.R (doRunrun): EAeng.params combines all of the

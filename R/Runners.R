@@ -136,7 +136,8 @@ doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
 }
 
 doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
-                      outdir=config.dir, override = FALSE, logfile="") {
+                      outdir=config.dir, override = FALSE, logfile="",
+                      noprep=FALSE) {
 
   netdir <- ifelse(!is.null(EA.config$netdir),EA.config$netdir,"nets")
   sappid <- basename(appid)
@@ -201,7 +202,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   },context="Configuring engine.")
   ## Currently continuing anyway.  Is this the right thing to do?
 
-  if (dburi != "") {
+  if (dburi != "" && !noprep) {
     flog.info("Preparing Database.")
 
     ## Clearning
@@ -303,8 +304,8 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
     }
   }
   setupDefaultSR(eng)
-  flog.info("Reseting Listners.")
-  if (!is.null(EA.config$listenerReset)) {
+  if (!is.null(EA.config$listenerReset) && !noprep) {
+    flog.info("Reseting Listners.")
     status <- withFlogging({
       resetListeners(eng$listenerSet,as.character(EA.config$listenerReset),
                      appid)
