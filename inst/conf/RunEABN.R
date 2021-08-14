@@ -2,9 +2,19 @@ library(R.utils)
 library(EABN)
 library(PNetica)
 
-appStem <- cmdArg("app",NULL)
-if (FALSE) {
-  appStem <- "userControl"
+if (interactive()) {
+  ## Edit these for the local application
+  appStem <- "P4test"
+  loglevel <- ""
+  noprep <- FALSE
+  override <- FALSE
+} else {
+  appStem <- cmdArg("app",NULL)
+  if (is.null(app) || !grepl("^ecd://",app))
+    stop("No app specified, use '--args app=ecd://...'")
+  loglevel <- cmdArg("level","")
+  noprep <- as.logical(cmdArg("noprep",FALSE))
+  override <- as.logical(cmdArg("override",FALSE))
 }
 
 source("/usr/local/share/Proc4/EAini.R")
@@ -43,5 +53,5 @@ for (ext in EA.config$extensions) {
 }
 
 eng <- doRunrun(app,sess,EA.config,EAeng.local,config.dir,outdir,
-                logfile=logfile)
+                logfile=logfile,override=override,noprep=noprep)
 
