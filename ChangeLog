@@ -1,3 +1,8 @@
+2021-08-16  Russell Almond  <ralmond@cherry.local>
+
+	* R/Evidence.R (EvidenceSet): Added "sender" field to parse list.
+	(EvidenceSet): Added "oid" attribute to "_id" field.
+
 2021-08-03  Russell Almond  <ralmond@cherry.local>
 
 	* R/Runners.R (doRunrun): Added noprep flag to the basic script.
