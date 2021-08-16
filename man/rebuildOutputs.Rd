@@ -3,7 +3,7 @@
 \title{Reconstructs the statistic and history outputs from the log files.}
 \description{
 
-  The last step of the runner (\code{\link{doRunRun}}) is to build a
+  The last step of the runner (\code{\link{doRunrun}}) is to build a
   number of output files from the logged output.  This function reruns
   those last calculations.
 
@@ -12,7 +12,7 @@
 rebuildOutputs(appid, EA.config, EAeng.local, outdir)
 }
 \arguments{
-  \item{app}{A character string giving the global unique identifier for
+  \item{appid}{A character string giving the global unique identifier for
     the application being run.  This is normally formatted like a URL,
     and \code{basename(app)} is used as a short name.}
   \item{EA.config}{A named list containing the configuration details.  See the
@@ -52,7 +52,7 @@ rebuildOutputs(appid, EA.config, EAeng.local, outdir)
   which is exported (to the file \code{EA.config$histfile}).  
 
   Both the statfile and histfile are registered using the
-  \code{\link[Proc4]{ListnerSet}$registerOutput} method.
+  \code{\link[Proc4]{ListenerSet}$registerOutput} method.
 
 }
 \value{
@@ -70,7 +70,7 @@ rebuildOutputs(appid, EA.config, EAeng.local, outdir)
 
   \code{\link{doBuild}}, \code{\link{doRunrun}}
 
-  \code{\linkS4class{EAEninge}}, 
+  \code{\linkS4class{BNEninge}}, 
   \code{\link[Proc4]{ListenerSet}},
   \code{\link{configStats}},
   \code{\link{buildHistMat}}

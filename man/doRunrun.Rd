@@ -239,7 +239,7 @@ outdir=config.dir, override = FALSE, logfile="", noprep=FALSE)
   \code{override} parameter is set to \code{TRUE} it stops.  Use the
   override only with extreme caution.
 
-  The \code{\link{EAEngineMongo}} version also checks the database for a
+  The \code{\link{BNEngineMongo}} version also checks the database for a
   running flag.  If it is found, then again the engine will not start
   unless the \code{override} flag is true.
 
@@ -268,7 +268,7 @@ outdir=config.dir, override = FALSE, logfile="", noprep=FALSE)
   logging system.
 
   Both the log file is registered using the
-  \code{\link[Proc4]{ListnerSet}$registerOutput} method.
+  \code{\link[Proc4]{ListenerSet}$registerOutput} method.
 
 }
   
@@ -300,7 +300,7 @@ outdir=config.dir, override = FALSE, logfile="", noprep=FALSE)
 
   \code{\link{doBuild}}, \code{\link{rebuildOutputs}}
 
-  \code{\linkS4class{EAEninge}}, \code{\link{mainLoop}},
+  \code{\linkS4class{BNEngine}}, \code{\link{mainLoop}},
   \code{\link[Proc4]{ListenerSet}}
 
 

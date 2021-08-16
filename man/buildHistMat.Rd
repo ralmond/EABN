@@ -49,7 +49,7 @@ buildAppHist(col, app)
 \seealso{
 
   \code{\link[CPTtools]{woeBal}}, \code{\link[CPTtools]{EAPBal}}
-  \code{\link[CPTtools]{ListenerSet}}
+  \code{\link[Proc4]{ListenerSet}}
 
 }
 \examples{

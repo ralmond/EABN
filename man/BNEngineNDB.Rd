@@ -15,7 +15,7 @@ BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
   manifest = data.frame(), processN = Inf, waittime = 0.25,
   profModel = character(), statmat = data.frame(),
   evidenceQueue = list(), activeTest =
-  "EAActive.txt", ...) 
+  "EAActive", ...) 
 
 }
 \arguments{

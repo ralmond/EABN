@@ -30,9 +30,9 @@ doBuild(sess, EA.tables, config.dir, override = FALSE)
   describe the scoring model:
   \describe{
     \item{Nets.csv}{Manifest of all networks. See
-      \code{\link[Peanut]{NetWarehouse}}.}
+      \code{\link[Peanut]{Warehouse}} and \code{\link[PNetica]{BNWarehouse}}.}
     \item{Nodes.csv}{Manifest of all nodes in all networks. See
-      \code{\link[Peanut]{NodeWarehouse}}.}
+      \code{\link[Peanut]{Warehouse}} and \code{\link[PNetica]{NNWarehouse}}.}
     \item{Omega.csv}{Description of the competency model.  See
       \code{\link[Peanut]{Omega2Pnet}}.}
     \item{Q.csv}{Description of the evidence model.  See
@@ -194,8 +194,9 @@ doBuild(sess, EA.tables, config.dir, override = FALSE)
 
   \code{\link{doRunrun}}, \code{\link{configStats}}
 
-  \code{\link[Peanut]{PnetWarehouse}},
-  \code{\link[Peanut]{PnodeWarehouse}},
+  \code{\link[Peanut]{Warehouse}},
+  \code{\link[PNetica]{BNWarehouse}},
+  \code{\link[PNetica]{NNWarehouse}},
   \code{\link[Peanut]{Omega2Pnet}},
   \code{\link[Peanut]{Qmat2Pnet}},
 
