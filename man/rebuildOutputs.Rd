@@ -70,7 +70,7 @@ rebuildOutputs(appid, EA.config, EAeng.local, outdir)
 
   \code{\link{doBuild}}, \code{\link{doRunrun}}
 
-  \code{\linkS4class{BNEninge}}, 
+  \code{\linkS4class{BNEngine}}, 
   \code{\link[Proc4]{ListenerSet}},
   \code{\link{configStats}},
   \code{\link{buildHistMat}}

@@ -10,9 +10,12 @@ Authors@R:
            comment = c(ORCID = "0000-0002-8876-9337"))
 Author: Russell Almond
 Maintainer: Russell Almond <ralmond@fsu.edu>
-Depends: R (>= 3.0), methods, mongolite, jsonlite, Peanut (>= 0.8), Proc4 (>= 0.3), futile.logger
-Suggests:  RNetica, PNetica
+Depends: R (>= 3.0), methods, Peanut (>= 0.8), Proc4 (>= 0.3),
+Imports: futile.logger, mongolite, jsonlite
+Suggests:  RNetica, PNetica,
+   knitr, rmarkdown, tidyr
 Description: Extracts observables from a sequence of events.
 License: Artistic-2.0 
 URL: http://pluto.coe.fsu.edu/Proc4
 Collate: Evidence.R StudentRec.R EAEngine.R EAEngineMongo.R EAEngineNDB.R EngineGears.R Runners.R
+VignetteBuilder: knitr

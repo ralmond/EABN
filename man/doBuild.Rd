@@ -52,8 +52,8 @@ doBuild(sess, EA.tables, config.dir, override = FALSE)
     \item{The tables (CSV files) are downloaded from internet sources
       (see Downloading Tables below) into the \dQuote{tables} directory.}
     \item{The tables are loaded into R and a
-      \code{\link[Peanut]{NetWarehouse}} and
-      \code{\link[Peanut]{NodeWarehouse}} are built for the models.}
+      \code{\link[Peanut]{PnetWarehouse}} and
+      \code{\link[Peanut]{PnodeWarehouse}} are built for the models.}
     \item{The \code{\link[Peanut]{Omega2Pnet}} script is run to build
       the proficiency model.}
     \item{The \code{\link[Peanut]{Qmat2Pnet}} script is run to build the
