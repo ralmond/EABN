@@ -1,7 +1,13 @@
 Package: EABN
-Version: 0.5-5
-Date: 2021/08/03
+Version: 0.6-1
+Date: 2022/04/25
 Title: Evidence Accumulation Bayes Net Engine
+Authors@R: 
+    person(given = "Russell",
+           family = "Almond",
+           role = c("aut", "cre"),
+           email = "ralmond@fsu.edu",
+           comment = c(ORCID = "0000-0002-8876-9337"))
 Author: Russell Almond
 Maintainer: Russell Almond <ralmond@fsu.edu>
 Depends: R (>= 3.0), methods, mongolite, jsonlite, Peanut (>= 0.8), Proc4 (>= 0.3), futile.logger
