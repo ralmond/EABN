@@ -337,7 +337,8 @@ defaultSR <- function(x) x$defaultSR
 
 setGeneric("getSR", function (srs,uid,ser="") standardGeneric("getSR"))
 setGeneric("saveSR", function (srs,rec) standardGeneric("saveSR"))
-setGeneric("newSR", function (srs,uid) standardGeneric("newSR"))
+setGeneric("newSR", function (srs,uid,timestamp=Sys.time())
+  standardGeneric("newSR"))
 setGeneric("clearSRs", function(srs) standardGeneric("clearSRs"))
 
 
@@ -372,7 +373,8 @@ setMethod("saveSR", c("StudentRecordSet","ANY"), function (srs,rec) {
   rec
 })
 
-setMethod("newSR", c("StudentRecordSet","ANY"), function (srs,uid) {
+setMethod("newSR", c("StudentRecordSet","ANY"),
+          function (srs,uid,timestamp=Sys.time()) {
   flog.debug("Making new student record for  %s", uid)
   dsr <- srs$defaultSR
   oldnet <- WarehouseFetch(srs$warehouse,as.legal.name(srs$warehouse,uid))
@@ -380,7 +382,7 @@ setMethod("newSR", c("StudentRecordSet","ANY"), function (srs,uid) {
     flog.warn("Removing old student model named %s.",PnetName(oldnet))
     WarehouseFree(srs$warehouse,PnetName(oldnet))
   }
-  rec <- StudentRecord(uid=uid,context(dsr),timestamp=Sys.time(),
+  rec <- StudentRecord(uid=uid,context(dsr),timestamp=timestamp,
                        sm=WarehouseCopy(srs$warehouse,sm(dsr),
                                         as.legal.name(srs$warehouse,uid)),
                        stats=stats(dsr),hist=dsr@hist,app=app(srs),

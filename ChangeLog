@@ -1,3 +1,14 @@
+2022-04-03  Russell Almond  <ralmond@cherry.local>
+
+	* R/StudentRec.R (newSR): added timestamp argument. 
+
+2021-12-29  Russell Almond  <ralmond@cherry.local>
+
+	* R/Runners.R (doRunrun): Changed the protocol of doRunrun to use
+	a null EAeng.local$dburi to indicate that the NDB engine should be
+	built.
+	
+
 2021-08-16  Russell Almond  <ralmond@cherry.local>
 
 	* R/Evidence.R (EvidenceSet): Added "sender" field to parse list.

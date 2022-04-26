@@ -144,29 +144,33 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   dburi <- EAeng.local$dburi
 
   flog.info("Building and configuring engine.")
-  listeners <- lapply(EA.config$listeners, buildListener,appid,dburi)
-  names(listeners) <- sapply(listeners,listenerName)
-
 
   EAeng.params <- c(EA.config$EAEngine,
                     EAeng.local[setdiff(names(EAeng.local),
                                         names(EA.config$EAEngine))])
   ## Force to character, JSON leave as list.
   EAeng.params$histNodes <- as.character(EAeng.params$histNodes)
-  EAeng.params$listenerSet <-
-    withFlogging({
-      ListenerSet(sender= sub("<app>",sappid,EA.config$sender),
-                  dbname=EAeng.local$dbname, dburi=EAeng.local$dburi,
-                  listeners=listeners,admindbname=EAeng.local$admindbname,
-                  colname=EA.config$lscolname)
-    }, context="Building listener set.")
-  if (is(EAeng.params$listenerSet,'try-error')) {
-    flog.fatal("Could not build listener set: %s",EAeng.params$listenerSet)
-    stop(EAeng.params$listenerSet)
-  }
-  if (nchar(logfile)>0L) {
+
+  if (is.null(dburi)) {
+    EAeng.params$listenerSet <- NULL # Listener set not used
+  } else {
+    listeners <- lapply(EA.config$listeners, buildListener,appid,dburi)
+    names(listeners) <- sapply(listeners,listenerName)
+    EAeng.params$listenerSet <-
+      withFlogging({
+        ListenerSet(sender= sub("<app>",sappid,EA.config$sender),
+                    dbname=EAeng.local$dbname, dburi=EAeng.local$dburi,
+                    listeners=listeners,admindbname=EAeng.local$admindbname,
+                    colname=EA.config$lscolname)
+      }, context="Building listener set.")
+    if (is(EAeng.params$listenerSet,'try-error')) {
+      flog.fatal("Could not build listener set: %s",EAeng.params$listenerSet)
+      stop(EAeng.params$listenerSet)
+    }
+    if (nchar(logfile)>0L) {
     EAeng.params$listenerSet$registerOutput(basename(logfile),logfile,
                                               appid,"EA","log")
+    }
   }
   netman <- read.csv(file.path(config.dir,netdir,
                              EA.config$EAEngine$manifestFile),
@@ -179,7 +183,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
       },context="Building Network Warehouse")
   EAeng.params$app <- appid
   eng <- withFlogging({
-    do.call(ifelse(EAeng.local$dburi=="",BNEngineNDB,BNEngineMongo),
+    do.call(ifelse(is.null(dburi),BNEngineNDB,BNEngineMongo),
             EAeng.params)
   }, context="Constructing Engine.")
   if (is(eng,'try-error')) {
@@ -202,7 +206,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   },context="Configuring engine.")
   ## Currently continuing anyway.  Is this the right thing to do?
 
-  if (dburi != "" && !noprep) {
+  if (!is.null(dburi) && !noprep) {
     flog.info("Preparing Database.")
 
     ## Clearning

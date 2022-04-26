@@ -147,7 +147,7 @@ logEvidence <- function (eng,rec,evidMess) {
 }
 
 accumulateEvidence <- function(eng,rec,evidMess, debug=0) {
-  withFlogging({
+  result <- withFlogging({
     rec1 <- updateRecord(rec,evidMess)
     rec1 <- updateSM(eng,rec1,evidMess, debug)
     if (interactive() && debug>1) utils::recover()
@@ -161,6 +161,8 @@ accumulateEvidence <- function(eng,rec,evidMess, debug=0) {
   },evidence=evidMess,
   context=sprintf("Proccesing %s for user %s, seqno %d",
                   context(evidMess),uid(evidMess),seqno(evidMess)))
+  flog.trace("Class of result is %s",class(result))
+  result
 }
 
 updateSM <- function (eng,rec,evidMess, debug=0) {
