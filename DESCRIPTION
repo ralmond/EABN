@@ -10,7 +10,7 @@ Authors@R:
            comment = c(ORCID = "0000-0002-8876-9337"))
 Author: Russell Almond
 Maintainer: Russell Almond <ralmond@fsu.edu>
-Depends: R (>= 3.0), methods, Peanut (>= 0.8), Proc4 (>= 0.3),
+Depends: R (>= 3.0), methods, Peanut (>= 0.8), Proc4 (>= 0.6),
 Imports: futile.logger, mongolite, jsonlite
 Suggests:  RNetica, PNetica,
    knitr, rmarkdown, tidyr

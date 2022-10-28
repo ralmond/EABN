@@ -6,8 +6,7 @@
 ## setClassUnion("PnetOrNull",c("Pnet","NULL"))
 
 setClass("StudentRecord",
-         slots=c("_id"="character",
-                 app="character",
+         slots=c(app="character",
                  uid="character",
                  context="character",
                  evidence="character",
@@ -17,7 +16,8 @@ setClass("StudentRecord",
                  seqno="integer",
                  stats="list",
                  hist="list",
-                 prev_id="character"))
+                 prev_id="character"),
+         contains="MongoRec")
 
 setMethod("app","StudentRecord", function(x) x@app)
 setMethod("uid","StudentRecord", function(x) x@uid)
@@ -337,7 +337,8 @@ defaultSR <- function(x) x$defaultSR
 
 setGeneric("getSR", function (srs,uid,ser="") standardGeneric("getSR"))
 setGeneric("saveSR", function (srs,rec) standardGeneric("saveSR"))
-setGeneric("newSR", function (srs,uid,timestamp=Sys.time())
+setGeneric("newSR", function (srs,uid,timestamp=Sys.time(),
+                              keep=FALSE, delete=FALSE)
   standardGeneric("newSR"))
 setGeneric("clearSRs", function(srs) standardGeneric("clearSRs"))
 
@@ -374,10 +375,13 @@ setMethod("saveSR", c("StudentRecordSet","ANY"), function (srs,rec) {
 })
 
 setMethod("newSR", c("StudentRecordSet","ANY"),
-          function (srs,uid,timestamp=Sys.time()) {
+          function (srs,uid,timestamp=Sys.time(), keep=FALSE, delete=FALSE) {
   flog.debug("Making new student record for  %s", uid)
   dsr <- srs$defaultSR
   oldnet <- WarehouseFetch(srs$warehouse,as.legal.name(srs$warehouse,uid))
+  oldname <- "Not a Pnet"
+  if (is.Pnet(oldnet)) oldname <- PnetName(oldnet)
+  flog.debug("Found old network %s (%s)", toString(oldnet), oldname)
   if (isTRUE(is.valid(srs$warehouse,oldnet))) {
     flog.warn("Removing old student model named %s.",PnetName(oldnet))
     WarehouseFree(srs$warehouse,PnetName(oldnet))
