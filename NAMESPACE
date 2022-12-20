@@ -13,7 +13,8 @@ export(StudentRecord, sm, "sm<-", stats, evidence, "evidence<-",
        statNames, histNames, stat,
        history, parseStudentRecord, parseStats, stats2json, unparseStats,
        fetchSM, unpackSM, updateRecord,
-       StudentRecordSet, getSR, saveSR, newSR, clearSRs)
+       StudentRecordSet, getSR, saveSR, newSR, clearSRs,
+       getIssues, logIssue)
 exportClasses(StudentRecord,StudentRecordSet)
 exportMethods(evidence, "evidence<-",
               sm, stats, app, uid, context, timestamp, mess,

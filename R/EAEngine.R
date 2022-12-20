@@ -16,7 +16,8 @@ BNEngine <-
                   ## These fields are included as they are related to the
                   ## configuration.
                   manifestFile="character",
-                  statFile="character"
+                  statFile="character",
+                  errorRestart="character"
               ),
               methods = list(
                   stats = function() {
@@ -90,7 +91,13 @@ BNEngine <-
                   },
                   show = function() {
                     methods::show(paste("<EABN: ",app,">"))
-                  }))
+                  },
+                  getRestart = function() {
+                    errorRestart
+                  },
+                  setRestart = function(newRestart=c("stopProcessing","checkNoScore","scoreAvailable"))
+                    errorRestart <<- newRestart
+                  ))
 
 ## warehouseObj <<- BNWarehouse(manifest=data.frame(),
 ##                              session=session,

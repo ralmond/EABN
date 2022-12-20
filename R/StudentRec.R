@@ -15,6 +15,7 @@ setClass("StudentRecord",
                  smser="list",
                  seqno="integer",
                  stats="list",
+                 issues="character",
                  hist="list",
                  prev_id="character"),
          contains="MongoRec")
@@ -44,6 +45,17 @@ setMethod("stat",c("StudentRecord","character"),
 setMethod("histNames","StudentRecord", function (sr) names(sr@hist))
 setMethod("history",c("StudentRecord","character"),
           function (sr, name) sr@hist[[name]])
+
+setGeneric("getIssues", function(sr) standardGeneric("getIssues"))
+setGeneric("logIssue", function(sr,issue) standardGeneric("logIssue"))
+setMethod("getIssues",c("StudentRecord"), function (sr) sr@issues)
+setMethod("logIssue",c("StudentRecord","character"),
+          function (sr, issue) {
+            sr@issues <- c(sr@issues,issue)
+            sr})
+setMethod("logIssue",c("StudentRecord","ANY"),
+          function (sr, issue) setMethod(sr,as.character(issue)))
+
 
 
 setGeneric("sm",function(x) standardGeneric("sm"))
@@ -75,10 +87,16 @@ StudentRecord <- function(uid,context="",timestamp=Sys.time(),
                           smser=list(),sm=NULL,stats=list(),hist=list(),
                           evidence=character(),
                           app="default",seqno=-1L, prev_id=NA_character_) {
+  if (!is.null(sm)) {
+    flog.debug("Creating student record for %s with no sm.", uid)
+  } else {
+    flog.debug("Creating student record for %s with sm name %s",
+               uid, PnetName(sm))
+  }
   new("StudentRecord",app=app,uid=uid,context=context,
       timestamp=timestamp,smser=smser,evidence=evidence,
       sm=sm,stats=stats,hist=hist,
-      seqno=seqno,"_id"=NA_character_,
+      seqno=seqno,"_id"=NA_character_,issues=character(),
       prev_id=prev_id)
 }
 
@@ -380,15 +398,20 @@ setMethod("newSR", c("StudentRecordSet","ANY"),
   dsr <- srs$defaultSR
   oldnet <- WarehouseFetch(srs$warehouse,as.legal.name(srs$warehouse,uid))
   oldname <- "Not a Pnet"
-  if (is.Pnet(oldnet)) oldname <- PnetName(oldnet)
-  flog.debug("Found old network %s (%s)", toString(oldnet), oldname)
+  if (is.Pnet(oldnet)) {
+    oldname <- PnetName(oldnet)
+    flog.debug("Found old network %s (%s)", toString(oldnet), oldname)
+  }
   if (isTRUE(is.valid(srs$warehouse,oldnet))) {
     flog.warn("Removing old student model named %s.",PnetName(oldnet))
     WarehouseFree(srs$warehouse,PnetName(oldnet))
   }
+  bn <- WarehouseCopy(srs$warehouse,sm(dsr),
+                      as.legal.name(srs$warehouse,uid))
+  flog.debug("Created new Bayes Net %s (%s)", toString(bn), PnetName(bn))
+  #recover()
   rec <- StudentRecord(uid=uid,context(dsr),timestamp=timestamp,
-                       sm=WarehouseCopy(srs$warehouse,sm(dsr),
-                                        as.legal.name(srs$warehouse,uid)),
+                       sm=bn,
                        stats=stats(dsr),hist=dsr@hist,app=app(srs),
                        seqno=0L)
   saveRec(rec,srs$recorddb())
