@@ -95,8 +95,10 @@ BNEngine <-
                   getRestart = function() {
                     errorRestart
                   },
-                  setRestart = function(newRestart=c("stopProcessing","checkNoScore","scoreAvailable"))
-                    errorRestart <<- newRestart
+                  setRestart = function(newRestart=c("checkNoScore",
+                                                     "stopProcessing",
+                                                     "scoreAvailable"))  
+                    errorRestart <<- newRestart[1]
                   ))
 
 ## warehouseObj <<- BNWarehouse(manifest=data.frame(),

@@ -62,15 +62,23 @@ setGeneric("sm",function(x) standardGeneric("sm"))
 setMethod("sm","StudentRecord", function(x) x@sm)
 setGeneric("sm<-",function(x,value) standardGeneric("sm<-"))
 setMethod("sm<-","StudentRecord", function(x,value) {
-  if (!is.null(value) && !is.Pnet(value))
-    stop("Must be a 'Pnet' or null.")
+  if (!is.null(value)) {
+    if (!is.Pnet(value)) {
+      stop("Must be a 'Pnet' or null.")
+    } else {
+      x@smser <- PnetSerialize(value)
+    }
+  } else {
+    x@smser <- NULL
+  }
   x@sm <- value
   x
-  })
+})
+
 fetchSM <- function (sr, warehouse) {
   sm(sr)<- WarehouseFetch(warehouse,as.legal.name(warehouse,uid(sr)))
   if (is.null(sm(sr)) || !is.valid(warehouse,sm(sr))) {
-    sm(sr) <- unpackSM(sr,warehouse)
+    sr@sm <- unpackSM(sr,warehouse)
   }
   sr
 }
@@ -116,6 +124,8 @@ setMethod("show","StudentRecord",function(object) {
   cat(toString(object),"\n")
 })
 
+
+
 setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) {
   ml$"_id" <- NULL
   ml$class <- NULL
@@ -126,7 +136,9 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
   ml$timestamp <- unboxer(ml$timestamp) # Auto_unbox bug.
   ## Serialize SM if necessary.
   if (!is.null(obj@sm)) {
-    smo <- PnetSerialize(obj@sm)
+    smo <- obj@smser
+    if (length(obj@smser) == 0L) 
+      smo <- PnetSerialize(obj@sm)
     smo$data <- base64_enc(smo$data)
     ml$sm <- smo
   } else {
@@ -354,6 +366,8 @@ setMethod("app","StudentRecordSet", function(x) x$app)
 defaultSR <- function(x) x$defaultSR
 
 setGeneric("getSR", function (srs,uid,ser="") standardGeneric("getSR"))
+setGeneric("revertSM", function (srs,uid,rec,keepIssues=TRUE)
+  standardGeneric("revertSM"))
 setGeneric("saveSR", function (srs,rec) standardGeneric("saveSR"))
 setGeneric("newSR", function (srs,uid,timestamp=Sys.time(),
                               keep=FALSE, delete=FALSE)
@@ -380,6 +394,29 @@ function (srs,uid,ser=NULL) {
   }
   rec
 })
+
+setMethod("revertSM", c("StudentRecordSet","ANY","StudentRecord","ANY"),
+          function (srs,uid,rec,keepIssues=TRUE) {
+  oldIssues <- getIssues(rec)
+  if (is.Pnet(sm(rec)) && isTRUE(is.valid(srs$warehouse,sm(rec)))) {
+    flog.warn("Removing old student model named %s.",PnetName(sm(rec)))
+    WarehouseFree(srs$warehouse,PnetName(sm(rec)))
+  }
+  nname <- as.legal.name(srs$warehouse,uid)
+  if (length(rec@smser) > 0L) {
+    bn <- WarehouseUnpack(srs$warehouse,rec@smser)
+    flog.debug("Reverting Bayes net %s (%s) to serialized verision.",
+               toString(bn),PnetName(bn))
+  } else {
+    bn <- WarehouseCopy(srs$warehouse,sm(srs$defaultSR),nname)
+    flog.debug("Created new Bayes Net %s (%s)", toString(bn), PnetName(bn))
+  }
+  sm(rec) <- bn
+  if (keepIssues) rec@issues <- union(oldIssues,rec@issues)
+  rec
+})
+
+
 
 setMethod("saveSR", c("StudentRecordSet","ANY"), function (srs,rec) {
   if (!is.null(srs$recorddb())) {

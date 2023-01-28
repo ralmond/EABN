@@ -1,6 +1,29 @@
+2022-12-29  Russell Almond  <ralmond@cherry.local>
+
+	* R/StudentRec.R (revertSM): New method for canceling update of
+	Student Record.  This reverts the record to the last serialized
+	version.
+	(as.jlist c("StudentRecord","list")): Now assume that the net is
+	already serialized.
+	(sm<- c("StudentRecord")):  Now sets the serialized model as well.
+
+	** Issue (saveSR):  saveRec currently does not update serialized
+	model. 
+
+	* R/EngineGears.R (updateSM): Added continuation and restart
+	logic:  When [Netica] error is encountered processing observable,
+	then invoke the logAndContinue restart.  This will log the message
+	and either `break` (`stopProcessing`) or continue (`next`).  When
+	the loop is finished (or exited), if there was an error and the
+	restart is not `scoreAvailable`, the student model will be rolled
+	back.
+	(revertSR): Rolls back the student model to what it was at the
+	beginnng of processing.
+
 2022-12-13  Russell Almond  <ralmond@cherry.local>
 
-	* R/StudentRec.R: Added `issues` field to student Record and added `logIssues` and `getIssues` method.
+	* R/StudentRec.R: Added `issues` field to student Record and added
+	`logIssues` and `getIssues` method. 
 
 2022-06-25  Russell Almond  <ralmond@cherry.local>
 

@@ -18,7 +18,7 @@ BNEngineMongo <-
                              dbname="EARecords",admindbname="Proc4",
                              profModel=character(),waittime=.25,
                              statistics=list(), histNodes=character(),
-                             processN=Inf,
+                             processN=Inf,errorRestart="checkNoScore",
                              ...) {
                       if (is.null(warehouse))
                         stop("Null warehouse.")
@@ -32,7 +32,8 @@ BNEngineMongo <-
                                 statistics=statistics,
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
-                                ...)
+                                errorRestart=errorRestart[1], 
+                               ...)
                   },
                   manifestdb = function() {
                     if (is.null(manifestDB)) {
@@ -165,10 +166,13 @@ BNEngineMongo <- function(app="default",warehouse,listenerSet=NULL,
                      dburi="mongodb://localhost", dbname="EARecords",
                      processN=Inf,
                      admindbname="Proc4", waittime=.25, profModel=character(),
+                     errorRestart=c("checkNoScore", "stopProcessing",
+                       "scoreAvailable"),
                      ...) {
   ## Drop ... from new() so we can quietly delete unused arugments.
   new("BNEngineMongo",app=app,listenerSet=listenerSet,
       warehouse=warehouse,dburi=dburi, dbname=dbname,processN=processN,
-      admindbname=admindbname,waittime=waittime,profModel=profModel)
+      admindbname=admindbname,waittime=waittime,profModel=profModel,
+      errorRestart=errorRestart[1])
 }
 

@@ -20,6 +20,7 @@ BNEngineNDB <-
                              evidenceQueue=list(),waittime=0,
                              processN=Inf,statmat=data.frame(),
                              activeTest="EAActive",
+                             errorRestart="checkNoScore", 
                              ...) {
                       if (is.null(warehouse))
                         stop("Null warehouse.")
@@ -31,6 +32,7 @@ BNEngineNDB <-
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
                                 activeTest=activeTest,
+                                errorRestart=errorRestart[1], 
                                 ...)
                   },
                   fetchStats = function() {
@@ -96,12 +98,15 @@ BNEngineNDB <- function(app="default",warehouse, listenerSet=NULL,
                      manifest=data.frame(),processN=Inf,
                      waittime=.25, profModel=character(),
                      statmat=data.frame(),evidenceQueue=list(),
-                     activeTest="EAActive",...) {
+                     activeTest="EAActive",
+                     errorRestart=c("checkNoScore", "stopProcessing",
+                       "scoreAvailable"),
+                      ...) {
   ## Removed ... from new, so we can silently drop unused arguments.
   new("BNEngineNDB",app=app,warehouse=warehouse,
       listenerSet=listenerSet,manifest=manifest,processN=processN,
       waittime=waittime,profModel=profModel,
-      activeTest=activeTest)
+      activeTest=activeTest,errorRestart=errorRestart[1])
 }
 
 setMethod("evidence","BNEngineNDB",

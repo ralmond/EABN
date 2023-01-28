@@ -1,4 +1,4 @@
-###  Evedence -- A set of evidence coming from the EI process.
+###  Evidence -- A set of evidence coming from the EI process.
 ###  This roughy follow a combination of the xAPI format.
 
 setClass("EvidenceSet",

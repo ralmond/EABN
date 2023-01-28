@@ -66,6 +66,15 @@ getRecordForUser <- function(eng,uid,srser=NULL) {
   rec
 }
 
+revertSR <- function (eng,rec) {
+  uid <- uid(rec)
+  flog.info("Reverting student model for %s.",uid)
+  rec <- revertSM(eng$studentRecords(),uid,rec,TRUE)
+  sm(rec) <- PnetCompile(sm(rec))
+  rec
+}
+
+
 #############################################
 ## Statistics
 
@@ -188,21 +197,56 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
   PnetCompile(sm(rec))
   flog.trace("Evidence:",details(evidMess),capture=TRUE)
   if (interactive() && debug>1) utils::recover()
-
+  ## This variable will be set to the first error.  Need to for errors
+  ## after main loop. 
+  anErr <- NULL
+  issues <- character()
   for (oname in names(observables(evidMess))) {
-    if(!is.null(obs[[oname]])) {
-      flog.trace("Processing observable %s.",oname)
-      oval <- observables(evidMess)[[oname]]
-      if (is.null(oval) || is.na(oval) || length(oval)==0L) {
-        flog.trace("Observable %s is null/NA, skipping.", oname)
+    continue <-tryCatch({
+      if(!is.null(obs[[oname]])) {
+        flog.trace("Processing observable %s.",oname)
+        oval <- observables(evidMess)[[oname]]
+        if (is.null(oval) || is.na(oval) || length(oval)==0L) {
+          flog.trace("Observable %s is null/NA, skipping.", oname)
+        } else {
+          flog.trace("Setting observable %s to %s",oname,as.character(oval))
+          PnodeEvidence(obs[[oname]]) <- oval
+        }
       } else {
-        flog.trace("Setting observable %s to %s",oname,as.character(oval))
-        PnodeEvidence(obs[[oname]]) <- oval
+        flog.trace("Skipping observable %s:  not a node.",oname)
       }
-    } else {
-      flog.trace("Skipping observable %s:  not a node.",oname)
+      TRUE ## Continue
+    },
+    ## Do I need more exceptions?
+    error=function(e) {
+      issue <- paste("While processing ", emName,
+                          ", Observable ", oname,
+                     ": got error: ", conditionMessage(e), ".")
+      flog.error(issue)
+      list(e=e,issue=issue)
+    })
+    if (isTRUE(continue)) next
+    else {
+      ## An issue occurred.
+      if (is.null(anErr)) anErr <- continue$e
+      issues <- c(issues,continue$issue)
+      flog.trace("Found %d issues",length(issues))
+      if(eng$getRestart()=="stopProcessing") break
     }
   }
+  ## Now check for errors:
+  if (!is.null(anErr) && eng$getRestart() != "scoreAvailable") {
+    ## Back out changes to student model.
+    rec <- revertSR(eng,rec)
+    flog.debug("%d issues found while processing evidence for level %s.",
+             length(issues),context(evidMess))
+    rec <- logIssue(rec,issues)
+    if (eng$getRestart() == "stopProcessing")     
+      signalCondition(anErr)
+    else
+      return (rec)
+  }
+  ## Continue processing
   if (flog.threshold()=="TRACE") {
     for (ob in obs) {
       flog.trace("Observable %s has value %s.",PnodeName(ob),
@@ -211,7 +255,11 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
   }
   if (interactive() && debug>0) utils::recover()
   PnetDetach(sm(rec),em)
-  PnetCompile(sm(rec))
+  ## This updates the serialized models
+  sm(rec) <- PnetCompile(sm(rec))
+  flog.debug("%d issues found while processing evidence for level %s.",
+             length(issues),context(evidMess))
+  rec <- logIssue(rec,issues)
   rec
 }
 

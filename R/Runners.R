@@ -3,7 +3,8 @@
 trimTable <- function (tab, lastcol="Description") {
     nlcol <- which(colnames(tab)==lastcol)
     result <- tab[,1:nlcol]
-    ## Need this as leading/trailing ws in column names is invivible in Google sheets (& M$ Excel)
+    ## Need this as leading/trailing ws in column names is invivible
+    ## in Google sheets (& M$ Excel)
     names(result) <- trimws(names(result),whitespace="[ \t\r\n.]")
     result
 }
@@ -203,7 +204,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
                                   EA.config$EAEngine$statFile),
                         stringsAsFactors=FALSE,strip.white=TRUE)
     configStats(eng,stattab)
-  },context="Configuring engine.")
+  }, context="Configuring engine.")
   ## Currently continuing anyway.  Is this the right thing to do?
 
   if (!is.null(dburi) && !noprep) {
