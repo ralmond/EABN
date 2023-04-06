@@ -140,7 +140,7 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
     if (length(obj@smser) == 0L) 
       smo <- PnetSerialize(obj@sm)
     smo$data <- base64_enc(smo$data)
-    ml$sm <- smo
+    ml$sm <- unboxer(smo)
   } else {
     ml$sm <- NULL
   }
@@ -172,9 +172,9 @@ parseStudentRecord <- function (rec) {
   else rec$seqno <- as.integer(rec$seqno)
   if (!is.null(rec$sm)) {
     smo <- list()
-    smo$name <- as.character(rec$sm[["name"]])
-    smo$data <- base64_dec(as.character(rec$sm[["data"]]))
-    smo$factory <- as.character(rec$sm[["factory"]])
+    smo$name <- unlist(as.character(rec$sm[["name"]]))
+    smo$data <- unlist(base64_dec(as.character(rec$sm[["data"]])))
+    smo$factory <- unlist(as.character(rec$sm[["factory"]]))
   } else {
     smo <- NULL
   }

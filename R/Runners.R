@@ -56,8 +56,9 @@ doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
   }, context=sprintf("Loading file %s.csv.",EA.tables$NetsName))
 
   nodeman <- withFlogging({
-    trimTable(read.csv(sprintf(templateURL,EA.tables$NodesName),
-                       stringsAsFactors=FALSE,strip.white=TRUE),"UpperBound")
+    tab1 <- trimTable(read.csv(sprintf(templateURL,EA.tables$NodesName),
+                               stringsAsFactors=FALSE,strip.white=TRUE),
+                      "UpperBound")
   }, context=sprintf("Loading file %s.csv.",EA.tables$NodesName))
 
   Omega <- withFlogging({
@@ -143,6 +144,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   netdir <- ifelse(!is.null(EA.config$netdir),EA.config$netdir,"nets")
   sappid <- basename(appid)
   dburi <- EAeng.local$dburi
+  if (dburi == "") dburi <- NULL
 
   flog.info("Building and configuring engine.")
 

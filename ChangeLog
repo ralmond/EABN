@@ -1,3 +1,7 @@
+2023-04-05  Russell Almond  <ralmond@cherry>
+
+	* R/StudentRec.R (StudentRecord): Added unboxer to smo.
+
 2022-12-29  Russell Almond  <ralmond@cherry.local>
 
 	* R/StudentRec.R (revertSM): New method for canceling update of
