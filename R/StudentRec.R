@@ -76,9 +76,11 @@ setMethod("sm<-","StudentRecord", function(x,value) {
 })
 
 fetchSM <- function (sr, warehouse) {
-  sm(sr)<- WarehouseFetch(warehouse,as.legal.name(warehouse,uid(sr)))
-  if (is.null(sm(sr)) || !is.valid(warehouse,sm(sr))) {
-    sr@sm <- unpackSM(sr,warehouse)
+  sm <- WarehouseFetch(warehouse,as.legal.name(warehouse,uid(sr)))
+  if (is.null(sm) || !is.valid(warehouse,sm)) {
+    sm(sr) <- unpackSM(sr,warehouse)
+  } else {
+    sm(sr) <- sm
   }
   sr
 }
