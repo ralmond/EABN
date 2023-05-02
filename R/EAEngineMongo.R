@@ -3,12 +3,12 @@ BNEngineMongo <-
               c(
                   dburi="character",
                   dbname="character",
-                  manifestDB = "MongoDB",
-                  evidenceDB = "MongoDB",
-                  statDB = "MongoDB",
-                  histNodesDB = "MongoDB",
+                  manifestDB = "ANY",
+                  evidenceDB = "ANY",
+                  statDB = "ANY",
+                  histNodesDB = "ANY",
                   admindbname="character",
-                  adminDB="MongoDB"
+                  adminDB="ANY"
               ),
               contains="BNEngine",
               methods = list(
