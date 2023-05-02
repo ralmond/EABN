@@ -24,7 +24,7 @@ BNEngineMongo <-
                         stop("Null warehouse.")
                       flog.info("Connecting to database %s/%s\n",dburi,dbname)
                       callSuper(app=app,dburi=dburi,dbname=dbname,
-                                warehouseObj=warehouse,statDB=NULL,
+                                warehouse=warehouse,statDB=NULL,
                                 manifestDB=NULL, evidenceDB=NULL,
                                 srs=NULL,listenerSet=listenerSet,
                                 histNodesDB=NULL,

@@ -20,6 +20,20 @@ BNEngine <-
                   errorRestart="character"
               ),
               methods = list(
+                  initialize = function(app=character(),profModel=character(),
+                                        statistics=list(),histnodes=character(),
+                                        warehouse=NULL,waittime=.25, processN=Inf,
+                                        errorRestart="checkNoScore",listenerSet=NULL,...) {
+                      if (is.null(warehouse))
+                          stop("Warehouse must be non-null.")
+                      callSuper(app=app,warehouseObj=warehouse,
+                                srs=NULL,listenerSet=listenerSet,
+                                statistics=statistics,
+                                histNodes=histNodes,profModel=profModel,
+                                waittime=waittime, processN=processN,
+                                errorRestart=errorRestart[1], 
+                                ...)
+                  },
                   stats = function() {
                     if (length(statistics) == 0L)
                       configStats(.self)

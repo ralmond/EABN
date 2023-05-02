@@ -4,6 +4,8 @@ library(EABN)
 appStem <- cmdArg("app",NULL)
 if (FALSE) {
   appStem <- "userControl"
+  appStem <- "linear"
+  appStem <- "adaptive"
 }
 
 source("/usr/local/share/Proc4/EAini.R")
@@ -29,5 +31,5 @@ for (ext in EA.config$extensions) {
   }
 }
 
-rebuildOutput(app,EA.config,EAeng.local,outdir)
+rebuildOutputs(app,EA.config,EAeng.local,outdir)
 
