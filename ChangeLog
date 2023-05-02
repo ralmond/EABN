@@ -1,3 +1,8 @@
+2023-04-15  Russell Almond  <ralmond@pei>
+
+	* R/StudentRec.R (fetchSM): Fixed a bug trying to set null value to SM field.
+	
+
 2023-04-05  Russell Almond  <ralmond@cherry>
 
 	* R/StudentRec.R (StudentRecord): Added unboxer to smo.
