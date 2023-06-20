@@ -183,7 +183,8 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
       PNetica::BNWarehouse(manifest=netman,
                            session=sess,key="Name",
                            address=file.path(config.dir,netdir))
-      },context="Building Network Warehouse")
+    },context="Building Network Warehouse")
+  flog.debug("Warehouse is a %s.",class(EAeng.params$warehous))
   EAeng.params$app <- appid
   eng <- withFlogging({
     do.call(ifelse(is.null(dburi),BNEngineNDB,BNEngineMongo),

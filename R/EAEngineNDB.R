@@ -24,9 +24,8 @@ BNEngineNDB <-
                              ...) {
                       if (is.null(warehouse))
                         stop("Null warehouse.")
-                      callSuper(app=app,warehouseObj=warehouse,
+                      callSuper(app=app,warehouse=warehouse,
                                 srs=NULL,listenerSet=listenerSet,
-                                warehouseObj=NULL,
                                 evidenceQueue=evidenceQueue,
                                 statistics=statistics,statmat=statmat,
                                 histNodes=histNodes,profModel=profModel,
