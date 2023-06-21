@@ -98,9 +98,9 @@ setMethod("app","BNEngine",function (x) x$app)
 
 ## Listener notification.
 setMethod("notifyListeners","BNEngine",
-           function(sender,mess) {
+           function(sender,message) {
              if (!is.null(sender$listenerSet))
-               sender$listenerSet$notifyListeners(mess)
+               sender$listenerSet$notifyListeners(message)
            })
 
 setGeneric("fetchNextEvidence",
