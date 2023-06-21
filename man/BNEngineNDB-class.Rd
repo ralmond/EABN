@@ -72,14 +72,21 @@ showClass("BNEngineNDB")
 \keyword{classes}
 \section{Activation}{
 
-  When the \code{\link{mainLoop}} runs out of evidence sets to process,
-  it checks the \code{is.active()} method of the engine.  If this
-  returns, false, it stops.
+  At the start of each iteration of the \code{\link{mainLoop}}, it
+  checks \code{eng$shouldHalt()} method. If this returns \code{TRUE},
+  then execution is immediately halted.  When the queue is empty, it
+  checks the \code{eng$stopWhenFinished()} method.  If this returns
+  true, then the main loop also terminates.
 
-  For the \code{BNEngineNDB} this checks the existance of the file
-  \code{activeTest}.  If this file exists, the engine is considered
-  active.  Deleting this file will cause the engine to become inactive
-  and stop after it finishes processing existing events.
+  In the no database version, the process communicates with the rest of
+  the system by checking the file referenced in the \code{activeTest}
+  field.  The \code{eng$activate()} creates this file with the extension
+  \sQuote{.running}.  Renaming the file to have the extension
+  \code{.finish} will cause \code{eng$stopWhenFinished()} to return
+  true, that is the \code{\link{mainLoop}} will finish when the queue is
+  empty.  Renaming the file to have the extension \code{.halt} will
+  cause \code{eng$shouldHalt()} to return true, and \code{mainLoop} will
+  stop when it finishes processing the current event.
 
 
 }
@@ -127,12 +134,20 @@ showClass("BNEngineNDB")
 }
 \section{Class-Based Methods}{
   \describe{
+    \item{\code{activate()}:}{Creates the \code{activeTest} to indicate
+      that the process is running.}
+    \item{\code{deactivate()}:}{Deletes the \code{activeTest} file to
+      indicate that the process is no longer running.}
+    \item{\code{shouldHalt()}:}{This function checks the
+      \code{activeTest} file to see whether or not the flag is set to
+      cause the process to halt after processing the current record.. }
+    \item{\code{stopWhenFinished()}:}{ This function checks the 
+      \code{activeTest} file database to see whether or not the flag is
+      set to cause the process to stop when the event queue is empty. } 
     \item{\code{studentRecords()}:}{ Returns the
       \code{\linkS4class{StudentRecordSet}} associated with this engine. }
     \item{\code{fetchStats()}:}{ Fetches the statistics marked in the
       database configuration. }
-    \item{\code{activate()}:}{ Creates the \code{activeTest} file to
-      activate the engine.}
     \item{\code{fetchStats()}:}{ Fetches the statistics or information in
       the \code{statmat} field.}
     \item{\code{initialize(app, warehouse, listeners, profModel,
@@ -146,8 +161,6 @@ showClass("BNEngineNDB")
       the queue.}
     \item{\code{saveStats(statmat)}:}{ This saves the statistic table to
       the internal field.}
-    \item{\code{isActivated()}:}{ This checks for the existance of the
-      field in the \code{activeTets} field.}
     \item{\code{evidenceSets()}:}{ This returns NULL }
     \item{\code{show()}:}{ This produces a printable summary. }
   }

@@ -13,11 +13,13 @@
 
 }
 \usage{
-mainLoop(eng)
+mainLoop(eng, N=NULL)
 }
 \arguments{
   \item{eng}{An \code{\linkS4class{BNEngine}} which will handle the
     evidence sets.}
+  \item{N}{If supplied, this should be an integer.  The loop will then
+    handle that many cycles before quitting.}
 }
 \details{
 
@@ -50,25 +52,8 @@ mainLoop(eng)
   First, if the event queue is empty, the process sleeps for a time
   given by \code{eng$waittime} and then checks the queue again.  At the
   same time, it checks status of the active flag for the process using
-  the \code{eng$isActivated()} call.
-
-  For the Mongo implementation, \code{eng$isActivated()} checks the
-  \code{active} field of the record corresponding to \code{app(eng)} in
-  the collection \code{AuthorizedApps} in the database \code{Proc4}.
-  Setting that field to false manually will result in the
-  \code{mainLoop} terminating when the queue is empty.  As R is running
-  in server mode when this happens, this often needs to be done using an
-  external process.  The following command issues from the Mongo shell
-  will shut down the server for an application containing the string
-  "appName" as part of its name.
-  
-  \code{db.AuthorizedApps.update(\{app:\{$regex:"appName"\}\},
-    \{$set:\{active:false\}\});}
-
-  For the no database implementation, \code{eng$isActivated()} checks
-  for the existance of the file named in the \code{activeTest} field.
-  Deleting that file will have the same effect as setting the active
-  field to false in the database version.
+  the \code{eng$stopWhenFinished()} call.  If this returns true and the
+  queue is empty, processing will terminate.
 
   To facilitate testing, the field \code{eng$processN} can be set to a
   finite value.  This number is decremented at every cycle, and when
@@ -77,6 +62,52 @@ mainLoop(eng)
   \code{eng$processN} to an infinite value, will result in an infinite
   loop that can only be stopped by using the active flag (or
   interrupting the process).
+
+
+}
+\section{Activation}{
+
+  When the loop begins, it calls the \code{eng$activate()} method to
+  mark the engine as active.  When the loop finishes (outside of the
+  main try/catch block, so it should always return), it calls the
+  \code{eng$deactivate()} method to signal that the engine has
+  terminated.
+
+  External processes can signal the engine through the
+  \code{eng$shouldHalt()} and \code{eng$stopWhenFinished()}.  The former
+  is checked every iteration, and the main loop halts when it becomes
+  true.  This allows for an immediate stop when needed.  The latter is
+  checked only when the queue is empty and details whether or not the
+  process should continue to wait for more messages in the queue.
+
+  \bold{Database Engine.} For the Mongo engine
+  (\code{\linkS4class{BNEngineMongo}}) the 
+  communication channel is the \code{AuthorizedApps} collection in the
+  administrative database.  In particular, the \code{EAsignal} field is
+  read by both methods.  The \code{eng$activate()} method changes the
+  value of that field to \dQuote{Running}.  Changing the value of the
+  field to \dQuote{Halt} will cause the \code{eng$shouldHalt()} to be
+  true triggering a halt before processing the next evidence set.
+  Changing the value of that field to \dQuote{Finish} will
+  \code{eng$stopWhenFinished()} to be true, causing the loop to stop
+  then the queue is empty.
+
+  The following command issues from the Mongo shell
+  will shut down the server for an application containing the string
+  "appName" as part of its name (note \dQuote{Halt} could be replaced
+  with \dQuote{finish}).
+  
+  \code{db.AuthorizedApps.update(\{app:\{$regex:"appName"\}\},
+    \{$set:\{"EAsignal":"Halt"\}\});}
+
+  \bold{No Database Engine.} For the Mongo engine
+  (\code{\linkS4class{BNEngineMongo}}) the 
+  communication channel is a file named \code{activeTest}.  The
+  name (extension) of this file is changed to produce the signals.
+  The \code{eng$activate()} method creates it with the extension
+  \code{.running}.  Changing the extension to  \code{.finish} or
+  \code{.halt} will send the appropriate signal.  The
+  \code{eng$deactive()} method removes the file.
 
 
 }

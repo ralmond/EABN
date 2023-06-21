@@ -3,12 +3,12 @@ BNEngineMongo <-
               c(
                   dburi="character",
                   dbname="character",
-                  manifestDB = "MongoDB",
-                  evidenceDB = "MongoDB",
-                  statDB = "MongoDB",
-                  histNodesDB = "MongoDB",
+                  manifestDB = "ANY",
+                  evidenceDB = "ANY",
+                  statDB = "ANY",
+                  histNodesDB = "ANY",
                   admindbname="character",
-                  adminDB="MongoDB"
+                  adminDB="ANY"
               ),
               contains="BNEngine",
               methods = list(
@@ -18,13 +18,13 @@ BNEngineMongo <-
                              dbname="EARecords",admindbname="Proc4",
                              profModel=character(),waittime=.25,
                              statistics=list(), histNodes=character(),
-                             processN=Inf,
+                             processN=Inf,errorRestart="checkNoScore",
                              ...) {
                       if (is.null(warehouse))
                         stop("Null warehouse.")
                       flog.info("Connecting to database %s/%s\n",dburi,dbname)
                       callSuper(app=app,dburi=dburi,dbname=dbname,
-                                warehouseObj=warehouse,statDB=NULL,
+                                warehouse=warehouse,statDB=NULL,
                                 manifestDB=NULL, evidenceDB=NULL,
                                 srs=NULL,listenerSet=listenerSet,
                                 histNodesDB=NULL,
@@ -32,7 +32,8 @@ BNEngineMongo <-
                                 statistics=statistics,
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
-                                ...)
+                                errorRestart=errorRestart[1], 
+                               ...)
                   },
                   manifestdb = function() {
                     if (is.null(manifestDB)) {
@@ -114,21 +115,46 @@ BNEngineMongo <-
                   },
                   admindb = function () {
                     if(is.null(adminDB))
-                      adminDB <<- mongo("AuthorizedApps",P4dbname,dburi)
+                      adminDB <<- mongo("AuthorizedApps",admindbname,dburi)
                     adminDB
+                  },
+                  activate = function() {
+                    if (length(admindb()$find(buildJQuery(app=app)))==0L) {
+                      admindb()$insert(buildJQuery(app=app,
+                                                   appStem=basename(app),
+                                                   EAactive=TRUE,
+                                                   EAsignal="running"))
+                    } else {
+                      admindb()$update(buildJQuery(app=app),
+                                    '{"$set":{"EAactive":true,"EAsignal":"running"}}')
+                    }
+                  },
+                  deactivate = function() {
+                    if (length(admindb()$find(buildJQuery(app=app)))==0L) {
+                      admindb()$insert(buildJQuery(app=app,
+                                                   appStem=basename(app),
+                                                   EAactive=FALSE))
+                    } else {
+                      admindb()$update(buildJQuery(app=app),
+                                    '{"$set":{"EAactive":false}}')
+                    }
                   },
                   isActivated = function() {
                     rec <- admindb()$find(buildJQuery(app=app),limit=1)
                     if (length(rec)==0L) return(FALSE)
-                    rec$active
+                    return (isTRUE(as.logical(rec$EAactive)))
                   },
-                  activate = function() {
-                    if (length(admindb()$find(buildJQuery(app=app)))==0L) {
-                      admindb()$insert(buildJQuery(app=app,active=TRUE))
-                    } else {
-                      admindb()$update(buildJQuery(app=app),
-                                    '{"$set":{"active":true}}')
-                    }
+                  shouldHalt = function() {
+                    rec <- admindb()$find(buildJQuery(app=app),limit=1)
+                    if (length(rec)==0L) return(FALSE)
+                    if (toupper(rec$EAsignal)=="HALT") return(TRUE)
+                    FALSE
+                  },
+                  stopWhenFinished = function() {
+                    rec <- admindb()$find(buildJQuery(app=app),limit=1)
+                    if (length(rec)==0L) return(TRUE)
+                    if (toupper(rec$EAsignal)!="RUNNING") return(TRUE)
+                    FALSE
                   },
                   show = function() {
                     methods::show(paste("<EABN: ",app,", DB:", dbname,">"))
@@ -140,10 +166,13 @@ BNEngineMongo <- function(app="default",warehouse,listenerSet=NULL,
                      dburi="mongodb://localhost", dbname="EARecords",
                      processN=Inf,
                      admindbname="Proc4", waittime=.25, profModel=character(),
+                     errorRestart=c("checkNoScore", "stopProcessing",
+                       "scoreAvailable"),
                      ...) {
+  ## Drop ... from new() so we can quietly delete unused arugments.
   new("BNEngineMongo",app=app,listenerSet=listenerSet,
       warehouse=warehouse,dburi=dburi, dbname=dbname,processN=processN,
       admindbname=admindbname,waittime=waittime,profModel=profModel,
-      ...)
+      errorRestart=errorRestart[1])
 }
 

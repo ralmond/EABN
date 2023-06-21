@@ -144,8 +144,16 @@ showClass("BNEngine")
 }
 \section{Class-Based Methods}{
   \describe{
-    \item{\code{isActivated()}:}{ This function checks the database to
-      see whether or not the flag is set to cause the process to stop. }
+    \item{\code{activate()}:}{Sets the flag to indicate that the process
+      is running.}
+    \item{\code{deactivate()}:}{Clears the flag to indicate that the process
+      is no longer running.}
+    \item{\code{shouldHalt()}:}{ This function checks the database to
+      see whether or not the flag is set to cause the process to halt
+      after processing the current record.. }
+    \item{\code{stopWhenFinished()}:}{ This function checks the database to
+      see whether or not the flag is set to cause the process to stop
+      when the event queue is empty. }
     \item{\code{setHistNodes(nodenames)}:}{ Sets the names of the
       history nodes.  Note this should be called before the call to
       \code{\link{baselineHist}} or the history nodes will not be set
@@ -165,8 +173,6 @@ showClass("BNEngine")
       database.  }
     \item{\code{stats()}:}{Returns the set of
       \code{\link[Peanut]{Statistic}} objects associate with the engine. }
-    \item{\code{activate()}:}{Sets the flag to indicate that the process
-      is running.}
     \item{\code{fetchManifest()}:}{ Fetches the network manifest from
       the database. }
     \item{\code{setManifest(manifest)}:}{ Sets the manifest for the

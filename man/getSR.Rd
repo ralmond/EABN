@@ -160,6 +160,45 @@ stopifnot(nrow(history(sr1a,"Physcis"))==2L)
 %PNetica%}
 
 ##  <<Here>> Need test with Mongo implementation
+library(PNetica)  ## Must load to setup Netica DLL
+app <- "ecd://epls.coe.fsu.edu/EITest"
+sess <- RNetica::NeticaSession()
+RNetica::startSession(sess)
+
+config.dir <- file.path(library(help="Peanut")$path, "auxdata")
+net.dir <- file.path(library(help="PNetica")$path,"testnets")
+
+netman <- read.csv(file.path(config.dir, "Mini-PP-Nets.csv"),
+                    row.names=1, stringsAsFactors=FALSE)
+stattab <- read.csv(file.path(config.dir, "Mini-PP-Statistics.csv"),
+                    as.is=TRUE)
+
+Nethouse <- PNetica::BNWarehouse(netman,session=sess,
+             address=net.dir)
+
+cl <- new("CaptureListener")
+listeners <- list("cl"=cl)
+
+ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
+                dbname="EARecords", dburi=makeDBuri(),
+                listeners=listeners,admindbname="Proc4",
+                colname="Messages")
+
+
+eng <- BNEngineMongo(app=app,warehouse=Nethouse,
+                     listenerSet=ls,
+                     profModel="miniPP_CM",
+                     histNodes="Physics",
+                     dburi=makeDBuri(),
+                     dbname="EARecords",admindbname="Proc4") 
+
+
+
+## Standard initialization methods.                     
+loadManifest(eng,netman)
+eng$setHistNodes("Physics")
+configStats(eng,stattab)
+setupDefaultSR(eng)
 
 }
 \keyword{ interface }

@@ -19,18 +19,19 @@ BNEngineNDB <-
                              statistics=list(), histNodes=character(),
                              evidenceQueue=list(),waittime=0,
                              processN=Inf,statmat=data.frame(),
-                             activeTest="EAActive.txt",
+                             activeTest="EAActive",
+                             errorRestart="checkNoScore", 
                              ...) {
                       if (is.null(warehouse))
                         stop("Null warehouse.")
-                      callSuper(app=app,warehouseObj=warehouse,
+                      callSuper(app=app,warehouse=warehouse,
                                 srs=NULL,listenerSet=listenerSet,
-                                warehouseObj=NULL,
                                 evidenceQueue=evidenceQueue,
                                 statistics=statistics,statmat=statmat,
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
                                 activeTest=activeTest,
+                                errorRestart=errorRestart[1], 
                                 ...)
                   },
                   fetchStats = function() {
@@ -62,17 +63,31 @@ BNEngineNDB <-
                     manifest
                   },
                   saveManifest = function(manif) {
-                    manif$app <- app(eng)
+                    manif$app <- app
                     manifest <<- manif
                   },
                   P4db = function () {
                     NULL
                   },
-                  isActivated = function() {
-                    file.exists(activeTest)
+                  shouldHalt = function() {
+                    file.exists(paste(activeTest,"halt",sep="."))
+                  },
+                  stopWhenFinished = function() {
+                    !file.exists(paste(activeTest,"running",sep="."))
                   },
                   activate = function() {
-                    file.create(activeTest)
+                    file.create(paste(activeTest,"running",sep="."))
+                  },
+                  isActivated = function() {
+                    locks <- list.files(dirname(activeTest),
+                               pattern=paste(basename(activeTest),"*",sep="."))
+                    return (length(locks) > 0L)
+                  },
+                  deactivate = function() {
+                    tryCatch(file.remove(paste(activeTest,
+                                               c("running","finish","halt"),
+                                               sep=".")),
+                             warning=function(w){})
                   },
                   show = function() {
                     methods::show(paste("<EABN: ",app,", No DB>"))
@@ -82,11 +97,15 @@ BNEngineNDB <- function(app="default",warehouse, listenerSet=NULL,
                      manifest=data.frame(),processN=Inf,
                      waittime=.25, profModel=character(),
                      statmat=data.frame(),evidenceQueue=list(),
-                     activeTest="EAActive.txt",...) {
+                     activeTest="EAActive",
+                     errorRestart=c("checkNoScore", "stopProcessing",
+                       "scoreAvailable"),
+                      ...) {
+  ## Removed ... from new, so we can silently drop unused arguments.
   new("BNEngineNDB",app=app,warehouse=warehouse,
       listenerSet=listenerSet,manifest=manifest,processN=processN,
       waittime=waittime,profModel=profModel,
-      activeTest=activeTest,...)
+      activeTest=activeTest,errorRestart=errorRestart[1])
 }
 
 setMethod("evidence","BNEngineNDB",
