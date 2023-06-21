@@ -1,5 +1,4 @@
 setClassUnion("NullRecordSet",c("StudentRecordSet","NULL"))
-setClassUnion("NullListenerSet",c("ListenerSet","NULL"))
 
 
 BNEngine <-
@@ -13,9 +12,28 @@ BNEngine <-
                   histNodes="character",
                   warehouseObj="PnetWarehouse",
                   waittime="numeric",
-                  processN="numeric"
+                  processN="numeric",
+                  ## These fields are included as they are related to the
+                  ## configuration.
+                  manifestFile="character",
+                  statFile="character",
+                  errorRestart="character"
               ),
               methods = list(
+                  initialize = function(app=character(),profModel=character(),
+                                        statistics=list(),histnodes=character(),
+                                        warehouse=NULL,waittime=.25, processN=Inf,
+                                        errorRestart="checkNoScore",listenerSet=NULL,...) {
+                      if (is.null(warehouse))
+                          stop("Warehouse must be non-null.")
+                      callSuper(app=app,warehouseObj=warehouse,
+                                srs=NULL,listenerSet=listenerSet,
+                                statistics=statistics,
+                                histNodes=histNodes,profModel=profModel,
+                                waittime=waittime, processN=processN,
+                                errorRestart=errorRestart[1], 
+                                ...)
+                  },
                   stats = function() {
                     if (length(statistics) == 0L)
                       configStats(.self)
@@ -72,14 +90,30 @@ BNEngine <-
                   saveManifest = function(manif) {
                     stop("Abstract method.")
                   },
+                  activate = function() {
+                  },
                   isActivated = function() {
                     TRUE
                   },
-                  activate = function() {
+                  deactivate = function() {
+                  },
+                  shouldHalt = function() {
+                    FALSE
+                  },
+                  stopWhenFinished = function() {
+                    TRUE
                   },
                   show = function() {
                     methods::show(paste("<EABN: ",app,">"))
-                  }))
+                  },
+                  getRestart = function() {
+                    errorRestart
+                  },
+                  setRestart = function(newRestart=c("checkNoScore",
+                                                     "stopProcessing",
+                                                     "scoreAvailable"))  
+                    errorRestart <<- newRestart[1]
+                  ))
 
 ## warehouseObj <<- BNWarehouse(manifest=data.frame(),
 ##                              session=session,

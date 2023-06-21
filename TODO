@@ -14,3 +14,5 @@
    setupDefaultSR
    configStats
    baselineHist
+
+* Baseline needs to take the timestamp of the initial event, not the time of scoring.

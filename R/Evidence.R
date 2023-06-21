@@ -1,4 +1,4 @@
-###  Evedence -- A set of evidence coming from the EI process.
+###  Evidence -- A set of evidence coming from the EI process.
 ###  This roughy follow a combination of the xAPI format.
 
 setClass("EvidenceSet",
@@ -9,7 +9,7 @@ EvidenceSet <- function(uid,context,timestamp=Sys.time(),
                         obs=list(),app="default",mess="Accumulate",
                         sender="EI", processed=FALSE) {
   new("EvidenceSet",app=app,uid=uid,context=context,mess=mess,
-      timestamp=timestamp,data=obs,sender=sender,"_id"=NA_character_,
+      timestamp=timestamp,data=obs,sender=sender,"_id"=c(oid=NA_character_),
       seqno=NA_integer_ , processed=processed)
 }
 
@@ -53,6 +53,7 @@ parseEvidence<- function (rec) {
       app=as.vector(ununboxer(rec$app)),
       uid=as.vector(ununboxer(rec$uid)),
       context=as.vector(ununboxer(rec$context)),
+      sender=as.vector(ununboxer(rec$sender)),
       mess=as.vector(ununboxer(rec$mess)),
       timestamp=as.POSIXlt(ununboxer(rec$timestamp)),
       processed=as.logical(ununboxer(rec$processed)),

@@ -6,8 +6,7 @@
 ## setClassUnion("PnetOrNull",c("Pnet","NULL"))
 
 setClass("StudentRecord",
-         slots=c("_id"="character",
-                 app="character",
+         slots=c(app="character",
                  uid="character",
                  context="character",
                  evidence="character",
@@ -16,8 +15,10 @@ setClass("StudentRecord",
                  smser="list",
                  seqno="integer",
                  stats="list",
+                 issues="character",
                  hist="list",
-                 prev_id="character"))
+                 prev_id="character"),
+         contains="MongoRec")
 
 setMethod("app","StudentRecord", function(x) x@app)
 setMethod("uid","StudentRecord", function(x) x@uid)
@@ -45,20 +46,41 @@ setMethod("histNames","StudentRecord", function (sr) names(sr@hist))
 setMethod("history",c("StudentRecord","character"),
           function (sr, name) sr@hist[[name]])
 
+setGeneric("getIssues", function(sr) standardGeneric("getIssues"))
+setGeneric("logIssue", function(sr,issue) standardGeneric("logIssue"))
+setMethod("getIssues",c("StudentRecord"), function (sr) sr@issues)
+setMethod("logIssue",c("StudentRecord","character"),
+          function (sr, issue) {
+            sr@issues <- c(sr@issues,issue)
+            sr})
+setMethod("logIssue",c("StudentRecord","ANY"),
+          function (sr, issue) setMethod(sr,as.character(issue)))
+
+
 
 setGeneric("sm",function(x) standardGeneric("sm"))
 setMethod("sm","StudentRecord", function(x) x@sm)
 setGeneric("sm<-",function(x,value) standardGeneric("sm<-"))
 setMethod("sm<-","StudentRecord", function(x,value) {
-  if (!is.null(value) && !is.Pnet(value))
-    stop("Must be a 'Pnet' or null.")
+  if (!is.null(value)) {
+    if (!is.Pnet(value)) {
+      stop("Must be a 'Pnet' or null.")
+    } else {
+      x@smser <- PnetSerialize(value)
+    }
+  } else {
+    x@smser <- NULL
+  }
   x@sm <- value
   x
-  })
+})
+
 fetchSM <- function (sr, warehouse) {
-  sm(sr)<- WarehouseFetch(warehouse,as.legal.name(warehouse,uid(sr)))
-  if (is.null(sm(sr)) || !is.valid(warehouse,sm(sr))) {
+  sm <- WarehouseFetch(warehouse,as.legal.name(warehouse,uid(sr)))
+  if (is.null(sm) || !is.valid(warehouse,sm)) {
     sm(sr) <- unpackSM(sr,warehouse)
+  } else {
+    sm(sr) <- sm
   }
   sr
 }
@@ -75,10 +97,16 @@ StudentRecord <- function(uid,context="",timestamp=Sys.time(),
                           smser=list(),sm=NULL,stats=list(),hist=list(),
                           evidence=character(),
                           app="default",seqno=-1L, prev_id=NA_character_) {
+  if (!is.null(sm)) {
+    flog.debug("Creating student record for %s with no sm.", uid)
+  } else {
+    flog.debug("Creating student record for %s with sm name %s",
+               uid, PnetName(sm))
+  }
   new("StudentRecord",app=app,uid=uid,context=context,
       timestamp=timestamp,smser=smser,evidence=evidence,
       sm=sm,stats=stats,hist=hist,
-      seqno=seqno,"_id"=NA_character_,
+      seqno=seqno,"_id"=NA_character_,issues=character(),
       prev_id=prev_id)
 }
 
@@ -98,6 +126,8 @@ setMethod("show","StudentRecord",function(object) {
   cat(toString(object),"\n")
 })
 
+
+
 setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) {
   ml$"_id" <- NULL
   ml$class <- NULL
@@ -108,9 +138,11 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
   ml$timestamp <- unboxer(ml$timestamp) # Auto_unbox bug.
   ## Serialize SM if necessary.
   if (!is.null(obj@sm)) {
-    smo <- PnetSerialize(obj@sm)
+    smo <- obj@smser
+    if (length(obj@smser) == 0L) 
+      smo <- PnetSerialize(obj@sm)
     smo$data <- base64_enc(smo$data)
-    ml$sm <- smo
+    ml$sm <- unboxer(smo)
   } else {
     ml$sm <- NULL
   }
@@ -142,9 +174,9 @@ parseStudentRecord <- function (rec) {
   else rec$seqno <- as.integer(rec$seqno)
   if (!is.null(rec$sm)) {
     smo <- list()
-    smo$name <- rec$sm[["name"]]
-    smo$data <- base64_dec(rec$sm[["data"]])
-    smo$factory <- rec$sm[["factory"]]
+    smo$name <- unlist(as.character(rec$sm[["name"]]))
+    smo$data <- unlist(base64_dec(as.character(rec$sm[["data"]])))
+    smo$factory <- unlist(as.character(rec$sm[["factory"]]))
   } else {
     smo <- NULL
   }
@@ -278,7 +310,7 @@ StudentRecordSet <-
               fields=c(app="character",
                        dbname="character",
                        dburi="character",
-                       db="MongoDB",
+                       db="ANY",
                        warehouse="PnetWarehouse",
                        defaultSR="SRorNull"),
               methods = list(
@@ -336,8 +368,12 @@ setMethod("app","StudentRecordSet", function(x) x$app)
 defaultSR <- function(x) x$defaultSR
 
 setGeneric("getSR", function (srs,uid,ser="") standardGeneric("getSR"))
+setGeneric("revertSM", function (srs,uid,rec,keepIssues=TRUE)
+  standardGeneric("revertSM"))
 setGeneric("saveSR", function (srs,rec) standardGeneric("saveSR"))
-setGeneric("newSR", function (srs,uid) standardGeneric("newSR"))
+setGeneric("newSR", function (srs,uid,timestamp=Sys.time(),
+                              keep=FALSE, delete=FALSE)
+  standardGeneric("newSR"))
 setGeneric("clearSRs", function(srs) standardGeneric("clearSRs"))
 
 
@@ -361,6 +397,29 @@ function (srs,uid,ser=NULL) {
   rec
 })
 
+setMethod("revertSM", c("StudentRecordSet","ANY","StudentRecord","ANY"),
+          function (srs,uid,rec,keepIssues=TRUE) {
+  oldIssues <- getIssues(rec)
+  if (is.Pnet(sm(rec)) && isTRUE(is.valid(srs$warehouse,sm(rec)))) {
+    flog.warn("Removing old student model named %s.",PnetName(sm(rec)))
+    WarehouseFree(srs$warehouse,PnetName(sm(rec)))
+  }
+  nname <- as.legal.name(srs$warehouse,uid)
+  if (length(rec@smser) > 0L) {
+    bn <- WarehouseUnpack(srs$warehouse,rec@smser)
+    flog.debug("Reverting Bayes net %s (%s) to serialized verision.",
+               toString(bn),PnetName(bn))
+  } else {
+    bn <- WarehouseCopy(srs$warehouse,sm(srs$defaultSR),nname)
+    flog.debug("Created new Bayes Net %s (%s)", toString(bn), PnetName(bn))
+  }
+  sm(rec) <- bn
+  if (keepIssues) rec@issues <- union(oldIssues,rec@issues)
+  rec
+})
+
+
+
 setMethod("saveSR", c("StudentRecordSet","ANY"), function (srs,rec) {
   if (!is.null(srs$recorddb())) {
     saveRec(rec,srs$recorddb())
@@ -372,17 +431,26 @@ setMethod("saveSR", c("StudentRecordSet","ANY"), function (srs,rec) {
   rec
 })
 
-setMethod("newSR", c("StudentRecordSet","ANY"), function (srs,uid) {
+setMethod("newSR", c("StudentRecordSet","ANY"),
+          function (srs,uid,timestamp=Sys.time(), keep=FALSE, delete=FALSE) {
   flog.debug("Making new student record for  %s", uid)
   dsr <- srs$defaultSR
   oldnet <- WarehouseFetch(srs$warehouse,as.legal.name(srs$warehouse,uid))
+  oldname <- "Not a Pnet"
+  if (is.Pnet(oldnet)) {
+    oldname <- PnetName(oldnet)
+    flog.debug("Found old network %s (%s)", toString(oldnet), oldname)
+  }
   if (isTRUE(is.valid(srs$warehouse,oldnet))) {
     flog.warn("Removing old student model named %s.",PnetName(oldnet))
     WarehouseFree(srs$warehouse,PnetName(oldnet))
   }
-  rec <- StudentRecord(uid=uid,context(dsr),timestamp=Sys.time(),
-                       sm=WarehouseCopy(srs$warehouse,sm(dsr),
-                                        as.legal.name(srs$warehouse,uid)),
+  bn <- WarehouseCopy(srs$warehouse,sm(dsr),
+                      as.legal.name(srs$warehouse,uid))
+  flog.debug("Created new Bayes Net %s (%s)", toString(bn), PnetName(bn))
+  #recover()
+  rec <- StudentRecord(uid=uid,context(dsr),timestamp=timestamp,
+                       sm=bn,
                        stats=stats(dsr),hist=dsr@hist,app=app(srs),
                        seqno=0L)
   saveRec(rec,srs$recorddb())

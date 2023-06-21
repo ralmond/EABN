@@ -66,14 +66,27 @@ showClass("BNEngineMongo")
 \keyword{classes}
 \section{Activation}{
 
-  When the \code{\link{mainLoop}} runs out of evidence sets to process,
-  it checks the \code{is.active()} method of the engine.  If this
-  returns, false, it stops.
+  At the start of each iteration of the \code{\link{mainLoop}}, it
+  checks \code{eng$shouldHalt()} method. If this returns \code{TRUE},
+  then execution is immediately halted.  When the queue is empty, it
+  checks the \code{eng$stopWhenFinished()} method.  If this returns
+  true, then the main loop also terminates.
 
-  For the \code{BNEngineMongo} this checks the \dQuote{AuthorizedApps}
+
+  The \code{BNEngineMongo} this checks the \dQuote{AuthorizedApps}
   collection in the database to see if the current \code{app} is
-  active.  It returns the value of the \code{active} field for the app's
-  record. 
+  active and the value of the field \code{EAsignal}.  The
+  \code{eng$activate()} method sets this field to \dQuote{Running}.  If
+  the field is set to \dQuote{Halt}, then \code{eng$shouldHalt()} will
+  return \code{TRUE} and the \code{\link{mainLoop}} will stop after
+  processing the current evidence set.  If the field is set to
+  \dQuote{Halt} (actually, anything other than \dQuote{Running}), then
+  \code{eng$stopWhenFinished()} will return \code{TRUE} and the
+  \code{mainLoop} will stop when the queue is empty.
+
+  The methods \code{eng$activate()} and \code{eng$deactivate()} set and
+  clear the \code{EAactive} flag in the \dQuote{AuthorizedApps}
+  database.
 
 }
 \section{Fields}{
@@ -132,14 +145,22 @@ showClass("BNEngineMongo")
 }
 \section{Methods}{
   \describe{
+    \item{\code{activate()}:}{Sets the flag in the admin database to
+      indicate that the process is running.}
+    \item{\code{deactivate()}:}{Clears the flag in the admin database to
+      indicate that the process is no longer running.}
+    \item{\code{shouldHalt()}:}{ This function checks the admin database to
+      see whether or not the flag is set to cause the process to halt
+      after processing the current record.. }
+    \item{\code{stopWhenFinished()}:}{ This function checks the admin
+      database to see whether or not the flag is set to cause the
+      process to stop when the event queue is empty. }
     \item{\code{statdb()}:}{ Returns the database contianing the
       statistic objects. }
     \item{\code{studentRecords()}:}{ Returns the
       \code{\linkS4class{StudentRecordSet}} associated with this engine. }
     \item{\code{fetchStats()}:}{ Fetches the statistics marked in the
       database configuration. }
-    \item{\code{activate()}:}{ Sets the field in the Proc4 database used
-      to indicate that this application is active. }
     \item{\code{initialize(app, warehouse, listeners, username,
         password, host, port, dbname, P4dbname, profModel, waittime,
         statistics, histNodes, processN, ...)}:}{ initializes the class.

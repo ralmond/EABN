@@ -1,7 +1,10 @@
 *~
+.Rhistory
+.Rproj.user
+.DS_Store
 \#*#
 \#*
 
-#EAEngineMongo.R#
 .Rhistory
 .Rproj.user
+

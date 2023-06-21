@@ -1,3 +1,120 @@
+2023-04-15  Russell Almond  <ralmond@pei>
+
+	* R/StudentRec.R (fetchSM): Fixed a bug trying to set null value to SM field.
+	
+
+2023-04-05  Russell Almond  <ralmond@cherry>
+
+	* R/StudentRec.R (StudentRecord): Added unboxer to smo.
+
+2022-12-29  Russell Almond  <ralmond@cherry.local>
+
+	* R/StudentRec.R (revertSM): New method for canceling update of
+	Student Record.  This reverts the record to the last serialized
+	version.
+	(as.jlist c("StudentRecord","list")): Now assume that the net is
+	already serialized.
+	(sm<- c("StudentRecord")):  Now sets the serialized model as well.
+
+	** Issue (saveSR):  saveRec currently does not update serialized
+	model. 
+
+	* R/EngineGears.R (updateSM): Added continuation and restart
+	logic:  When [Netica] error is encountered processing observable,
+	then invoke the logAndContinue restart.  This will log the message
+	and either `break` (`stopProcessing`) or continue (`next`).  When
+	the loop is finished (or exited), if there was an error and the
+	restart is not `scoreAvailable`, the student model will be rolled
+	back.
+	(revertSR): Rolls back the student model to what it was at the
+	beginnng of processing.
+
+2022-12-13  Russell Almond  <ralmond@cherry.local>
+
+	* R/StudentRec.R: Added `issues` field to student Record and added
+	`logIssues` and `getIssues` method. 
+
+2022-06-25  Russell Almond  <ralmond@cherry.local>
+
+	* R/StudentRec.R: (StudentRecord) Made subclass of MongoRec.
+	
+
+2022-04-03  Russell Almond  <ralmond@cherry.local>
+
+	* R/StudentRec.R (newSR): added timestamp argument. 
+
+2021-12-29  Russell Almond  <ralmond@cherry.local>
+
+	* R/Runners.R (doRunrun): Changed the protocol of doRunrun to use
+	a null EAeng.local$dburi to indicate that the NDB engine should be
+	built.
+	
+
+2021-08-16  Russell Almond  <ralmond@cherry.local>
+
+	* R/Evidence.R (EvidenceSet): Added "sender" field to parse list.
+	(EvidenceSet): Added "oid" attribute to "_id" field.
+
+2021-08-03  Russell Almond  <ralmond@cherry.local>
+
+	* R/Runners.R (doRunrun): Added noprep flag to the basic script.
+
+2021-04-27  Russell Almond  <ralmond@cherry>
+
+	* R/Runners.R (doRunrun): EAeng.params combines all of the
+	EA.config$EAEngine and EAeng.local parameters.  Changed
+	constructors so that they would quitely drop unused arguments. 
+
+	* R/EAEngineMongo.R (BNEngineMongo): Same change.
+
+	* R/EAEngineNDB.R (BNEngineNDB): Changed constructors to not pass
+	... through.  
+
+2021-04-26  Russell Almond  <ralmond@cherry>
+
+	* R/Runners.R (doRunrun): Added compatability for DB-less operation mode.  
+
+2021-03-08  Russell Almond  <ralmond@cherry>
+
+	* R/Runners.R (trimTable): Added clean up for stray spaces in
+	column names.  
+
+2020-10-04  Russell Almond  <ralmond@Cherry>
+
+	* R/Runners.R (doRunrun): Added history output file.
+
+2020-08-08  Russell Almond  <ralmond@Cherry>
+
+	* R/EngineGears.R (mainLoop): Added N argument to mainLoop
+	(logEvidence): Added debugging.
+
+2020-07-31  Russell Almond  <ralmond@Cherry>
+
+	* R/Runners.R (doRunrun): Wrapped Many operations withFlogging to
+	better capture errors.
+
+2020-07-19  Russell Almond  <ralmond@Cherry>
+
+	* R/Runners.R (doRunrun): Added eng as output, so could debug more
+	easily. 
+
+	* R/StudentRec.R (parseStudentRecord): Added some as.character()
+	wraps inside the sm data as jsonlite seemed to be listing them.
+
+
+2020-06-12  Russell Almond  <ralmond@Cherry>
+
+	* R/Runners.R (trimTable): New function for cleanning unwanted
+	columns from downloaded tables.
+	(doBuild): New function for building from online spreadsheet.
+	(doRunrun): New function for Running in reurn and server mode.
+	
+
+2020-05-21  Russell Almond  <ralmond@Cherry>
+
+	* R/EAEngine.R (BNEngine): Added manifestFile and statFile fields
+	to correspond to configuration JSON.
+
 2020-04-03  Russell Almond  <ralmond@Cherry>
 
 	* R/EAEngine.R (BNEngine): Removed netDirectory field as this
