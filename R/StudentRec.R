@@ -139,7 +139,7 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
   ## Serialize SM if necessary.
   if (!is.null(obj@sm)) {
     smo <- obj@smser
-    if (length(obj@smser) == 0L) 
+    if (length(obj@smser) == 0L)
       smo <- PnetSerialize(obj@sm)
     smo$data <- base64_enc(smo$data)
     ml$sm <- unboxer(smo)
@@ -304,28 +304,31 @@ updateRecord <- function (rec, evidMess) {
 ## 3) No SR for uid -- clone Prof Model and save.
 
 setClassUnion("SRorNull",c("StudentRecord","NULL"))
+setClassUnion("MTWarehouse",c("PnetWarehouse","NULL"))
 
 StudentRecordSet <-
   setRefClass("StudentRecordSet",
               fields=c(app="character",
-                       dbname="character",
-                       dburi="character",
-                       db="ANY",
-                       warehouse="PnetWarehouse",
+                       db="MongoDB",
+                       whouse="MTWarehouse",
                        defaultSR="SRorNull"),
               methods = list(
-                  initialize =
-                    function(app="default",dbname="EARecords",
-                             dburi="mongodb://localhost",
-                             db = NULL,warehouse=NULL,
-                             ...)
-                      callSuper(app=app,db=db,dbname=dbname,dburi=dburi,
-                                warehouse=warehouse,defaultSR=NULL,
-                                ...),
+                initialize =
+                  function(app="default",
+                           db = MongoDB("StudentRecords","EARecords"),
+                           warehouse=NULL,
+                           ...) {
+                    callSuper(app=app,db=db,whouse=warehouse,
+                              defaultSR=NULL,
+                              ...)
+                  },
+                  warehouse=function() {
+                    if (is.null(whouse))
+                      stop("Warehouse never initialized.")
+                    else
+                      whouse
+                  },
                   recorddb = function () {
-                    if (is.null(db) && length(dburi)>0L && nchar(dburi) >0L) {
-                      db <<- mongo("StudentRecords",dbname,dburi)
-                    }
                     db
                   },
                   clearAll = function(clearDefault=FALSE) {
@@ -335,34 +338,36 @@ StudentRecordSet <-
                     if (!is.null(defaultSR))
                       profModel <- PnetName(sm(defaultSR))
 
-                    ClearWarehouse(warehouse)
+                    ClearWarehouse(warehouse())
 
                     if (clearDefault) {
                       defaultSR <<- NULL
                     } else if (!is.null(profModel)) {
-                      sm(defaultSR) <<- WarehouseFetch(warehouse,profModel)
+                      sm(defaultSR) <<- WarehouseFetch(warehouse(),profModel)
                       PnetCompile(sm(defaultSR))
                     }
 
                     if (!is.null(recorddb())) {
                       if (clearDefault)
-                        recorddb()$remove(buildJQuery(app=app))
+                        mdbRemove(recorddb(),buildJQuery(app=app))
                       else
-                        recorddb()$remove(buildJQuery(app=app,
-                                                      uid=c("ne"="*DEFAULT*")))
+                        mdbRemove(recorddb(),
+                                  buildJQuery(app=app,
+                                              uid=c("ne"="*DEFAULT*")))
                     }
                   }
               ))
 
 
 StudentRecordSet <- function(app="default",warehouse=NULL,
-                             dburi="mongodb://localhost",
-                             dbname="EARecords",
-                             ...)
-  new("StudentRecordSet",app=app, dbname=dbname, dburi=dburi,
-      db=NULL, warehouse=warehouse, ...)
-
-
+                             db = MongoDB("StudentRecords","EARecords"),
+                              ...) {
+  if (is.null(warehouse)) {
+       stop("Warehouse must be specified when building StudentRecordSet")
+  }
+  new("StudentRecordSet",app=app,
+      db=db, warehouse=warehouse, ...)
+}
 
 setMethod("app","StudentRecordSet", function(x) x$app)
 defaultSR <- function(x) x$defaultSR
@@ -392,7 +397,7 @@ function (srs,uid,ser=NULL) {
     rec <- NULL
   }
   if (!is.null(rec)) {
-    rec <- fetchSM(rec,srs$warehouse)
+    rec <- fetchSM(rec,srs$warehouse())
   }
   rec
 })
@@ -400,17 +405,17 @@ function (srs,uid,ser=NULL) {
 setMethod("revertSM", c("StudentRecordSet","ANY","StudentRecord","ANY"),
           function (srs,uid,rec,keepIssues=TRUE) {
   oldIssues <- getIssues(rec)
-  if (is.Pnet(sm(rec)) && isTRUE(is.valid(srs$warehouse,sm(rec)))) {
+  if (is.Pnet(sm(rec)) && isTRUE(is.valid(srs$warehouse(),sm(rec)))) {
     flog.warn("Removing old student model named %s.",PnetName(sm(rec)))
-    WarehouseFree(srs$warehouse,PnetName(sm(rec)))
+    WarehouseFree(srs$warehouse(),PnetName(sm(rec)))
   }
-  nname <- as.legal.name(srs$warehouse,uid)
+  nname <- as.legal.name(srs$warehouse(),uid)
   if (length(rec@smser) > 0L) {
-    bn <- WarehouseUnpack(srs$warehouse,rec@smser)
+    bn <- WarehouseUnpack(srs$warehouse(),rec@smser)
     flog.debug("Reverting Bayes net %s (%s) to serialized verision.",
                toString(bn),PnetName(bn))
   } else {
-    bn <- WarehouseCopy(srs$warehouse,sm(srs$defaultSR),nname)
+    bn <- WarehouseCopy(srs$warehouse(),sm(srs$defaultSR),nname)
     flog.debug("Created new Bayes Net %s (%s)", toString(bn), PnetName(bn))
   }
   sm(rec) <- bn
@@ -421,8 +426,8 @@ setMethod("revertSM", c("StudentRecordSet","ANY","StudentRecord","ANY"),
 
 
 setMethod("saveSR", c("StudentRecordSet","ANY"), function (srs,rec) {
-  if (!is.null(srs$recorddb())) {
-    saveRec(rec,srs$recorddb())
+  if (mdbAvaliable(srs$recorddb())) {
+    saveRec(srs$recorddb(),rec)
   } else {
     if (length(m_id(rec))==0L || is.na(m_id(rec))) {
       rec@"_id" <- paste(uid(rec),seqno(rec),sep="@")
@@ -435,33 +440,34 @@ setMethod("newSR", c("StudentRecordSet","ANY"),
           function (srs,uid,timestamp=Sys.time(), keep=FALSE, delete=FALSE) {
   flog.debug("Making new student record for  %s", uid)
   dsr <- srs$defaultSR
-  oldnet <- WarehouseFetch(srs$warehouse,as.legal.name(srs$warehouse,uid))
+  oldnet <- WarehouseFetch(srs$warehouse(),as.legal.name(srs$warehouse(),uid))
   oldname <- "Not a Pnet"
   if (is.Pnet(oldnet)) {
     oldname <- PnetName(oldnet)
     flog.debug("Found old network %s (%s)", toString(oldnet), oldname)
   }
-  if (isTRUE(is.valid(srs$warehouse,oldnet))) {
+  if (isTRUE(is.valid(srs$warehouse(),oldnet))) {
     flog.warn("Removing old student model named %s.",PnetName(oldnet))
-    WarehouseFree(srs$warehouse,PnetName(oldnet))
+    WarehouseFree(srs$warehouse(),PnetName(oldnet))
   }
-  bn <- WarehouseCopy(srs$warehouse,sm(dsr),
-                      as.legal.name(srs$warehouse,uid))
+  bn <- WarehouseCopy(srs$warehouse(),sm(dsr),
+                      as.legal.name(srs$warehouse(),uid))
   flog.debug("Created new Bayes Net %s (%s)", toString(bn), PnetName(bn))
   #recover()
   rec <- StudentRecord(uid=uid,context(dsr),timestamp=timestamp,
                        sm=bn,
                        stats=stats(dsr),hist=dsr@hist,app=app(srs),
                        seqno=0L)
-  saveRec(rec,srs$recorddb())
+  saveRec(srs$recorddb(),rec)
   rec
 })
 
 setMethod("clearSRs", c("StudentRecordSet"), function (srs) {
-  if (!is.null(srs$recorddb()))
-    if (srs$recorddb()$count(buildJQuery(app=app(srs))) > 0L)
-      srs$recorddb()$remove(buildJQuery(app=app(srs)))
+  if (mdbAvailable(srs$recorddb()))
+    if (mdbCount(srs$recorddb(),buildJQuery(app=app(srs))) > 0L)
+      mdbRemove(srs$recorddb(),buildJQuery(app=app(srs)))
   invisible(srs)
 })
+
 
 

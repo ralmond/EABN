@@ -8,14 +8,14 @@
   In particular, it cannot store student records, so it cannot maintain
   state between scoring sessions without extenal help.
 
-  
+
 }
 \usage{
 BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
   manifest = data.frame(), processN = Inf, waittime = 0.25,
   profModel = character(), statmat = data.frame(),
   evidenceQueue = list(), activeTest =
-  "EAActive", ...) 
+  "EAActive", ...)
 
 }
 \arguments{
@@ -60,7 +60,7 @@ BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
 
   Almond, Mislevy, Steinberg, Yan and Williamson (2015).  \emph{Bayesian
     Networks in Educational Assessment}.  Springer.  Especially Chapter
-  13. 
+  13.
 
 
 }
@@ -73,7 +73,7 @@ BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
   Constituent parts:
   \code{\link{StudentRecordSet}}, \code{\link[Peanut]{PnetWarehouse}}
   \code{\link[Proc4]{ListenerSet}}
-  
+
   Setup Functions:
   \code{\link{loadManifest}},
   \code{\link{setupDefaultSR}},
@@ -116,7 +116,7 @@ cl <- new("CaptureListener")
 listeners <- list("cl"=cl)
 
 ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                  dburi="", listeners=listeners)
+                  listeners=listeners)
 
 eng <- BNEngineNDB(app=app,warehouse=Nethouse,
                      listenerSet=ls,manifest=netman,
@@ -125,7 +125,7 @@ eng <- BNEngineNDB(app=app,warehouse=Nethouse,
                      statmat=stattab,
                      activeTest="EAActive.txt")
 
-## Standard initialization methods.                     
+## Standard initialization methods.
 loadManifest(eng,netman)
 eng$setHistNodes("Physics")
 configStats(eng,stattab)

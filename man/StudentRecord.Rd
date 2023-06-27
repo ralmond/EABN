@@ -6,11 +6,13 @@
   This is the constructor for a \code{\linkS4class{StudentRecord}}
   object.  Basically, this is a wrapper around the studnet model for the
   appropriate user, with meta-data about the evidence that has been
-  absorbed. 
+  absorbed.
 
 }
 \usage{
-StudentRecord(uid, context = "", timestamp = Sys.time(), smser = list(), sm = NULL, stats = list(), hist = list(), evidence = character(), app = "default", seqno = -1L, prev_id = NA_character_)
+StudentRecord(uid, context = "", timestamp = Sys.time(), smser = list(),
+sm = NULL, stats = list(), hist = list(), evidence = character(),
+app = "default", seqno = -1L, prev_id = NA_character_)
 }
 \arguments{
   \item{uid}{A user identifier for the student/player.}
@@ -67,7 +69,7 @@ statmat <- read.csv(file.path(config.dir,"Mini-PP-Statistics.csv"),
 rownames(statmat) <- statmat$Name
 statlist <- sapply(statmat$Name,function (st)
     Statistic(statmat[st,"Fun"],statmat[st,"Node"],st))
-names(statlist) <- statmat$Name 
+names(statlist) <- statmat$Name
 dsr@stats <- lapply(statlist,
                     function (stat) calcStat(stat,sm(dsr)))
 names(dsr@stats) <- names(statlist)

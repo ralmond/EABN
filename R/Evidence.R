@@ -1,5 +1,5 @@
 ###  Evidence -- A set of evidence coming from the EI process.
-###  This roughy follow a combination of the xAPI format.
+###  This roughly follow a combination of the xAPI format.
 
 setClass("EvidenceSet",
          slots=c(seqno="integer"),
@@ -61,5 +61,4 @@ parseEvidence<- function (rec) {
       data=parseData(ununboxer(rec$data)),
       seqno=as.vector(rec$seqno))
 }
-
 

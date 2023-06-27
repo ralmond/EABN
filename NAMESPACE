@@ -1,4 +1,5 @@
 import(methods)
+import(mongo)
 import(Proc4)
 import(Peanut)
 import(futile.logger)
@@ -29,8 +30,8 @@ exportClass(BNEngine,BNEngineMongo)
 export(BNEngine,BNEngineMongo, loadManifest, setupDefaultSR,
        logEvidence, accumulateEvidence, configStats, updateStats,
        announceStats, baselineHist, updateHist, getRecordForUser,
-       handleEvidence, mainLoop, updateSM, fetchNextEvidence, markProcessed)
-exportMethods(notifyListeners,fetchNextEvidence,markProcessed)
+       handleEvidence, mainLoop, updateSM)
+exportMethods(notifyListeners)
 
 export(trimTable,doBuild,doRunrun,rebuildOutputs,buildAppHist,buildHistMat)
 

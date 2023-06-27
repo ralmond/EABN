@@ -3,13 +3,14 @@
 trimTable <- function (tab, lastcol="Description") {
   nlcol <- which(colnames(tab)==lastcol)
   result <- tab[,1:nlcol]
-  ## Need this as leading/trailing ws in column names is invivible
+  ## Need this as leading/trailing ws in column names is invisible
   ## in Google sheets (& M$ Excel)
   names(result) <- trimws(names(result),whitespace="[ \t\r\n.]")
   result
 }
 
-doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
+doBuild <- function (sess, EA.tables,  config.dir,
+                     override=FALSE) {
 
   netdir <- ifelse(!is.null(EA.tables$netdir),EA.tables$netdir,"nets")
   tabdir <- ifelse(!is.null(EA.tables$netdir),EA.tables$tabdir,"tables")
@@ -27,6 +28,7 @@ doBuild <- function (sess, EA.tables,  config.dir, override=FALSE) {
     file.remove(file.path(config.dir,netdir,"netbuilder.lock"))
   })
 
+  ## TODO -- Replace this with calls to googlesheets
   tid <- EA.tables$TableID
   flog.info("Downloading spreadsheets from %s",tid)
   if (!is.null(tid) && nchar(tid)>0L) {
@@ -145,34 +147,56 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   sappid <- basename(appid)
   dburi <- EAeng.local$dburi
   if (!is.null(dburi) && dburi == "") dburi <- NULL
+  sslops <- EAeng.local$ssloptions
+  if (is.null(sslops)) sslops <- mongolite::ssl_options()
+  dbname <- EAeng.local$dbname
+  if (is.null(dbname)) dbname<-""
+  admindbname <- EAeng.local$admindbname
+  if (is.null(admindbname)) admindbname<-""
 
   flog.info("Building and configuring engine.")
 
-  EAeng.params <- c(EA.config$EAEngine,
-                    EAeng.local[setdiff(names(EAeng.local),
-                                        names(EA.config$EAEngine))])
+  EAeng.params <- EA.config$EAEngine
+  if (is.null(dburi)) {
+    EAeng.params$activeTest <- EAeng.local$activeTest
+    srsDB <- MongoDB(noMongo=TRUE)
+  } else {
+    cnms <- EA.config$colnames
+    colname <- ifelse(is.null(cnms$stat),"Statistics",cnms$stat)
+    EAeng.params$statDB <- MongoDB(colname,dbname,dburi,sslops)
+    colname <- ifelse(is.null(cnms$stat),"manifest",cnms$stat)
+    EAeng.params$manifestDB <- MongoDB(colname,dbname,dburi,sslops)
+    colname <- ifelse(is.null(cnms$stat),"evidence",cnms$stat)
+    EAeng.params$evidenceDB<- MongoDB(colname,dbname,dburi,sslops)
+    colname <- ifelse(is.null(cnms$stat),"hist",cnms$stat)
+    EAeng.params$histNodesDB<- MongoDB(colname,dbname,dburi,sslops)
+    colname <- ifelse(is.null(cnms$stat),"admin",cnms$stat)
+    EAeng.params$adminDB<- MongoDB(colname,admindbname,dburi,sslops)
+    colname <- ifelse(is.null(cnms$stat),"studentRecords",cnms$stat)
+    srsDB <- MongoDB(colname,dbname,dburi,sslops)
+  }
+
   ## Force to character, JSON leave as list.
   EAeng.params$histNodes <- as.character(EAeng.params$histNodes)
 
-  if (is.null(dburi)) {
+  if (is.null(EA.config$listners)) {
     EAeng.params$listenerSet <- NULL # Listener set not used
   } else {
-    listeners <- lapply(EA.config$listeners, buildListener,appid,dburi)
-    names(listeners) <- sapply(listeners,listenerName)
     EAeng.params$listenerSet <-
       withFlogging({
-        ListenerSet(sender= sub("<app>",sappid,EA.config$sender),
-                    dbname=EAeng.local$dbname, dburi=EAeng.local$dburi,
-                    listeners=listeners,admindbname=EAeng.local$admindbname,
-                    colname=EA.config$lscolname)
+        buildListenerSet(sender= sub("<app>",sappid,EA.config$sender),
+                        EA.config$listeners,appid,
+                        EA.config$colnames$listenerSetLog,
+                        dburi,sslops,EA.config$colnames$registry,
+                        admindbname,mongoverbose=FALSE)
       }, context="Building listener set.")
     if (is(EAeng.params$listenerSet,'try-error')) {
       flog.fatal("Could not build listener set: %s",EAeng.params$listenerSet)
       stop(EAeng.params$listenerSet)
     }
     if (nchar(logfile)>0L) {
-    EAeng.params$listenerSet$registerOutput(basename(logfile),logfile,
-                                              appid,"EA","log")
+      registerOutput(EAeng.params$listenerSet,basename(logfile),logfile,
+                     appid,"EA","log")
     }
   }
   netman <- read.csv(file.path(config.dir,netdir,
@@ -185,7 +209,10 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
                            address=file.path(config.dir,netdir))
     },context="Building Network Warehouse")
   flog.debug("Warehouse is a %s.",class(EAeng.params$warehous))
+
   EAeng.params$app <- appid
+  EAeng.params$srs <- StudentRecordSet(appid,EAeng.params$warehouse,
+                                       db=srsDB)
   eng <- withFlogging({
     do.call(ifelse(is.null(dburi),BNEngineNDB,BNEngineMongo),
             EAeng.params)
@@ -210,118 +237,40 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   }, context="Configuring engine.")
   ## Currently continuing anyway.  Is this the right thing to do?
 
+
   if (!is.null(dburi) && !noprep) {
     flog.info("Preparing Database.")
 
-    ## Clearning
-    if (isTRUE(EA.config$filter$doRemove)) {
-      flog.debug("Removing old evidence sets.")
-      remquery <- EA.config$filter$remove
-      status <- withFlogging({
-        if (!is.null(names(remquery)))
-          remquery <- list(remquery)      #Single query make it multiple.
-        for (rq in remquery) {
-          rquery <- do.call(buildJQuery,c(list(app=appid),rq))
-          flog.trace("Removing %s",rquery)
-          eng$evdienceSets()$remove(rquery)
-        }
-      }, context=sprintf("removing old evidence sets: %s.",
-                         paste(remquery,collapse=", ")))
-      if (is(status,'try-error')) {
-        flog.fatal("Error during database event set removal: %s.",
-                   status)
-        stop(status)
-      }
+    ## Clean Messages
+    if (isTRUE(filter$doRemove)) {
+      cleanMessageQueue(eng$evdienceSet(),EA.config$filter$remove)
     }
     ## Clearing Student Records
     if (isTRUE(EA.config$SRreset)) {
-      flog.debug("Clearing old student records.")
-      status <- withFlogging({
-        eng$studentRecords()$clearAll(TRUE)   #Clear default, as we will set
-                                        #it back up in a moment.
-      },context = "Clearning old student records.")
-      if (is(status,'try-error')) {
-        flog.fatal("Error during database clearing: %s.",
-                   status)
-        stop(status)
-      }
+      doClearSRS(eng$studentRecords())
     }
 
     ## Import
-    for (fil in EA.config$importFile) {
-      flog.info("Importing from file  %s.", fil)
-      impf <- file.path(config.dir,fil)
-      if (!file.exists(impf)) {
-        flog.warn("File %s does not exist, skipping import.",
-                  EA.config$importFile)
-      } else {
-        status <-
-          system2("mongoimport",c("--jsonArray",
-                                  "-d",EAeng.local$dbname,
-                                  "-c","EvidenceSets",
-                                  impf), stdout=TRUE, stderr=TRUE)
-        if (!is.null(attr(status,"status"))) {
-          flog.fatal("Got error when loading import file.")
-          flog.fatal("Error:",status,capture=TRUE)
-          stop(status)
-        }
-      }
-    }
+    data.dir <- EA.config$dataDir
+    if (is.null(data.dir)) data.dir <- config.dir
+    importMessages(eng$evidenceSet(),EA.config$importFile,data.dir)
 
-    ## Purging New Evidence sets.
-    if (isTRUE(EA.config$filter$doPurge)) {
-      flog.debug("Purging unwanted evidence sets.")
-      purquery <- EA.config$filter$purge
-      status <- withFlogging({
-        if (!is.null(names(purquery)))
-          purquery <- list(purquery)      #Single query make it multiple.
-        for (pq in purquery) {
-          pquery <- do.call(buildJQuery,c(list(app=appid),pq))
-          flog.trace("Purging %s",pquery)
-          eng$evdienceSets()$remove(pquery)
-        }
-      }, context=sprintf("Purging new evidence sets: %s.",
-                         paste(remquery,collapse=", ")))
-      if (is(status,'try-error')) {
-        flog.fatal("Error during evidence set purging: %s.",
-                   status)
-        stop(status)
-      }
+    ## Purging Unused messages
+    if (isTRUE(filter$doPurge)) {
+      cleanMessageQueue(eng$evidenceSet(),EA.config$filter$purge)
     }
 
     ## Setting Processed flag.
-    if (isTRUE(EA.config$filter$doReprocess)) {
-      flog.debug("Clearing processed flags.")
-      repquery <- EA.config$filter$reprocess
-      status <- withFlogging({
-        if (!is.null(names(repquery)))
-          repquery <- list(repquery)      #Single query make it multiple.
-        for (rq in repquery) {
-          rquery <- do.call(buildJQuery, c(list(app=appid),rq))
-          flog.trace("Reprocessing %s",rquery)
-          eng$evidenceSets()$update(rquery,'{"$set":{"processed":false}}',
-                                    multiple=TRUE)
-        }
-      }, context=sprintf("Clearing Processed Flag: %s.",
-                         paste(repquery,collapse=", ")))
-      if (is(status,'try-error')) {
-        flog.fatal("Error while clearing processed: %s.",
-                   status)
-        stop(status)
-      }
+    if (isTRUE(filter$doReprocess)) {
+      resetProcessedMessages(eng$evidenceSet(),EA.config$filter$reprocess)
     }
   }
   setupDefaultSR(eng)
+
   if (!is.null(EA.config$listenerReset) && !noprep) {
-    flog.info("Reseting Listners.")
-    status <- withFlogging({
-      resetListeners(eng$listenerSet,as.character(EA.config$listenerReset),
-                     appid)
-    }, context="Resetting Listeners.")
-    if (is(status,'try-error')) {
-      flog.fatal("Error while resetting listeners.",status)
-      stop(status)
-    }
+    doResetListeners(eng$listenerSet,
+                    as.character(EA.config$listenerReset),
+                    appid)
   }
 
   if (EA.config$limitNN=="ALL") {
@@ -330,8 +279,8 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
       eng$processN <- es$count(buildJQuery(app=appid,processed=FALSE))
     } else {
       ## Want zero here as in DB-less mode we just want to exit
-      ## returning the engine.  
-      eng$processN <- 0 
+      ## returning the engine.
+      eng$processN <- 0
     }
   } else {
     eng$processN <- as.numeric(EA.config$limitNN)
@@ -344,76 +293,25 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   } else {
     flog.info("Running in server mode.")
   }
-  tryCatch({
-    file.create(file.path(config.dir,netdir,paste(sappid,"lock",sep=".")))
-    if (eng$processN > 0)
-      withFlogging(mainLoop(eng))
-  },finally={
+
+  file.create(file.path(config.dir,netdir,paste(sappid,"lock",sep=".")))
+  withr::defer({
     file.remove(file.path(config.dir,netdir,paste(sappid,"lock",sep=".")))
     eng$deactivate()
   })
+  if (eng$processN > 0)
+    withFlogging(mainLoop(eng))
 
-  if (!is.null(EA.config$statListener)) {
-    sl <- eng$listenerSet$listeners[[EA.config$statListener]]
-    if (is.null(sl)) {
-      flog.warn("Stat listener %s not found, skipping building stat file.",
-                 EA.config$statListener)
-    } else {
-      stat1 <- sl$messdb()$find(buildJQuery(app=appid))
-      if (isTRUE(nrow(stat1) > 0L)) {
-        sdat <- data.frame(stat1[,c("app","uid","context","timestamp")],
-                           do.call(cbind,stat1$data))
-        sdat$app <- basename(sdat$app)
-        fname <- gsub("<app>",sappid,EA.config$statfile)
+  rebuildOutputs(eng$listenerSet,appid,EA.config,outdir)
 
-        write.csv(sdat,file.path(outdir,fname))
-        EAeng.params$listenerSet$registerOutput(fname,file.path(outdir,fname),
-                                                appid,"EA")
-      } else {
-        flog.warn("No records in statistics file.")
-      }
-
-    }
-  }
-  if (!is.null(EA.config$histListener)) {
-    hl <- eng$listenerSet$listeners[[EA.config$histListener]]
-    if (is.null(hl)) {
-      flog.warn("History listener %s not found, skipping building history file.",
-                 EA.config$histListener)
-    } else {
-      hist <- buildAppHist(hl$messdb(),appid)
-      if (isTRUE(nrow(hist) > 0L)) {
-        hist$app <- basename(hist$app)
-        fname <- gsub("<app>",sappid,EA.config$histfile)
-
-        write.csv(hist,file.path(outdir,fname))
-        EAeng.params$listenerSet$registerOutput(fname,file.path(outdir,fname),
-                                                appid,"EA")
-      } else {
-        flog.warn("No records in history file.")
-      }
-
-    }
-  }
   invisible(eng)
 }
 
 
-rebuildOutputs <- function (appid, EA.config,  EAeng.local, outdir) {
+rebuildOutputs <- function (listenerSet, appid, EA.config,  outdir) {
 
   sappid <- basename(appid)
-  dburi <- EAeng.local$dburi
-
-  flog.info("Building and configuring engine.")
-  listeners <- lapply(EA.config$listeners, buildListener,appid,dburi)
-  names(listeners) <- sapply(listeners,listenerName)
-  listenerSet <-
-    withFlogging({
-      ListenerSet(sender= sub("<app>",sappid,EA.config$sender),
-                  dbname=EAeng.local$dbname, dburi=EAeng.local$dburi,
-                  listeners=listeners,admindbname=EAeng.local$admindbname,
-                  colname=EA.config$lscolname)
-    }, context="Building listener set.")
+  listeners <- listenerSet$listners
 
   if (!is.null(EA.config$statListener)) {
     sl <- listeners[[EA.config$statListener]]
@@ -421,20 +319,13 @@ rebuildOutputs <- function (appid, EA.config,  EAeng.local, outdir) {
       flog.warn("Stat listener %s not found, skipping building stat file.",
                  EA.config$statListener)
     } else {
-      stat1 <- sl$messdb()$find(buildJQuery(app=appid))
-      if (isTRUE(nrow(stat1) > 0L)) {
-        sdat <- data.frame(stat1[,c("app","uid","context","timestamp")],
-                           do.call(cbind,stat1$data))
-        sdat$app <- basename(sdat$app)
+      sdat <- listenerDataTable(sl,NULL,appid)
+      if (!is.null(sdat)) {
         fname <- gsub("<app>",sappid,EA.config$statfile)
-
         write.csv(sdat,file.path(outdir,fname))
         listenerSet$registerOutput(fname,file.path(outdir,fname),
                                                 appid,"EA")
-      } else {
-        flog.warn("No records in statistics file.")
       }
-
     }
   }
   if (!is.null(EA.config$histListener)) {
@@ -462,7 +353,7 @@ rebuildOutputs <- function (appid, EA.config,  EAeng.local, outdir) {
 
 
 buildHistMat <- function (col, app, uid) {
-  stat1 <- col$find(buildJQuery(app=app, uid=uid))
+  stat1 <- mdbFind(col,buildJQuery(app=app, uid=uid))
   stat1d <- lapply(stat1$data,function (d) flattenStats(parseData(d)))
   data.frame(stat1[,c("app","uid","context","timestamp")],
              do.call(rbind,stat1d))
@@ -473,3 +364,31 @@ buildAppHist <- function (col, app) {
   do.call(rbind,
           lapply(uids,function(u) buildHistMat(col, app, u)))
 }
+
+doClearSRS <- function (srs) {
+  flog.debug("Clearing old student records.")
+  status <- withFlogging({
+    srs$clearAll(TRUE)
+    ##Clear default, as we will set
+    ## it back up in a moment.
+  },context = "Clearning old student records.")
+  if (is(status,'try-error')) {
+    flog.fatal("Error during database clearing: %s.",
+               status)
+    stop(status)
+  }
+}
+
+doResetListeners <- function (ls,whichOnes,appid) {
+  flog.info("Reseting Listners.")
+  status <- withFlogging({
+    resetListeners(eng$listenerSet,whichOnes, appid)
+  }, context="Resetting Listeners.")
+  if (is(status,'try-error')) {
+    flog.fatal("Error while resetting listeners.",status)
+    stop(status)
+  }
+}
+
+
+

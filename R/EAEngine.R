@@ -1,37 +1,43 @@
-setClassUnion("NullRecordSet",c("StudentRecordSet","NULL"))
-
+setClassUnion("SRSorNull",c("StudentRecordSet","NULL"))
 
 BNEngine <-
   setRefClass("BNEngine",
               c(
                   app = "character",
-                  srs = "NullRecordSet",
+                  srs = "SRSorNull",
                   profModel = "character",
                   listenerSet="NullListenerSet",
                   statistics="list",
                   histNodes="character",
-                  warehouseObj="PnetWarehouse",
+                  warehouseObj="MTWarehouse",
                   waittime="numeric",
                   processN="numeric",
+                  evidenceQueue = "MessageQueue",
                   ## These fields are included as they are related to the
                   ## configuration.
                   manifestFile="character",
                   statFile="character",
-                  errorRestart="character"
+                  errorRestart="character",
+                  sender="character"
               ),
               methods = list(
                   initialize = function(app=character(),profModel=character(),
                                         statistics=list(),histnodes=character(),
-                                        warehouse=NULL,waittime=.25, processN=Inf,
-                                        errorRestart="checkNoScore",listenerSet=NULL,...) {
-                      if (is.null(warehouse))
-                          stop("Warehouse must be non-null.")
+                                        warehouse=NULL,waittime=.25,
+                                        processN=Inf,
+                                        errorRestart="checkNoScore",
+                                        listenerSet=NULL,
+                                        srs=NULL,evidenceQueue=NULL,
+                                        sender="EABN",...) {
+                      if (is.null(evidenceQueue))
+                        evidenceQueue=new("ListQueue",app)
                       callSuper(app=app,warehouseObj=warehouse,
-                                srs=NULL,listenerSet=listenerSet,
+                                srs=srs,listenerSet=listenerSet,
                                 statistics=statistics,
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
-                                errorRestart=errorRestart[1], 
+                                errorRestart=errorRestart[1],
+                                evidenceQueue=evidenceQueue,
                                 ...)
                   },
                   stats = function() {
@@ -45,20 +51,11 @@ BNEngine <-
                   saveStats = function(stats) {
                     stop("Abstract method.")
                   },
-                  evidenceSets = function() {
-                    stop("Abstract method.")
-                  },
-                  setProcessed= function (mess) {
-                    mess@processed <- TRUE
-                    saveRec(mess,evidenceSets())
-                    mess
-                  },
-                  setError= function (mess,e) {
-                    markAsError(mess,evidenceSets(),e)
-                    mess
+                  evidenceSet = function() {
+                    evidenceQueue
                   },
                   fetchNextEvidence = function() {
-                    stop("Abstract Method")
+                    evidenceSet()$fetchNextMessage()
                   },
                   getHistNodes = function() {
                     histNodes
@@ -69,10 +66,13 @@ BNEngine <-
                     histNodes <<- nodenames
                   },
                   studentRecords = function () {
-                    stop("Abstract method.")
+                    if (is.null(srs))
+                      stop("Student record set not initialized.")
                     srs
                   },
                   warehouse = function () {
+                    if (is.null(warehouseObj))
+                      stop("Warehouse not initialized.")
                     if (nrow(WarehouseManifest(warehouseObj))==0L) {
                       loadManifest(.self)
                     }
@@ -111,7 +111,7 @@ BNEngine <-
                   },
                   setRestart = function(newRestart=c("checkNoScore",
                                                      "stopProcessing",
-                                                     "scoreAvailable"))  
+                                                     "scoreAvailable"))
                     errorRestart <<- newRestart[1]
                   ))
 
@@ -121,8 +121,13 @@ BNEngine <-
 ##                              key="Name")
 
 
-BNEngine <- function(app="default",session,listenerSet=NULL,
-                     waittime=.25, profModel=character(),
+BNEngine <- function(app="default",profModel=character(),
+                     statistics=list(),histnodes=character(),
+                     warehouse=NULL,waittime=.25,
+                     processN=Inf,
+                     errorRestart="checkNoScore",
+                     listenerSet=NULL,
+                     srs=NULL,evidenceQueue=NULL,
                      ...) {
   stop("BNEngine now abstract, use BNMongoEngine or BNSQLEngine.")
 }
@@ -137,15 +142,14 @@ setMethod("notifyListeners","BNEngine",
                sender$listenerSet$notifyListeners(message)
            })
 
-setGeneric("fetchNextEvidence",
-           function (eng) standardGeneric("fetchNextEvidence"))
-setMethod("fetchNextEvidence","BNEngine",
-          function(eng) eng$fetchNextEvidence())
+setMethod("fetchNextMessage","BNEngine",
+          function(queue) fetchNextMessage(queue$evidenceSet()))
 
-setGeneric("markProcessed",
-           function(eng,eve) standardGeneric("markProcessed"))
-setMethod("markProcessed","BNEngine",
-          function(eng,eve) eng$setProcessed(eve))
+setMethod("markAsProcessed",c("BNEngine","P4Message"),
+          function(col,mess) markAsProcessed(col$evidenceSet(),mess))
+
+setMethod("markAsError",c("BNEngine","P4Message"),
+          function(col,mess,e) markAsError(col$evidenceSet(),mess,e))
 
 
 

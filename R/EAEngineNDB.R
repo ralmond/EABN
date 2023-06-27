@@ -6,8 +6,6 @@ BNEngineNDB <-
   setRefClass("BNEngineNDB",
               c(
                   manifest = "data.frame",
-                  histnodes = "character",
-                  evidenceQueue="list",
                   statmat="data.frame",
                   activeTest="character"
               ),
@@ -20,18 +18,17 @@ BNEngineNDB <-
                              evidenceQueue=list(),waittime=0,
                              processN=Inf,statmat=data.frame(),
                              activeTest="EAActive",
-                             errorRestart="checkNoScore", 
+                             errorRestart="checkNoScore",
+                             srs=NULL,
                              ...) {
-                      if (is.null(warehouse))
-                        stop("Null warehouse.")
                       callSuper(app=app,warehouse=warehouse,
-                                srs=NULL,listenerSet=listenerSet,
+                                srs=srs,listenerSet=listenerSet,
                                 evidenceQueue=evidenceQueue,
                                 statistics=statistics,statmat=statmat,
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
                                 activeTest=activeTest,
-                                errorRestart=errorRestart[1], 
+                                errorRestart=errorRestart[1],
                                 ...)
                   },
                   fetchStats = function() {
@@ -53,11 +50,7 @@ BNEngineNDB <-
                     es
                   },
                   studentRecords = function() {
-                    if (is.null(srs)) {
-                      srs <<- StudentRecordSet(app=app,warehouse=warehouse(),
-                                              dburi="")
-                    }
-                    srs
+                     srs
                   },
                   fetchManifest = function() {
                     manifest
@@ -99,13 +92,18 @@ BNEngineNDB <- function(app="default",warehouse, listenerSet=NULL,
                      statmat=data.frame(),evidenceQueue=list(),
                      activeTest="EAActive",
                      errorRestart=c("checkNoScore", "stopProcessing",
-                       "scoreAvailable"),
-                      ...) {
+                                    "scoreAvailable"),
+                     srs=StudentRecordSet(app=app,warehouse=warehouse,
+                                          db=MongoDB(noMongo=TRUE)),
+                     ...) {
   ## Removed ... from new, so we can silently drop unused arguments.
+  if (is.null(warehouse)) stop("Warehouse must be supplied.")
+  if (is.null(srs)) stop("Student record set must be supplied.")
   new("BNEngineNDB",app=app,warehouse=warehouse,
       listenerSet=listenerSet,manifest=manifest,processN=processN,
       waittime=waittime,profModel=profModel,
-      activeTest=activeTest,errorRestart=errorRestart[1])
+      activeTest=activeTest,errorRestart=errorRestart[1],srs=srs,
+      ...)
 }
 
 setMethod("evidence","BNEngineNDB",
