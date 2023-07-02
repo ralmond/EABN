@@ -4,7 +4,7 @@
 \title{Covert Student Records to/from JSON}
 \description{
 
-  The \code{\link[Proc4]{as.json}} function takes an
+  The \code{\link[mongo]{as.json}} function takes an
   \code{\linkS4class{StudentRecord}} (among other objects) and turns it
   into JSON.  The function \code{parseStudentRecord} takes the list produced
   as the output to \code{\link[jsonlite]{fromJSON}} and turns it back
@@ -29,7 +29,7 @@ parseStudentRecord(rec)
 }
 \details{
 
-  See the description for \code{\link[Proc4]{as.json}} for more
+  See the description for \code{\link[mongo]{as.json}} for more
   description of the general JSON conversion prototocl.
 
   The \code{\linkS4class{StudentRecord}} contains a
@@ -62,8 +62,8 @@ parseStudentRecord(rec)
 \author{Russell Almond}
 \seealso{
 
-  \code{\linkS4class{StudentRecord}}, \code{\link[Proc4]{as.json}},
-  \code{\link[Proc4]{getOneRec}}, \code{\link[Proc4]{getManyRecs}}
+  \code{\linkS4class{StudentRecord}}, \code{\link[mongo]{as.json}},
+  \code{\link[mongo]{getOneRec}}, \code{\link[mongo]{getManyRecs}}
 
   \code{\link{fetchSM}}, \code{\link[Peanut]{PnetSerialize}}
 

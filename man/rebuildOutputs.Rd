@@ -9,20 +9,16 @@
 
 }
 \usage{
-rebuildOutputs(appid, EA.config, EAeng.local, outdir)
+rebuildOutputs(listenerSet, appid, EA.config, outdir)
 }
 \arguments{
+  \item{listenerSet}{The engine's listener set (which contains a registry for
+    output files).}
   \item{appid}{A character string giving the global unique identifier for
     the application being run.  This is normally formatted like a URL,
     and \code{basename(app)} is used as a short name.}
   \item{EA.config}{A named list containing the configuration details.  See the
     \sQuote{Configuration} section below.}
-  \item{EAeng.local}{A named list containing additional parameters for the
-    engine constructor.  The intention that these are local
-    configuraiton paramete (e.g., database names and passwords) as
-    opposed to more global information.  Note this must have an element
-    named \dQuote{dburi} which gives the URI for the database, or which
-    should be blank if the no database engine is to be used.}
   \item{outdir}{The pathname of the directory to which output files
     will be written.}
 }

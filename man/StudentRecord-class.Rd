@@ -61,6 +61,8 @@ Objects can be created by calls to the function
     \item{\code{hist}:}{Object of class \code{"list"} list of history lists for
       the designed history variables.  There is one element for each
       history variable.}
+    \item{\code{issues}:}{A character vector giving errors and warnings
+      from processing evidence for this record.}
     \item{\code{prev_id}:}{Object of class \code{"character"} the Mongo
       ID of the previous student model.}
   }

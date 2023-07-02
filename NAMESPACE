@@ -3,9 +3,10 @@ import(mongo)
 import(Proc4)
 import(Peanut)
 import(futile.logger)
+importFrom("withr","defer")
 ## Use explict imports from RNetica so we can keep track of dependencies.
 #import(RNetica)
-importFrom("mongolite","mongo")
+#importFrom("mongolite","mongo")
 importFrom("jsonlite", "toJSON", "fromJSON","base64_enc","base64_dec")
 importFrom("utils","read.csv","write.csv")
 importFrom("stats","na.omit")
@@ -27,7 +28,7 @@ exportClasses(EvidenceSet)
 exportMethods(seqno, "seqno<-")
 
 exportClass(BNEngine,BNEngineMongo)
-export(BNEngine,BNEngineMongo, loadManifest, setupDefaultSR,
+export(BNEngine,BNEngineMongo, newBNEngineMongo, loadManifest, setupDefaultSR,
        logEvidence, accumulateEvidence, configStats, updateStats,
        announceStats, baselineHist, updateHist, getRecordForUser,
        handleEvidence, mainLoop, updateSM)
@@ -36,7 +37,7 @@ exportMethods(notifyListeners)
 export(trimTable,doBuild,doRunrun,rebuildOutputs,buildAppHist,buildHistMat)
 
 exportClass(BNEngineNDB)
-export(BNEngineNDB)
+export(BNEngineNDB, newBNEngineNDB)
 
 
 

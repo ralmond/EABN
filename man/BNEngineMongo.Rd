@@ -5,7 +5,7 @@
 
   The \code{\linkS4class{BNEngineMongo}} is a
   \code{\linkS4class{BNEngine}} which is attached to a
-  \code{\link[Proc4]{MongoDB-class}} database, which hold both the queue and
+  \code{\link[mongo]{MongoDB-class}} database, which hold both the queue and
   the \code{\linkS4class{StudentRecordSet}}.  
 
 }
@@ -24,7 +24,7 @@ admindbname = "Proc4", waittime = 0.25, profModel = character(),
   \item{listenerSet}{A \code{\link[Proc4]{ListenerSet}} which contains the
     listeners for clients of the engine's messages.}
   \item{dburi}{A character scalar giving the login information for the
-    mongo database.  See \code{\link[Proc4]{makeDBuri}}.}
+    mongo database.  See \code{\link[mongo]{makeDBuri}}.}
   \item{dbname}{The name for the EA database.}
   \item{processN}{The number of records to process before stopping.  The
     default value \code{Inf} runs the process until the active flag is
@@ -43,7 +43,7 @@ admindbname = "Proc4", waittime = 0.25, profModel = character(),
   This creates an uninitialized \code{\linkS4class{BNEngine}},
   specifically a \code{\linkS4class{BNEngineMongo}}.
 
-  The \code{\link[Proc4]{makeDBuri}} function provides a useful
+  The \code{\link[mongo]{makeDBuri}} function provides a useful
   shorthand for calculating the \code{dburi} field.
 
 }

@@ -16,7 +16,7 @@
 }
 \usage{
 getSR(srs, uid, ser = "")
-newSR(srs, uid)
+newSR(srs, uid, timestamp = Sys.time())
 saveSR(srs, rec)
 clearSRs(srs)
 }
@@ -29,6 +29,8 @@ clearSRs(srs)
     either be a list which is the output of
     \code{\link[jsonlite]{fromJSON}} or \code{NULL}.}
   \item{rec}{A \code{\linkS4class{StudentRecord}} to be saved.}
+  \item{timestamp}{A \code{POSIXt} datetime indicating the last
+    modification date of the record.}
 }
 \details{
 
@@ -54,7 +56,7 @@ clearSRs(srs)
       function \code{saveSR} is called to save the new record.}
     \item{\code{saveSR}}{If the database exists, the student record is
       saved to the database.  Otherwise, if no
-      \code{\link[Proc4]{m_id}} exists for the record one is created
+      \code{\link[mongo]{m_id}} exists for the record one is created
       from the \code{\link[Proc4]{uid}} and \code{\link{seqno}}.}
     \item{\code{clearSRs}}{In database mode, it clears the database.
       Otherwise, nothing is done.}

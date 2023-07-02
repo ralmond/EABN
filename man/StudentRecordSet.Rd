@@ -11,17 +11,14 @@
 }
 \usage{
 StudentRecordSet(app = "default", warehouse = NULL,
-  dburi = "mongodb://localhost", dbname = "EARecords", ...)
+                 db=MongoDB("StudentRecords","EARecords"),...)
 }
 \arguments{
   \item{app}{A character scalar providing a guid for the application.}
   \item{warehouse}{An object of type \code{\link[Peanut]{PnetWarehouse}}
     that contains already built student models.}
-  \item{dburi}{A character scalar giving the URI for the database, or an
-    empty character string if the record set is not connected to the
-    database. }
-  \item{dbname}{A character scalar giving the name of the database where
-    records are stored.}
+  \item{db}{A \code{\link[mongo::JSONDB-class]{JSONDB}} object which store the student
+    records. }
   \item{\dots}{Other arguments for future extensions.}
 }
 \details{
@@ -31,13 +28,13 @@ StudentRecordSet(app = "default", warehouse = NULL,
   student models and possibly a database containing the student records.
 
   The \code{StudentRecordSet} operates in two modes, depending on the
-  value of \code{dburi}.  If \code{dburi} references a
-  \code{\link[Proc4]{MongoDB-class}} database, then the
+  value of \code{db}.  If \code{db} references a
+  \code{\link[mongo]{MongoDB-class}} database, then the
   \code{StudentRecordSet} set will save student records (including
   serialized Bayes nets) to the database and restore them on demmand.
   This facilitates scoring across several sessions.
 
-  If the \code{dburi} argument is an empty string or \code{NULL} no
+  If the \code{db} argument has the \code{noMongo} flag, no
   database connection will be created.  Instead, the calls to the
   \code{\link{getSR}} function should pass in a serialized version of
   the student record function.  If no serialized record is available, a

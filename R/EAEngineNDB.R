@@ -15,7 +15,8 @@ BNEngineNDB <-
                     function(app="default",warehouse=NULL, listenerSet=NULL,
                              manifest=data.frame(),profModel=character(),
                              statistics=list(), histNodes=character(),
-                             evidenceQueue=list(),waittime=0,
+                             evidenceQueue=new("ListQueue",app,list()),
+                             waittime=0,
                              processN=Inf,statmat=data.frame(),
                              activeTest="EAActive",
                              errorRestart="checkNoScore",
@@ -86,16 +87,17 @@ BNEngineNDB <-
                     methods::show(paste("<EABN: ",app,", No DB>"))
                   }))
 
-BNEngineNDB <- function(app="default",warehouse, listenerSet=NULL,
-                     manifest=data.frame(),processN=Inf,
-                     waittime=.25, profModel=character(),
-                     statmat=data.frame(),evidenceQueue=list(),
-                     activeTest="EAActive",
-                     errorRestart=c("checkNoScore", "stopProcessing",
-                                    "scoreAvailable"),
-                     srs=StudentRecordSet(app=app,warehouse=warehouse,
-                                          db=MongoDB(noMongo=TRUE)),
-                     ...) {
+newBNEngineNDB <- function(app="default",warehouse, listenerSet=NULL,
+                           manifest=data.frame(),processN=Inf,
+                           waittime=.25, profModel=character(),
+                           statmat=data.frame(),
+                           evidenceQueue=new("ListQueue",app,list()),
+                           activeTest="EAActive",
+                           errorRestart=c("checkNoScore", "stopProcessing",
+                                          "scoreAvailable"),
+                           srs=StudentRecordSet(app=app,warehouse=warehouse,
+                                                db=MongoDB(noMongo=TRUE)),
+                           ...) {
   ## Removed ... from new, so we can silently drop unused arguments.
   if (is.null(warehouse)) stop("Warehouse must be supplied.")
   if (is.null(srs)) stop("Student record set must be supplied.")

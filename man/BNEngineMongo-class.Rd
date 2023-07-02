@@ -168,12 +168,12 @@ showClass("BNEngineMongo")
       functions, so these should be called instead of directly accessing
       the fields.}
     \item{\code{manifestdb()}:}{ Returns the
-      \code{\link[Proc4]{MongoDB-class}} handle to the manifest information
+      \code{\link[mongo]{MongoDB-class}} handle to the manifest information
       collection.  }
-    \item{\code{admindb()}:}{ Returns the \code{\link[Proc4]{MongoDB-class}}
+    \item{\code{admindb()}:}{ Returns the \code{\link[mongo]{MongoDB-class}}
       handle to the \dQuote{AuthorizedApps} collection.}
     \item{\code{histNodesdb()}:}{ Returns the
-      \code{\link[Proc4]{MongoDB-class}} handle to the hist nodes collection. }
+      \code{\link[mongo]{MongoDB-class}} handle to the hist nodes collection. }
     \item{\code{saveManifest(manifest)}:}{ Saves the current
       \code{\link[Peanut]{PnetWarehouse}} manifest to the
       \code{manifestdb()} collection }
@@ -191,7 +191,7 @@ showClass("BNEngineMongo")
     \item{\code{setError(mess, e)}:}{ Added an error message to an
       evidence set. }
     \item{\code{evidenceSets()}:}{ Returns a
-      \code{\link[Proc4]{MongoDB-class}} handle to the collection/queue of
+      \code{\link[mongo]{MongoDB-class}} handle to the collection/queue of
       evidence sets. }
     \item{\code{getHistNodes()}:}{ Fetches the history nodes from the
       \code{histNodesdb()} collection. }

@@ -28,7 +28,7 @@ stats2json(slist, flatten=FALSE)
 
   The function \code{unparseStats} massages the list of statistics so it
   will be output in clean JSON (in particular, using
-  \code{\link[Proc4]{unboxer}} to make sure scalars appear as scalars
+  \code{\link[mongo]{unboxer}} to make sure scalars appear as scalars
   and not vectors). The function \code{stats2json} is just
   \code{\link[jsonlite]{toJSON}(unparseStats(slist)).} 
 
@@ -47,7 +47,7 @@ stats2json(slist, flatten=FALSE)
 
   The function \code{unparseStats} returns a list which is ready to be
   passed to \code{\link[jsonlite]{toJSON}}.  In particular, scalars are
-  marked using \code{\link[Proc4]{unboxer}}.
+  marked using \code{\link[mongo]{unboxer}}.
 
   The function \code{stats2json} returns a string containing the JSON.
 
@@ -65,7 +65,7 @@ stats2json(slist, flatten=FALSE)
 }
 \seealso{
 
-  \code{\link[Proc4]{ParseMessage}} gives general information about how
+  \code{\link[mongo]{buildObject}} gives general information about how
   the parsing/unparsing protocol works.
 
   \code{\link[Peanut]{Statistic}} gives a list of available statistics.

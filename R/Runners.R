@@ -150,30 +150,33 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   sslops <- EAeng.local$ssloptions
   if (is.null(sslops)) sslops <- mongolite::ssl_options()
   dbname <- EAeng.local$dbname
-  if (is.null(dbname)) dbname<-""
+  if (is.null(dbname)) dbname<-"EARecords"
   admindbname <- EAeng.local$admindbname
-  if (is.null(admindbname)) admindbname<-""
+  if (is.null(admindbname)) admindbname<-"Proc4"
+  mongoverbose <- EAeng.local$mongoverbose
+  if (is.null(mongoverbose)) mongoverbose <- FALSE
 
   flog.info("Building and configuring engine.")
 
   EAeng.params <- EA.config$EAEngine
+  EAeng.params$dburi <- dburi
   if (is.null(dburi)) {
     EAeng.params$activeTest <- EAeng.local$activeTest
     srsDB <- MongoDB(noMongo=TRUE)
   } else {
     cnms <- EA.config$colnames
-    colname <- ifelse(is.null(cnms$stat),"Statistics",cnms$stat)
-    EAeng.params$statDB <- MongoDB(colname,dbname,dburi,sslops)
-    colname <- ifelse(is.null(cnms$stat),"manifest",cnms$stat)
-    EAeng.params$manifestDB <- MongoDB(colname,dbname,dburi,sslops)
-    colname <- ifelse(is.null(cnms$stat),"evidence",cnms$stat)
-    EAeng.params$evidenceDB<- MongoDB(colname,dbname,dburi,sslops)
-    colname <- ifelse(is.null(cnms$stat),"hist",cnms$stat)
-    EAeng.params$histNodesDB<- MongoDB(colname,dbname,dburi,sslops)
-    colname <- ifelse(is.null(cnms$stat),"admin",cnms$stat)
-    EAeng.params$adminDB<- MongoDB(colname,admindbname,dburi,sslops)
-    colname <- ifelse(is.null(cnms$stat),"studentRecords",cnms$stat)
-    srsDB <- MongoDB(colname,dbname,dburi,sslops)
+    EAeng.params$sslops <- sslops
+    EAeng.params$eadbname <- dbname
+    EAeng.params$admindbnam <- admindbname
+    EAeng.params$mongoverbose <- mongoverbose
+    srscol <- ifelse(is.null(cnms$srec),"StudentRecords",cnms$srec)
+    srDB <- MongoDB(srscol,dbname,dburi,mongoverbose,options=sslops)
+    EAeng.params$statcol <- ifelse(is.null(cnms$stats),"Statistics",cnms$stats)
+    EAeng.params$manifestCol <- ifelse(is.null(cnms$manifest),"Manifest",cnms$manifest)
+    EAeng.params$evidenceCol<- ifelse(is.null(cnms$evidence),"EvidenceSets",cnms$evidence)
+    EAeng.params$histcol <- ifelse(is.null(cnms$hist),"histNodes",cnms$hist)
+    EAeng.params$admincol- ifelse(is.null(cnms$stat),"AuthorizedApps",cnms$stat)
+    
   }
 
   ## Force to character, JSON leave as list.
@@ -214,7 +217,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   EAeng.params$srs <- StudentRecordSet(appid,EAeng.params$warehouse,
                                        db=srsDB)
   eng <- withFlogging({
-    do.call(ifelse(is.null(dburi),BNEngineNDB,BNEngineMongo),
+    do.call(ifelse(is.null(dburi),newBNEngineNDB,newBNEngineMongo),
             EAeng.params)
   }, context="Constructing Engine.")
   if (is(eng,'try-error')) {
@@ -242,7 +245,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
     flog.info("Preparing Database.")
 
     ## Clean Messages
-    if (isTRUE(filter$doRemove)) {
+    if (isTRUE(EA.config$filter$doRemove)) {
       cleanMessageQueue(eng$evdienceSet(),EA.config$filter$remove)
     }
     ## Clearing Student Records
@@ -256,12 +259,12 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
     importMessages(eng$evidenceSet(),EA.config$importFile,data.dir)
 
     ## Purging Unused messages
-    if (isTRUE(filter$doPurge)) {
+    if (isTRUE(EA.config$filter$doPurge)) {
       cleanMessageQueue(eng$evidenceSet(),EA.config$filter$purge)
     }
 
     ## Setting Processed flag.
-    if (isTRUE(filter$doReprocess)) {
+    if (isTRUE(EA.config$filter$doReprocess)) {
       resetProcessedMessages(eng$evidenceSet(),EA.config$filter$reprocess)
     }
   }
@@ -382,7 +385,7 @@ doClearSRS <- function (srs) {
 doResetListeners <- function (ls,whichOnes,appid) {
   flog.info("Reseting Listners.")
   status <- withFlogging({
-    resetListeners(eng$listenerSet,whichOnes, appid)
+    resetListeners(ls,whichOnes, appid)
   }, context="Resetting Listeners.")
   if (is(status,'try-error')) {
     flog.fatal("Error while resetting listeners.",status)

@@ -376,8 +376,7 @@ setGeneric("getSR", function (srs,uid,ser="") standardGeneric("getSR"))
 setGeneric("revertSM", function (srs,uid,rec,keepIssues=TRUE)
   standardGeneric("revertSM"))
 setGeneric("saveSR", function (srs,rec) standardGeneric("saveSR"))
-setGeneric("newSR", function (srs,uid,timestamp=Sys.time(),
-                              keep=FALSE, delete=FALSE)
+setGeneric("newSR", function (srs,uid,timestamp=Sys.time())
   standardGeneric("newSR"))
 setGeneric("clearSRs", function(srs) standardGeneric("clearSRs"))
 
@@ -426,7 +425,7 @@ setMethod("revertSM", c("StudentRecordSet","ANY","StudentRecord","ANY"),
 
 
 setMethod("saveSR", c("StudentRecordSet","ANY"), function (srs,rec) {
-  if (mdbAvaliable(srs$recorddb())) {
+  if (mdbAvailable(srs$recorddb())) {
     saveRec(srs$recorddb(),rec)
   } else {
     if (length(m_id(rec))==0L || is.na(m_id(rec))) {
@@ -437,7 +436,7 @@ setMethod("saveSR", c("StudentRecordSet","ANY"), function (srs,rec) {
 })
 
 setMethod("newSR", c("StudentRecordSet","ANY"),
-          function (srs,uid,timestamp=Sys.time(), keep=FALSE, delete=FALSE) {
+          function (srs,uid,timestamp=Sys.time()) {
   flog.debug("Making new student record for  %s", uid)
   dsr <- srs$defaultSR
   oldnet <- WarehouseFetch(srs$warehouse(),as.legal.name(srs$warehouse(),uid))
