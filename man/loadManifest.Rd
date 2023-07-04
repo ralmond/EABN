@@ -81,7 +81,7 @@ loadManifest(eng, manifest = data.frame())
 
 }
 \examples{
-%\dontrun{
+\dontrun{
 ## Requires PNetica
 library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
@@ -104,9 +104,9 @@ cl <- new("CaptureListener")
 listeners <- list("cl"=cl)
 
 ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                  dburi="", listeners=listeners)
+                  db=MongoDB(noMongo=TRUE), listeners=listeners)
 
-eng <- BNEngineNDB(app=app,warehouse=Nethouse,
+eng <- newBNEngineNDB(app=app,warehouse=Nethouse,
                      listenerSet=ls,manifest=netman,
                      profModel="miniPP_CM",
                      histNodes="Physics",
@@ -119,7 +119,7 @@ stopifnot(nrow(WarehouseManifest(eng$warehouse())) == 0L)
 loadManifest(eng,netman)
 stopifnot(nrow(WarehouseManifest(eng$warehouse())) == 5L)
 
-%PNetica%}
+}
 }
 \keyword{ interface }
 \keyword{ manip }

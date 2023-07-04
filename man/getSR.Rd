@@ -66,10 +66,10 @@ clearSRs(srs)
 \value{
 
   The functions \code{getSR}, \code{newSR} and \code{saveSR} return the
-  student record or \code{NULL} if the record was not found or created. 
+  student record or \code{NULL} if the record was not found or created.
 
   The function \code{clearSRs} returns the student record set (its
-  argument). 
+  argument).
 
 }
 \author{Russell Almond}
@@ -86,7 +86,7 @@ clearSRs(srs)
 }
 \examples{
 
-%\dontrun{
+\dontrun{
 ## Requires PNetica
 library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
@@ -108,16 +108,16 @@ cl <- new("CaptureListener")
 listeners <- list("cl"=cl)
 
 ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                  dburi="", listeners=listeners)
+                  db=MongoDB(noMongo=TRUE), listeners=listeners)
 
-eng <- BNEngineNDB(app=app,warehouse=Nethouse,
+eng <- newBNEngineNDB(app=app,warehouse=Nethouse,
                      listenerSet=ls,manifest=netman,
                      profModel="miniPP_CM",
                      histNodes="Physics",
                      statmat=stattab,
                      activeTest="EAActive.txt")
 
-## Standard initialization methods.                     
+## Standard initialization methods.
 loadManifest(eng,netman)
 eng$setHistNodes("Physics")
 configStats(eng,stattab)
@@ -159,7 +159,7 @@ stopifnot(abs(eap1-eap1a) < .001)
 stopifnot(nrow(history(sr1a,"Physcis"))==2L)
 
 
-%PNetica%}
+}
 
 ##  <<Here>> Need test with Mongo implementation
 library(PNetica)  ## Must load to setup Netica DLL
@@ -182,21 +182,20 @@ cl <- new("CaptureListener")
 listeners <- list("cl"=cl)
 
 ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                dbname="EARecords", dburi=makeDBuri(),
-                listeners=listeners,admindbname="Proc4",
-                colname="Messages")
+                  db=mongo::MongoDB("Messages","EARecords", makeDBuri()),
+                  registryDB=mongo::MongoDB("OutputFiles","Proc4",makeDBuri()),
+                  listeners=listeners)
 
-
-eng <- BNEngineMongo(app=app,warehouse=Nethouse,
+eng <- newBNEngineMongo(app=app,warehouse=Nethouse,
                      listenerSet=ls,
                      profModel="miniPP_CM",
                      histNodes="Physics",
                      dburi=makeDBuri(),
-                     dbname="EARecords",admindbname="Proc4") 
+                     dbname="EARecords",admindbname="Proc4")
 
 
 
-## Standard initialization methods.                     
+## Standard initialization methods.
 loadManifest(eng,netman)
 eng$setHistNodes("Physics")
 configStats(eng,stattab)

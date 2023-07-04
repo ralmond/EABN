@@ -13,7 +13,7 @@
 }
 \usage{
 accumulateEvidence(eng, rec, evidMess, debug = 0)
-handleEvidence(eng, evidMess, srser = NULL, debug = 0) 
+handleEvidence(eng, evidMess, srser = NULL, debug = 0)
 }
 \arguments{
   \item{eng}{The \code{\linkS4class{BNEngine}} which controls the
@@ -34,7 +34,7 @@ handleEvidence(eng, evidMess, srser = NULL, debug = 0)
     \item{Update the student record to associate it with the new
       evidence (\code{\link{updateRecord}}).}
     \item{Update the student model with the new evidence
-      (\code{\link{updateSM}}).} 
+      (\code{\link{updateSM}}).}
     \item{Update the statistics for the new student model
       (\code{\link{updateStats}}).}
     \item{Update the history for the new evidence
@@ -56,11 +56,11 @@ handleEvidence(eng, evidMess, srser = NULL, debug = 0)
     \item{Mark the evidence as belonging to this student record
       (\code{\link{logEvidence}}).}
     \item{Update the record by calling \code{accumulateEvidence}.}
-    \item{Mark the evidence as processed (\code{\link{markProcessed}}).}
+    \item{Mark the evidence as processed (\code{\link[Proc4]{markAsProcessed}}).}
   }
   If an error is encountered, then the error message is added to the
-  evidence set.  
-  
+  evidence set.
+
 
 }
 \value{
@@ -69,13 +69,13 @@ handleEvidence(eng, evidMess, srser = NULL, debug = 0)
   processed.  If an error occurs during the call to
   \code{accumulateEvidence} both function will return an object of class
   \code{try-error} instead of the student record.
-  
+
 }
 \references{
 
   Almond, Mislevy, Steinberg, Yan and Williamson (2015).  \emph{Bayesian
     Networks in Educational Assessment}.  Springer.  Especially Chapters
-  5 and 13. 
+  5 and 13.
 
 
 }
@@ -121,7 +121,7 @@ handleEvidence(eng, evidMess, srser = NULL, debug = 0)
   \code{\linkS4class{BNEngineMongo}}, \code{\linkS4class{BNEngineNDB}}
   \code{\linkS4class{StudentRecord}},
   \code{\linkS4class{EvidenceSet}}
-  
+
 
   Main Loop Functions:
   \code{\link{mainLoop}},
@@ -133,8 +133,8 @@ handleEvidence(eng, evidMess, srser = NULL, debug = 0)
   \code{\link{updateHist}},
   \code{\link{announceStats}},
   \code{\link{saveSR}}
-  
-    
+
+
 }
 \examples{
 
@@ -160,16 +160,16 @@ cl <- new("CaptureListener")
 listeners <- list("cl"=cl)
 
 ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                  dburi="", listeners=listeners)
+                  db=MongoDB(noMongo=TRUE), listeners=listeners)
 
-eng <- BNEngineNDB(app=app,warehouse=Nethouse,
+eng <- newBNEngineNDB(app=app,warehouse=Nethouse,
                      listenerSet=ls,manifest=netman,
                      profModel="miniPP_CM",
                      histNodes="Physics",
                      statmat=stattab,
                      activeTest="EAActive.txt")
 
-## Standard initialization methods.                     
+## Standard initialization methods.
 loadManifest(eng,netman)
 eng$setHistNodes("Physics")
 configStats(eng,stattab)
@@ -197,7 +197,7 @@ sr1.ser <- as.json(sr1)
 e2 <- EvidenceSet(uid="S2",app="Test",context="PPconjEM",
                   obs=list("ConjunctiveObs"="Wrong"))
 
-sr2 <- handleEvidence(eng,e2,fromJSON(sr1.ser))
+sr2 <- handleEvidence(eng,e2,jsonlite::fromJSON(sr1.ser))
 stopifnot(!is(sr2,'try-error'))
 eap2 <- stat(sr2,"Physics_EAP")
 stopifnot(uid(sr2)==uid(sr1),

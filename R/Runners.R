@@ -176,7 +176,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
     EAeng.params$evidenceCol<- ifelse(is.null(cnms$evidence),"EvidenceSets",cnms$evidence)
     EAeng.params$histcol <- ifelse(is.null(cnms$hist),"histNodes",cnms$hist)
     EAeng.params$admincol- ifelse(is.null(cnms$stat),"AuthorizedApps",cnms$stat)
-    
+
   }
 
   ## Force to character, JSON leave as list.
@@ -246,7 +246,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
 
     ## Clean Messages
     if (isTRUE(EA.config$filter$doRemove)) {
-      cleanMessageQueue(eng$evdienceSet(),EA.config$filter$remove)
+      cleanMessageQueue(eng$evdienceSets(),EA.config$filter$remove)
     }
     ## Clearing Student Records
     if (isTRUE(EA.config$SRreset)) {
@@ -256,7 +256,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
     ## Import
     data.dir <- EA.config$dataDir
     if (is.null(data.dir)) data.dir <- config.dir
-    importMessages(eng$evidenceSet(),EA.config$importFile,data.dir)
+    importMessages(eng$evidenceSets(),EA.config$importFile,data.dir)
 
     ## Purging Unused messages
     if (isTRUE(EA.config$filter$doPurge)) {
@@ -265,7 +265,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
 
     ## Setting Processed flag.
     if (isTRUE(EA.config$filter$doReprocess)) {
-      resetProcessedMessages(eng$evidenceSet(),EA.config$filter$reprocess)
+      resetProcessedMessages(eng$evidenceSets(),EA.config$filter$reprocess)
     }
   }
   setupDefaultSR(eng)

@@ -39,20 +39,6 @@ BNEngineNDB <-
                     stats$app <- app
                     statmat <<- statmat
                   },
-                  ## Here
-                  evidenceSets = function() {
-                    NULL
-                  },
-                  fetchNextEvidence = function() {
-                    if (length(evidenceQueue) == 0L)
-                      return(NULL)
-                    es <- evidenceQueue[[1]]
-                    evidenceQueue <<- evidenceQueue[-1]
-                    es
-                  },
-                  studentRecords = function() {
-                     srs
-                  },
                   fetchManifest = function() {
                     manifest
                   },

@@ -4,7 +4,7 @@
 \description{
 
   The \code{\linkS4class{BNEngine}} contains a
-  \code{\linkS4class{StudentRecordSet}}, which is a collection of 
+  \code{\linkS4class{StudentRecordSet}}, which is a collection of
   \code{\linkS4class{StudentRecord}} objects.  The function
   \code{getRecordForUser} fetches one from the collection (if it exists)
   or creates a new one.
@@ -35,7 +35,7 @@ getRecordForUser(eng, uid, srser = NULL)
 
   If no student record is available for the \code{uid}, then a new one
   is created by cloning the default student record (see
-  \code{\link{setupDefaultSR}}).  
+  \code{\link{setupDefaultSR}}).
 
   This function mostly just calls \code{\link{getSR}} on the
   \code{\linkS4class{StudentRecordSet}}; however, if a new record is
@@ -52,8 +52,8 @@ getRecordForUser(eng, uid, srser = NULL)
   the record could be replaced with a new version, rendering the student
   model in the old records inactive.  Be careful when dealing with old
   records.
-  
-  
+
+
 }
 \value{
 
@@ -64,7 +64,7 @@ getRecordForUser(eng, uid, srser = NULL)
 
   Almond, Mislevy, Steinberg, Yan and Williamson (2015).  \emph{Bayesian
     Networks in Educational Assessment}.  Springer.  Especially Chapter
-  13. 
+  13.
 
 }
 \author{Russell Almond}
@@ -102,16 +102,16 @@ cl <- new("CaptureListener")
 listeners <- list("cl"=cl)
 
 ls <- ListenerSet(sender= "EAEngine[Test]",
-                  dburi="", listeners=listeners)
+                  db=MongoDB(noMongo=TRUE), listeners=listeners)
 
-eng <- BNEngineNDB(app="Test",warehouse=Nethouse,
+eng <- newBNEngineNDB(app="Test",warehouse=Nethouse,
                      listenerSet=ls,manifest=netman,
                      profModel="miniPP_CM",
                      histNodes="Physics",
                      statmat=stattab,
                      activeTest="EAActive.txt")
 
-## Standard initialization methods.                     
+## Standard initialization methods.
 loadManifest(eng,netman1)
 eng$setHistNodes("Physics")
 configStats(eng,stattab)
@@ -141,7 +141,7 @@ stopifnot(nrow(history(sr1,"Physcis"))==2L)
 sr1.ser <- as.json(sr1)
 WarehouseFree(Nethouse,PnetName(sm(sr1))) # Delete student model to
                                            # force restore.
-sr1a <- getRecordForUser(eng,"Student1",fromJSON(sr1.ser))
+sr1a <- getRecordForUser(eng,"Student1",jsonlite::fromJSON(sr1.ser))
 #PnetCompile(sm(sr1a))
 eap1a <- stat(sr1a,"Physics_EAP")
 stopifnot(abs(eap1-eap1a) < .001)

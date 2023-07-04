@@ -15,7 +15,8 @@
 newBNEngineNDB(app = "default", warehouse, listenerSet = NULL,
   manifest = data.frame(), processN = Inf, waittime = 0.25,
   profModel = character(), statmat = data.frame(),
-  evidenceQueue = new("ListQueue",list()), activeTest = "EAActive",
+  evidenceQueue = new("ListQueue",app, list()),
+  activeTest = "EAActive",
   errorRestart=c("checkNoScore","stopProcessing","scoreAvailable"),
   srs =StudentRecordSet(app=app,warehouse=warehouse, db=MongoDB(noMongo=TRUE)),
   ...)

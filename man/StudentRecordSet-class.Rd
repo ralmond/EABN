@@ -19,7 +19,7 @@ across scoring sessions.
 \section{Extends}{
 
 All reference classes extend and inherit methods from
-\code{"\linkS4class{envRefClass}"}. 
+\code{"\linkS4class{envRefClass}"}.
 
 }
 \details{
@@ -64,7 +64,7 @@ All reference classes extend and inherit methods from
     \item{getSR}{\code{signature(srs = "StudentRecordSet",
         uid="ANY",ser="character")}: Returns the student record for the
       specified ID. If \code{ser} is supplied it should be a json list
-      object containing the student record.} 
+      object containing the student record.}
     \item{newSR}{\code{signature(srs = "StudentRecordSet",
         uid="character")}: Creates a new Student Record for the
       specified ID by cloning the default student record. }
@@ -83,7 +83,7 @@ All reference classes extend and inherit methods from
 
   \code{\link[Peanut]{PnetWarehouse}} and \code{\link[Peanut]{Pnet}} for
   information about the contained Bayesian networks.
-  
+
   \code{\linkS4class{BNEngine}} for the engine that holds it.
 }
 \examples{
@@ -96,17 +96,13 @@ showClass("StudentRecordSet")
       the application identifier }
     \item{\code{dbname}:}{Object of class \code{character} which
       contains the name of the database.}
-    \item{\code{dburi}:}{Object of class \code{character} containing the
-      URI for connecting to the database, for example
-      \dQuote{mongodb://localhost:271017}. To create a record set not
-      connecteded to the database, set this value to \code{character()}.}
-    \item{\code{db}:}{Object of class \code{MongoDB} a connection to the
+    \item{\code{db}:}{Object of class \code{\link[mongo]{JSONDB}} a connection to the
       database or \code{NULL} if the object is not connected to the
       database.  Users should call the \code{recorddb()} function rather
       than access this field directly.}
     \item{\code{warehouse}:}{Object of class
       \code{\link[Peanut]{PnetWarehouse}} which contains already loaded
-      nets. } 
+      nets. }
     \item{\code{defaultSR}:}{Object of class
       \code{\linkS4class{StudentRecord}} or \code{NULL}.  This is the
       default student record which is cloned to create new studnet records. }

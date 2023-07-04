@@ -65,6 +65,8 @@ cat("This sample file is available in", system.file("conf/RunEABN.R",
 library(R.utils)
 library(EABN)
 library(PNetica)
+library(futile.logger)
+library(jsonlite)
 
 if (interactive()) {
   ## Edit these for the local application
@@ -88,7 +90,7 @@ source("/usr/local/share/Proc4/EAini.R")
 ## Assumes the path config.dir (set in the INI file) contains a file
 ## config.json giving the location of the necessary configuration files
 ## and network files.
-EA.config <- fromJSON(file.path(config.dir,"config.json"),FALSE)
+EA.config <- jsonlite::fromJSON(file.path(config.dir,"config.json"),FALSE)
 
 app <- as.character(Proc4.config$apps[appStem])
 if (length(app)==0L || any(app=="NULL")) {

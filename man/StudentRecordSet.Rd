@@ -17,7 +17,7 @@ StudentRecordSet(app = "default", warehouse = NULL,
   \item{app}{A character scalar providing a guid for the application.}
   \item{warehouse}{An object of type \code{\link[Peanut]{PnetWarehouse}}
     that contains already built student models.}
-  \item{db}{A \code{\link[mongo::JSONDB-class]{JSONDB}} object which store the student
+  \item{db}{A \code{\link[mongo]{JSONDB}} object which store the student
     records. }
   \item{\dots}{Other arguments for future extensions.}
 }
@@ -47,7 +47,7 @@ StudentRecordSet(app = "default", warehouse = NULL,
 \author{Russell Almond}
 \seealso{
 
-  \code{\linkS4class{StudentRecordSet}}, \code{\linkS4class{StudentRecord}}, 
+  \code{\linkS4class{StudentRecordSet}}, \code{\linkS4class{StudentRecord}},
   \code{\link{getSR}}, \code{\link{saveSR}}, \code{\link{newSR}},
   \code{\link{clearSRs}}
 }
@@ -71,8 +71,8 @@ Nethouse <- PNetica::BNWarehouse(manifest=netman1,session=sess,key="Name",
 
 ## Setup to test without Mongo
 SRS <- StudentRecordSet(app="Test",warehouse=Nethouse,
-                        dburi="")
-stopifnot(is.null(SRS$recorddb()))
+                        db=mongo::MongoDB(noMongo=TRUE))
+stopifnot(!mdbAvailable((SRS$recorddb())))
 
 ## Setup default SR
 dsr <- StudentRecord("*DEFAULT*",app="Test",
@@ -86,7 +86,7 @@ statmat <- read.csv(file.path(config.dir,"Mini-PP-Statistics.csv"),
 rownames(statmat) <- statmat$Name
 statlist <- sapply(statmat$Name,function (st)
     Statistic(statmat[st,"Fun"],statmat[st,"Node"],st))
-names(statlist) <- statmat$Name 
+names(statlist) <- statmat$Name
 dsr@stats <- lapply(statlist,
                     function (stat) calcStat(stat,sm(dsr)))
 names(dsr@stats) <- names(statlist)

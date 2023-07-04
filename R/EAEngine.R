@@ -51,11 +51,11 @@ BNEngine <-
                   saveStats = function(stats) {
                     stop("Abstract method.")
                   },
-                  evidenceSet = function() {
+                  evidenceSets = function() {
                     evidenceQueue
                   },
                   fetchNextEvidence = function() {
-                    evidenceSet()$fetchNextMessage()
+                    evidenceSets()$fetchNextMessage()
                   },
                   getHistNodes = function() {
                     histNodes
@@ -143,13 +143,13 @@ setMethod("notifyListeners","BNEngine",
            })
 
 setMethod("fetchNextMessage","BNEngine",
-          function(queue) fetchNextMessage(queue$evidenceSet()))
+          function(queue) fetchNextMessage(queue$evidenceSets()))
 
 setMethod("markAsProcessed",c("BNEngine","P4Message"),
-          function(col,mess) markAsProcessed(col$evidenceSet(),mess))
+          function(col,mess) markAsProcessed(col$evidenceSets(),mess))
 
 setMethod("markAsError",c("BNEngine","P4Message"),
-          function(col,mess,e) markAsError(col$evidenceSet(),mess,e))
+          function(col,mess,e) markAsError(col$evidenceSets(),mess,e))
 
 
 

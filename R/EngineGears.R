@@ -272,11 +272,11 @@ handleEvidence <- function (eng, evidMess, srser=NULL, debug=0) {
   if (interactive() && debug>1) utils::recover()
   out <- accumulateEvidence(eng,rec,evidMess,debug)
   if (interactive() && debug>1) utils::recover()
-  eng$setProcessed(evidMess)
+  markAsProcessed(eng,evidMess)
   if (is(out,'try-error')) {
     flog.warn("Processing %s for user %s generated error: %s",
               context,uid,toString(out))
-    eng$setError(evidMess,out)
+    markAsError(eng,evidMess,out)
   }
   out
 }

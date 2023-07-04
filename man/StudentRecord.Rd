@@ -87,7 +87,7 @@ history(dsr,"Physics")
 ## Serialization and unserialization
 dsr.ser <- as.json(dsr)
 
-dsr1 <- parseStudentRecord(fromJSON(dsr.ser))
+dsr1 <- parseStudentRecord(jsonlite::fromJSON(dsr.ser))
 dsr1 <- fetchSM(dsr1,Nethouse)
 
 ### dsr and dsr1 should be the same.

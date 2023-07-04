@@ -208,7 +208,7 @@ file.path(help(package="EABN")$path,"conf","EABuild.R")
 ## Set up config.dir, logpath and  NeticaLicenseKey
 source("/usr/local/share/Proc4/EAini.R")
 
-EA.config <- fromJSON(file.path(config.dir,"config.json"),FALSE)
+EA.config <- jsonlite::fromJSON(file.path(config.dir,"config.json"),FALSE)
 
 EA.tables <- EA.config$Tables
 EA.tables$netdir <- EA.config$netdir
@@ -216,9 +216,9 @@ EA.tables$netdir <- EA.config$netdir
 sess <- RNetica::NeticaSession(LicenseKey=NeticaLicenseKey)
 startSession(sess)
 
-flog.appender(appender.file(file.path(logpath,
+futile.logger::flog.appender(appender.file(file.path(logpath,
                             sub("<app>","builder",EA.config$logname))))
-flog.threshold(EA.config$loglevel)
+futile.logger::flog.threshold(EA.config$loglevel)
 
 doBuild(sess,EA.tables,config.dir)
 }

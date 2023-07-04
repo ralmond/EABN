@@ -61,9 +61,9 @@ e2 <- EvidenceSet(uid="S1",app="Test",context="PPdurAttEM",
                   obs=list("Attempts"=2,"Duration"=38.3))
 
 e1.ser <- as.json(e1)
-e1a <- parseEvidence(fromJSON(e1.ser))
+e1a <- parseEvidence(jsonlite::fromJSON(e1.ser))
 e2.ser <- as.json(e2)
-e2a <- parseEvidence(fromJSON(e2.ser))
+e2a <- parseEvidence(jsonlite::fromJSON(e2.ser))
 
 stopifnot(all.equal(e1,e1a), all.equal(e2,e2a))
 

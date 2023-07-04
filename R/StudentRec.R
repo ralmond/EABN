@@ -54,7 +54,7 @@ setMethod("logIssue",c("StudentRecord","character"),
             sr@issues <- c(sr@issues,issue)
             sr})
 setMethod("logIssue",c("StudentRecord","ANY"),
-          function (sr, issue) setMethod(sr,as.character(issue)))
+          function (sr, issue) logIssue(sr,as.character(issue)))
 
 
 
@@ -203,7 +203,7 @@ unparseStats <- function (slist,flatten=FALSE) {
       lapply(as.list(s),unboxer)
     )
   if (flatten)
-    res <- as.list(flatten(as.data.frame(res)))
+    res <- as.list(flattenStats(as.data.frame(res)))
   res
 }
 
@@ -390,7 +390,7 @@ function (srs,uid,ser=NULL) {
       rec@"_id" <- paste(uid(rec),seqno(rec),sep="@")
     }
   } else if (!is.null(srs$recorddb())) {
-    rec <- getOneRec(buildJQuery(app=app(srs),uid=uid),srs$recorddb(),
+    rec <- getOneRec(srs$recorddb(),buildJQuery(app=app(srs),uid=uid),
                      parseStudentRecord)
   } else {
     rec <- NULL

@@ -87,7 +87,7 @@ if (FALSE) {
 
 source("/usr/local/share/Proc4/EAini.R")
 
-EA.config <- fromJSON(file.path(config.dir,"config.json"),FALSE)
+EA.config <- jsonlite::fromJSON(file.path(config.dir,"config.json"),FALSE)
 
 app <- as.character(Proc4.config$apps[appStem])
 if (length(app)==0L || any(app=="NULL")) {
