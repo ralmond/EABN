@@ -162,7 +162,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   EAeng.params$dburi <- dburi
   if (is.null(dburi)) {
     EAeng.params$activeTest <- EAeng.local$activeTest
-    srsDB <- MongoDB(noMongo=TRUE)
+    srsDB <- mongo::MongoDB(noMongo=TRUE)
   } else {
     cnms <- EA.config$colnames
     EAeng.params$sslops <- sslops
@@ -170,7 +170,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
     EAeng.params$admindbnam <- admindbname
     EAeng.params$mongoverbose <- mongoverbose
     srscol <- ifelse(is.null(cnms$srec),"StudentRecords",cnms$srec)
-    srDB <- MongoDB(srscol,dbname,dburi,mongoverbose,options=sslops)
+    srDB <- mongo::MongoDB(srscol,dbname,dburi,mongoverbose,options=sslops)
     EAeng.params$statcol <- ifelse(is.null(cnms$stats),"Statistics",cnms$stats)
     EAeng.params$manifestCol <- ifelse(is.null(cnms$manifest),"Manifest",cnms$manifest)
     EAeng.params$evidenceCol<- ifelse(is.null(cnms$evidence),"EvidenceSets",cnms$evidence)
@@ -278,13 +278,8 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
 
   if (EA.config$limitNN=="ALL") {
     es <- eng$evidenceSets()
-    if (!is.null(es)) {
-      eng$processN <- es$count(buildJQuery(app=appid,processed=FALSE))
-    } else {
-      ## Want zero here as in DB-less mode we just want to exit
-      ## returning the engine.
-      eng$processN <- 0
-    }
+    ## If this is an empty queue, then this should return 0
+    eng$processN <- es$count()
   } else {
     eng$processN <- as.numeric(EA.config$limitNN)
   }
