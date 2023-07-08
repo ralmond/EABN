@@ -34,7 +34,7 @@ export(BNEngine,BNEngineMongo, newBNEngineMongo, loadManifest, setupDefaultSR,
        handleEvidence, mainLoop, updateSM)
 exportMethods(notifyListeners)
 
-export(trimTable,doBuild,doRunrun,rebuildOutputs,buildAppHist,buildHistMat)
+export(trimTable,doBuild,doRunrun)
 
 exportClass(BNEngineNDB)
 export(BNEngineNDB, newBNEngineNDB)

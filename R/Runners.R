@@ -300,68 +300,26 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   if (eng$processN > 0)
     withFlogging(mainLoop(eng))
 
-  rebuildOutputs(eng$listenerSet,appid,EA.config,outdir)
+  Proc4::generateListenerExports(eng$listenerSet,EA.config$listenerExports,
+                          appid,outdir)
 
   invisible(eng)
 }
 
-
-rebuildOutputs <- function (listenerSet, appid, EA.config,  outdir) {
-
-  sappid <- basename(appid)
-  listeners <- listenerSet$listners
-
-  if (!is.null(EA.config$statListener)) {
-    sl <- listeners[[EA.config$statListener]]
-    if (is.null(sl)) {
-      flog.warn("Stat listener %s not found, skipping building stat file.",
-                 EA.config$statListener)
-    } else {
-      sdat <- listenerDataTable(sl,NULL,appid)
-      if (!is.null(sdat)) {
-        fname <- gsub("<app>",sappid,EA.config$statfile)
-        write.csv(sdat,file.path(outdir,fname))
-        listenerSet$registerOutput(fname,file.path(outdir,fname),
-                                                appid,"EA")
-      }
-    }
-  }
-  if (!is.null(EA.config$histListener)) {
-    hl <- listeners[[EA.config$histListener]]
-    if (is.null(hl)) {
-      flog.warn("History listener %s not found, skipping building history file.",
-                 EA.config$histListener)
-    } else {
-      hist <- buildAppHist(hl$messdb(),appid)
-      if (isTRUE(nrow(hist) > 0L)) {
-        hist$app <- basename(hist$app)
-        fname <- gsub("<app>",sappid,EA.config$histfile)
-
-        write.csv(hist,file.path(outdir,fname))
-        listenerSet$registerOutput(fname,file.path(outdir,fname),
-                                                appid,"EA")
-      } else {
-        flog.warn("No records in history file.")
-      }
-
-    }
-  }
-}
-
-
-
-buildHistMat <- function (col, app, uid) {
-  stat1 <- mdbFind(col,buildJQuery(app=app, uid=uid))
-  stat1d <- lapply(stat1$data,function (d) flattenStats(parseData(d)))
-  data.frame(stat1[,c("app","uid","context","timestamp")],
-             do.call(rbind,stat1d))
-}
-
-buildAppHist <- function (col, app) {
-  uids <- col$distinct("uid",buildJQuery(app=app))
-  do.call(rbind,
-          lapply(uids,function(u) buildHistMat(col, app, u)))
-}
+## These functions are probably not needed anymore.
+#
+# buildHistMat <- function (col, app, uid) {
+#   stat1 <- mdbFind(col,buildJQuery(app=app, uid=uid))
+#   stat1d <- lapply(stat1$data,function (d) flattenStats(parseData(d)))
+#   data.frame(stat1[,c("app","uid","context","timestamp")],
+#              do.call(rbind,stat1d))
+# }
+#
+# buildAppHist <- function (col, app) {
+#   uids <- col$distinct("uid",buildJQuery(app=app))
+#   do.call(rbind,
+#           lapply(uids,function(u) buildHistMat(col, app, u)))
+# }
 
 doClearSRS <- function (srs) {
   flog.debug("Clearing old student records.")
