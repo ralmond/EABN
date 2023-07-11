@@ -1,4 +1,5 @@
 library(EABN)
+library(RNetica)
 library(futile.logger)
 flog.threshold(DEBUG)
 
