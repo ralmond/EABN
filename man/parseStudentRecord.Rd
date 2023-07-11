@@ -4,11 +4,11 @@
 \title{Covert Student Records to/from JSON}
 \description{
 
-  The \code{\link[Proc4]{as.json}} function takes an
+  The \code{\link[mongo]{as.json}} function takes an
   \code{\linkS4class{StudentRecord}} (among other objects) and turns it
   into JSON.  The function \code{parseStudentRecord} takes the list produced
   as the output to \code{\link[jsonlite]{fromJSON}} and turns it back
-  into an \code{\linkS4class{StudentRecord}} object.  
+  into an \code{\linkS4class{StudentRecord}} object.
 
 
 }
@@ -25,11 +25,11 @@ parseStudentRecord(rec)
   \item{serialize}{A logical flag. If true,
     \code{\link[jsonlite]{serializeJSON}} is used to protect the
     \code{data} field (and other objects which might contain complex R
-    code.} 
+    code.}
 }
 \details{
 
-  See the description for \code{\link[Proc4]{as.json}} for more
+  See the description for \code{\link[mongo]{as.json}} for more
   description of the general JSON conversion prototocl.
 
   The \code{\linkS4class{StudentRecord}} contains a
@@ -45,7 +45,7 @@ parseStudentRecord(rec)
   The \code{parseStudentRecord} function restores the \code{smser}
   field, but not the \code{sm} field.  This must be done in the context
   of the \code{\linkS4class{StudentRecordSet}}, or equivalently the
-  \code{\link[Peanut]{PnetWarehouse}}, which is currently managing 
+  \code{\link[Peanut]{PnetWarehouse}}, which is currently managing
   the networks.  To finish the process, call \code{\link{fetchSM}} to
   restore the student model network.
 
@@ -57,13 +57,13 @@ parseStudentRecord(rec)
 
   The \code{as.jlist} method returns a list which can be passed to
   \code{\link[jsonlite]{toJSON}} to produce legible JSON from the R
-  object. 
+  object.
 }
 \author{Russell Almond}
 \seealso{
 
-  \code{\linkS4class{StudentRecord}}, \code{\link[Proc4]{as.json}},
-  \code{\link[Proc4]{getOneRec}}, \code{\link[Proc4]{getManyRecs}}
+  \code{\linkS4class{StudentRecord}}, \code{\link[mongo]{as.json}},
+  \code{\link[mongo]{getOneRec}}, \code{\link[mongo]{getManyRecs}}
 
   \code{\link{fetchSM}}, \code{\link[Peanut]{PnetSerialize}}
 
@@ -92,16 +92,16 @@ cl <- new("CaptureListener")
 listeners <- list("cl"=cl)
 
 ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                  dburi="", listeners=listeners)
+                  db=MongoDB(noMongo=TRUE), listeners=listeners)
 
-eng <- BNEngineNDB(app=app,warehouse=Nethouse,
+eng <- newBNEngineNDB(app=app,warehouse=Nethouse,
                      listenerSet=ls,manifest=netman,
                      profModel="miniPP_CM",
                      histNodes="Physics",
                      statmat=stattab,
                      activeTest="EAActive.txt")
 
-## Standard initialization methods.                     
+## Standard initialization methods.
 loadManifest(eng,netman)
 eng$setHistNodes("Physics")
 configStats(eng,stattab)
@@ -113,8 +113,8 @@ sr0 <- getRecordForUser(eng,"S1")
 eap0 <- stat(sr0,"Physics_EAP")
 
 sr0.ser <- as.json(sr0)
-sr0a <- parseStudentRecord(fromJSON(sr0.ser))
-sr0a <- fetchSM(sr0a,recset$warehouse)
+sr0a <- parseStudentRecord(jsonlite::fromJSON(sr0.ser))
+sr0a <- fetchSM(sr0a,recset$warehouse())
 ## This should relink to the same student model
 stopifnot(sm(sr0a)==sm(sr0),abs(eap0-stat(sr0a,"Physics_EAP")) <.0001)
 
@@ -129,12 +129,12 @@ eap1 <- stat(sr1,"Physics_EAP")
 sr1.ser <- as.json(sr1)
 
 ## Force delete student model to make sure that it is properly
-## recovered. 
+## recovered.
 WarehouseFree(Nethouse,PnetName(sm(sr1)))
 stopifnot(!is.active(sm(sr1)))  # No longer active.
 
-sr1a <- parseStudentRecord(fromJSON(sr1.ser))
-sr1a <- fetchSM(sr1a,recset$warehouse)
+sr1a <- parseStudentRecord(jsonlite::fromJSON(sr1.ser))
+sr1a <- fetchSM(sr1a,recset$warehouse())
 eap1a <- stat(sr1a,"Physics_EAP")
 stopifnot(all(evidence(sr1)==evidence(sr1a)),
           abs(eap1-eap1a) <.001)

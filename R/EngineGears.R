@@ -66,6 +66,15 @@ getRecordForUser <- function(eng,uid,srser=NULL) {
   rec
 }
 
+revertSR <- function (eng,rec) {
+  uid <- uid(rec)
+  flog.info("Reverting student model for %s.",uid)
+  rec <- revertSM(eng$studentRecords(),uid,rec,TRUE)
+  sm(rec) <- PnetCompile(sm(rec))
+  rec
+}
+
+
 #############################################
 ## Statistics
 
@@ -141,11 +150,13 @@ logEvidence <- function (eng,rec,evidMess) {
     ## NDB need to generate an ID.
     evidMess@"_id" <- paste(uid(evidMess),seqno(evidMess),sep="+")
   }
+  flog.debug("Evidence %d for %s:",seqno(evidMess),uid(evidMess))
+  flog.debug("Data: ",details(evidMess),capture=TRUE)
   evidMess
 }
 
 accumulateEvidence <- function(eng,rec,evidMess, debug=0) {
-  withFlogging({
+  result <- withFlogging({
     rec1 <- updateRecord(rec,evidMess)
     rec1 <- updateSM(eng,rec1,evidMess, debug)
     if (interactive() && debug>1) utils::recover()
@@ -159,6 +170,8 @@ accumulateEvidence <- function(eng,rec,evidMess, debug=0) {
   },evidence=evidMess,
   context=sprintf("Proccesing %s for user %s, seqno %d",
                   context(evidMess),uid(evidMess),seqno(evidMess)))
+  flog.trace("Class of result is %s",class(result))
+  result
 }
 
 updateSM <- function (eng,rec,evidMess, debug=0) {
@@ -176,7 +189,7 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
   }
   em <- WarehouseSupply(eng$warehouse(),emName)
   if (is.null(em)) {
-    flog.error("No evidence model net for context %s",context(evidMess))
+    flog.warn("No evidence model net for context %s",context(evidMess))
     stop("No evidence model net for context %s",context(evidMess))
   }
   obs <- PnetAdjoin(sm(rec),em)
@@ -184,21 +197,56 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
   PnetCompile(sm(rec))
   flog.trace("Evidence:",details(evidMess),capture=TRUE)
   if (interactive() && debug>1) utils::recover()
-
+  ## This variable will be set to the first error.  Need to for errors
+  ## after main loop.
+  anErr <- NULL
+  issues <- character()
   for (oname in names(observables(evidMess))) {
-    if(!is.null(obs[[oname]])) {
-      flog.trace("Processing observable %s.",oname)
-      oval <- observables(evidMess)[[oname]]
-      if (is.null(oval) || is.na(oval) || length(oval)==0L) {
-        flog.trace("Observable %s is null/NA, skipping.", oname)
+    continue <-tryCatch({
+      if(!is.null(obs[[oname]])) {
+        flog.trace("Processing observable %s.",oname)
+        oval <- observables(evidMess)[[oname]]
+        if (is.null(oval) || is.na(oval) || length(oval)==0L) {
+          flog.trace("Observable %s is null/NA, skipping.", oname)
+        } else {
+          flog.trace("Setting observable %s to %s",oname,as.character(oval))
+          PnodeEvidence(obs[[oname]]) <- oval
+        }
       } else {
-        flog.trace("Setting observable %s to %s",oname,as.character(oval))
-        PnodeEvidence(obs[[oname]]) <- oval
+        flog.trace("Skipping observable %s:  not a node.",oname)
       }
-    } else {
-      flog.trace("Skipping observable %s:  not a node.",oname)
+      TRUE ## Continue
+    },
+    ## Do I need more exceptions?
+    error=function(e) {
+      issue <- paste("While processing ", emName,
+                          ", Observable ", oname,
+                     ": got error: ", conditionMessage(e), ".")
+      flog.error(issue)
+      list(e=e,issue=issue)
+    })
+    if (isTRUE(continue)) next
+    else {
+      ## An issue occurred.
+      if (is.null(anErr)) anErr <- continue$e
+      issues <- c(issues,continue$issue)
+      flog.trace("Found %d issues",length(issues))
+      if(eng$getRestart()=="stopProcessing") break
     }
   }
+  ## Now check for errors:
+  if (!is.null(anErr) && eng$getRestart() != "scoreAvailable") {
+    ## Back out changes to student model.
+    rec <- revertSR(eng,rec)
+    flog.debug("%d issues found while processing evidence for level %s.",
+             length(issues),context(evidMess))
+    rec <- logIssue(rec,issues)
+    if (eng$getRestart() == "stopProcessing")
+      signalCondition(anErr)
+    else
+      return (rec)
+  }
+  ## Continue processing
   if (flog.threshold()=="TRACE") {
     for (ob in obs) {
       flog.trace("Observable %s has value %s.",PnodeName(ob),
@@ -207,7 +255,11 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
   }
   if (interactive() && debug>0) utils::recover()
   PnetDetach(sm(rec),em)
-  PnetCompile(sm(rec))
+  ## This updates the serialized models
+  sm(rec) <- PnetCompile(sm(rec))
+  flog.debug("%d issues found while processing evidence for level %s.",
+             length(issues),context(evidMess))
+  rec <- logIssue(rec,issues)
   rec
 }
 
@@ -220,36 +272,48 @@ handleEvidence <- function (eng, evidMess, srser=NULL, debug=0) {
   if (interactive() && debug>1) utils::recover()
   out <- accumulateEvidence(eng,rec,evidMess,debug)
   if (interactive() && debug>1) utils::recover()
-  eng$setProcessed(evidMess)
+  markAsProcessed(eng,evidMess)
   if (is(out,'try-error')) {
     flog.warn("Processing %s for user %s generated error: %s",
               context,uid,toString(out))
-    eng$setError(evidMess,out)
+    markAsError(eng,evidMess,out)
   }
   out
 }
 
-mainLoop <- function(eng) {
+mainLoop <- function(eng,N=NULL) {
+  if (!missing(N)) eng$processN <- N
   withFlogging({
-    flog.info("Evidence AccumulationEngine %s starting.", app(eng))
-    active <- eng$isActivated()
+    flog.info("Evidence AccumulationEngine %s starting.", basename(app(eng)))
+    eng$activate()
+    active <- TRUE
     while (active) {
-      eve <- fetchNextEvidence(eng)
+      if (eng$shouldHalt()) {
+        flog.fatal("EA Engine %s halted because of user request.",
+                   basename(app(eng)))
+        break
+      }
+      eve <- fetchNextMessage(eng)
       if (is.null(eve)) {
         ## Queue is empty, wait and check again.
         Sys.sleep(eng$waittime)
         ## Check for deactivation signal.
-        active <- eng$isActivated()
+        if (eng$stopWhenFinished()) {
+          flog.info("EA Engine %s stopping because queue is empty.",
+                    basename(app(eng)))
+          active <- FALSE
+        } else {
+          active <- TRUE
+        }
       } else {
         handleEvidence(eng,eve)
-        markProcessed(eng,eve)
+        markAsProcessed(eng,eve)
         eng$processN <- eng$processN -1
         active <- eng$processN > 0
       }
     }
-  flog.info("EA Engine %s was deactivated.",
-            app(eng))
+  eng$deactivate()
   },
-  context=sprintf("Running EA Application %s",app(eng)))
-  flog.info("Application Engine %s stopping.",app(eng))
+  context=sprintf("Running EA Application %s",basename(app(eng))))
+  flog.info("Application Engine %s stopped.",basename(app(eng)))
 }

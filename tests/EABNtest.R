@@ -1,27 +1,29 @@
 library(EABN)
+library(RNetica)
+library(futile.logger)
 flog.threshold(DEBUG)
 
 
 tapp <- "ecd://epls.coe.fsu.edu/P4test"
 
-source("~/.Netica.R")
-sess <- NeticaSession(LicenseKey=NeticaLicenseKey)
-startSession(sess)
+NeticaLicenseKey <- Sys.getenv("NETICA_LICENSE_KEY")
+sess <- RNetica::NeticaSession(LicenseKey=NeticaLicenseKey)
+RNetica::startSession(sess)
 
 cl <- new("CaptureListener")
-ul <- UpdateListener(dbname="Proc4",dburi="mongodb://localhost",
-            colname="Statistics",targetField="data",
+ul <- UpdateListener(db=mongo::MongoDB("Statistics","Proc4"),
+            targetField="data",
             messSet=c("Statistics"),
             jsonEncoder="stats2json")
 
 
-
-EAeng <- BNEngine(tapp,sess,list(cl=cl,ul=ul))
+if (FALSE) {
+EAeng <- newBNEngine(tapp,sess,list(cl=cl,ul=ul))
 loadManifest(EAeng)
 configStats(EAeng)
 
 ### One time setup
-if (false) {
+if (FALSE) {
   testdir <- "/home/ralmond/Projects/EABN/inst"
 
   mantab <- read.csv(file.path(testdir,"sampleAssessment",
@@ -75,3 +77,4 @@ pstat <- EAeng$stats()$Physics_EAP
 fsr0a <- updateHist(EAeng,fsr0a,es1)
 announceStats(EAeng,fsr0a)
 fsr0a <- saveSR(EAeng$studentRecords(),fsr0a)
+}

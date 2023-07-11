@@ -6,8 +6,6 @@ BNEngineNDB <-
   setRefClass("BNEngineNDB",
               c(
                   manifest = "data.frame",
-                  histnodes = "character",
-                  evidenceQueue="list",
                   statmat="data.frame",
                   activeTest="character"
               ),
@@ -17,20 +15,21 @@ BNEngineNDB <-
                     function(app="default",warehouse=NULL, listenerSet=NULL,
                              manifest=data.frame(),profModel=character(),
                              statistics=list(), histNodes=character(),
-                             evidenceQueue=list(),waittime=0,
+                             evidenceQueue=new("ListQueue",app,list()),
+                             waittime=0,
                              processN=Inf,statmat=data.frame(),
-                             activeTest="EAActive.txt",
+                             activeTest="EAActive",
+                             errorRestart="checkNoScore",
+                             srs=NULL,
                              ...) {
-                      if (is.null(warehouse))
-                        stop("Null warehouse.")
-                      callSuper(app=app,warehouseObj=warehouse,
-                                srs=NULL,listenerSet=listenerSet,
-                                warehouseObj=NULL,
+                      callSuper(app=app,warehouse=warehouse,
+                                srs=srs,listenerSet=listenerSet,
                                 evidenceQueue=evidenceQueue,
                                 statistics=statistics,statmat=statmat,
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
                                 activeTest=activeTest,
+                                errorRestart=errorRestart[1],
                                 ...)
                   },
                   fetchStats = function() {
@@ -40,53 +39,59 @@ BNEngineNDB <-
                     stats$app <- app
                     statmat <<- statmat
                   },
-                  ## Here
-                  evidenceSets = function() {
-                    NULL
-                  },
-                  fetchNextEvidence = function() {
-                    if (length(evidenceQueue) == 0L)
-                      return(NULL)
-                    es <- evidenceQueue[[1]]
-                    evidenceQueue <<- evidenceQueue[-1]
-                    es
-                  },
-                  studentRecords = function() {
-                    if (is.null(srs)) {
-                      srs <<- StudentRecordSet(app=app,warehouse=warehouse(),
-                                              dburi="")
-                    }
-                    srs
-                  },
                   fetchManifest = function() {
                     manifest
                   },
                   saveManifest = function(manif) {
-                    manif$app <- app(eng)
+                    manif$app <- app
                     manifest <<- manif
                   },
                   P4db = function () {
                     NULL
                   },
-                  isActivated = function() {
-                    file.exists(activeTest)
+                  shouldHalt = function() {
+                    file.exists(paste(activeTest,"halt",sep="."))
+                  },
+                  stopWhenFinished = function() {
+                    !file.exists(paste(activeTest,"running",sep="."))
                   },
                   activate = function() {
-                    file.create(activeTest)
+                    file.create(paste(activeTest,"running",sep="."))
+                  },
+                  isActivated = function() {
+                    locks <- list.files(dirname(activeTest),
+                               pattern=paste(basename(activeTest),"*",sep="."))
+                    return (length(locks) > 0L)
+                  },
+                  deactivate = function() {
+                    tryCatch(file.remove(paste(activeTest,
+                                               c("running","finish","halt"),
+                                               sep=".")),
+                             warning=function(w){})
                   },
                   show = function() {
                     methods::show(paste("<EABN: ",app,", No DB>"))
                   }))
 
-BNEngineNDB <- function(app="default",warehouse, listenerSet=NULL,
-                     manifest=data.frame(),processN=Inf,
-                     waittime=.25, profModel=character(),
-                     statmat=data.frame(),evidenceQueue=list(),
-                     activeTest="EAActive.txt",...) {
+newBNEngineNDB <- function(app="default",warehouse, listenerSet=NULL,
+                           manifest=data.frame(),processN=Inf,
+                           waittime=.25, profModel=character(),
+                           statmat=data.frame(),
+                           evidenceQueue=new("ListQueue",app,list()),
+                           activeTest="EAActive",
+                           errorRestart=c("checkNoScore", "stopProcessing",
+                                          "scoreAvailable"),
+                           srs=StudentRecordSet(app=app,warehouse=warehouse,
+                                                db=MongoDB(noMongo=TRUE)),
+                           ...) {
+  ## Removed ... from new, so we can silently drop unused arguments.
+  if (is.null(warehouse)) stop("Warehouse must be supplied.")
+  if (is.null(srs)) stop("Student record set must be supplied.")
   new("BNEngineNDB",app=app,warehouse=warehouse,
       listenerSet=listenerSet,manifest=manifest,processN=processN,
       waittime=waittime,profModel=profModel,
-      activeTest=activeTest,...)
+      activeTest=activeTest,errorRestart=errorRestart[1],srs=srs,
+      ...)
 }
 
 setMethod("evidence","BNEngineNDB",

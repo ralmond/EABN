@@ -40,7 +40,7 @@ setupDefaultSR(eng)
     \item{The student model is compiled
       (\code{\link[Peanut]{PnetCompile}}).}
     \item{The baseline statisics are calculated
-      (\code{\link{updateStats}}).} 
+      (\code{\link{updateStats}}).}
     \item{The baseline history is set
       (\code{\link{baselineHist}}).}
     \item{The default student record is saved in the \code{defaultSR}
@@ -52,14 +52,14 @@ setupDefaultSR(eng)
 }
 \value{
 
-  This function is called for its side effects.  
+  This function is called for its side effects.
 
 }
 \references{
 
   Almond, Mislevy, Steinberg, Yan and Williamson (2015).  \emph{Bayesian
     Networks in Educational Assessment}.  Springer.  Especially Chapter
-  13. 
+  13.
 
 }
 \author{Russell Almond}
@@ -99,16 +99,16 @@ cl <- new("CaptureListener")
 listeners <- list("cl"=cl)
 
 ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                  dburi="", listeners=listeners)
+                  db=MongoDB(noMongo=TRUE), listeners=listeners)
 
-eng <- BNEngineNDB(app=app,warehouse=Nethouse,
+eng <- newBNEngineNDB(app=app,warehouse=Nethouse,
                      listenerSet=ls,manifest=netman,
                      profModel="miniPP_CM",
                      histNodes="Physics",
                      statmat=stattab,
                      activeTest="EAActive.txt")
 
-## Standard initialization methods.                     
+## Standard initialization methods.
 loadManifest(eng,netman)
 eng$setHistNodes("Physics")
 configStats(eng,stattab)

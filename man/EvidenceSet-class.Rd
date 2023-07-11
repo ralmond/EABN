@@ -56,7 +56,7 @@ Class \code{"\link[Proc4]{P4Message}"}, directly.
   \describe{
     \item{as.jlist}{\code{signature(obj = "EvidenceSet", ml = "list")}:
       This is a helper function used in serialization.  See
-      \code{\link[Proc4]{as.json}}.}
+      \code{\link[mongo]{as.json}}.}
     \item{observables}{\code{signature(x = "EvidenceSet")}: returns a
       named list of observables (the \code{data}) field. }
     \item{seqno}{\code{signature(x = "EvidenceSet")}: returns the
