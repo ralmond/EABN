@@ -1,19 +1,40 @@
 \name{BNEngineMongo}
 \alias{BNEngineMongo}
+\alias{newBNEngineMongo}
 \title{Creates a Bayes Net Engine attached to a Mongo database.}
 \description{
 
   The \code{\linkS4class{BNEngineMongo}} is a
   \code{\linkS4class{BNEngine}} which is attached to a
-  \code{\link[Proc4]{MongoDB-class}} database, which hold both the queue and
-  the \code{\linkS4class{StudentRecordSet}}.  
+  \code{\link[mongo:MongoDB-class]{MongoDB}} database, which hold both the queue and
+  the \code{\linkS4class{StudentRecordSet}}.
 
 }
 \usage{
-BNEngineMongo(app = "default", warehouse, listenerSet = NULL,
-dburi = "mongodb://localhost", dbname = "EARecords", processN = Inf,
-admindbname = "Proc4", waittime = 0.25, profModel = character(),
-...) 
+newBNEngineMongo(app = "default", warehouse, listenerSet = NULL, processN = Inf,
+    statistics = list(),
+    dburi = "mongodb://localhost", sslops = mongolite::ssl_options(),
+    eadbname = "EARecords", admindbname = "Proc4", waittime = 0.25,
+    profModel = character(), histNodes = character(),
+    errorRestart = c("checkNoScore", "stopProcessing", "scoreAvailable"),
+    srcol = "StudentRecords",
+    mongoverbose = FALSE,
+    srs = StudentRecordSet(app = app, warehouse = warehouse,
+        db = MongoDB(srcol, eadbname, dburi, verbose = mongoverbose,
+            options = sslops)),
+    manifestCol = "Manifest", manifestDB = MongoDB(manifestCol,
+        eadbname, dburi, verbose = mongoverbose, options = sslops),
+    evidenceCol = "EvidenceSets", evidenceQueue = new("MongoQueue",
+        app = app, messDB = MongoDB(evidenceCol, eadbname, dburi,
+        verbose = mongoverbose, options = sslops), builder = Proc4::buildMessage),
+    histcol = "histNodes", histNodesDB = MongoDB(histcol, eadbname,
+        dburi, verbose = mongoverbose, options = sslops),
+    statcol = "Statistics",
+    statDB = MongoDB(statcol, eadbname, dburi, verbose = mongoverbose,
+        options = sslops),
+    admincol = "AuthorizedApps", adminDB = MongoDB(admincol,
+        admindbname, dburi, verbose = mongoverbose, options = sslops),
+    ...)
 }
 \arguments{
   \item{app}{A character scalar giving the globally unique identifier
@@ -23,27 +44,55 @@ admindbname = "Proc4", waittime = 0.25, profModel = character(),
     the student models.}
   \item{listenerSet}{A \code{\link[Proc4]{ListenerSet}} which contains the
     listeners for clients of the engine's messages.}
+  \item{statistics}{Object of class \code{list} containing
+      \code{\link[Peanut]{Statistic}} objects to be run on every update
+      cycle.}
   \item{dburi}{A character scalar giving the login information for the
-    mongo database.  See \code{\link[Proc4]{makeDBuri}}.}
-  \item{dbname}{The name for the EA database.}
+    mongo database.  See \code{\link[mongo]{makeDBuri}}.}
+  \item{sslops}{Options for SSL connections to database.  See \code{\link[mongolite]{ssl_options}}.}
+  \item{eadbname}{The name for the EA database.}
+  \item{admindbname}{The name of the admin database used to check for
+    shutdown requests.}
   \item{processN}{The number of records to process before stopping.  The
     default value \code{Inf} runs the process until the active flag is
     cleared.}
-  \item{admindbname}{The name of the admin database used to check for
-    shutdown requests.}
   \item{waittime}{The amout of time (in seconds) to wait before checking
     again for new evidence sets when the evidence set queue is empty.}
   \item{profModel}{The name of the proficiency model (its ID in the
     warehouse manifest).}
-  \item{\dots}{Extra room in case we later think of more things we
-    should add.}
+  \item{histNodes}{A character vector giving the names of the nodes for which history will automaticall be recorded.}
+  \item{errorRestart}{A character scalar describing how to handle
+    errors.  The default, "checkNoScore" will continue scoreing to try
+    to find additional errors, but will not report statistics; the
+    "scoreAvailable" option reports the scores based on the evidence
+    sets which do not produce errors.  The "stopProcessing" option
+    immediately stops processing.}
+  \item{srcol}{A character scalar giving the name of the database backing the student record set.  Ignored if       \code{srs} is specified.}
+  \item{mongoverbose}{A flag.  If true, extra debugging information from database calls is generated.}
+  \item{srs}{A \code{\linkS4class{StudentRecordSet}} object for storing the student records.}
+  \item{manifestCol}{The name of the column containing the manifest data, ignored if \code{manifestDB} is supplied.}
+  \item{manifestDB}{A \code{\link[mongo]{JSONDB}} the database where manifest information is cached.}
+  \item{evidenceCol}{The name of the column containing the evidence sets, ignored if \code{evidenceQueue} is supplied.}
+  \item{evidenceQueue}{A \code{\link[Proc4:MessageQueue-class]{MessageQueue}} where the evidence sets exist.}
+  \item{histcol}{The name of the column into which history data should be stored, ignored if \code{histNodesDB} is supplied.}
+  \item{histNodesDB}{A \code{\link[mongo]{JSONDB}} database where history information is stored.}
+  \item{statcol}{The name of the column into which statistics should be stored, ignored if \code{statDB} is supplied.}
+  \item{statDB}{A \code{\link[mongo]{JSONDB}} database where statistics are stored.}
+  \item{admincol}{The name of the column in the administrative database where engine status information is stored, ignored if \code{adminDB} is supplied.}
+  \item{adminDB}{A \code{\link[mongo]{JSONDB}} where status information about the engine is stored.}
+  \item{\dots}{Extra arguments are ignored.  This allows arguments for
+    other engine versions to be set in the parameters and ignored.}
 }
 \details{
 
   This creates an uninitialized \code{\linkS4class{BNEngine}},
   specifically a \code{\linkS4class{BNEngineMongo}}.
 
-  The \code{\link[Proc4]{makeDBuri}} function provides a useful
+  The \code{app}, \code{warehouse}, and \code{listenerSet} arguments need to be supplied,
+  for most of the rest, the default arguments work.
+
+  In particular, most of the \dQuote{db} arguments are built using the default arguments.
+  The \code{\link[mongo]{makeDBuri}} function provides a useful
   shorthand for calculating the \code{dburi} field.
 
 }
@@ -57,18 +106,15 @@ admindbname = "Proc4", waittime = 0.25, profModel = character(),
 
   Almond, Mislevy, Steinberg, Yan and Williamson (2015).  \emph{Bayesian
     Networks in Educational Assessment}.  Springer.  Especially Chapter
-  13. 
+  13.
 
 
 }
 \author{Russell Almond}
 \note{
 
-  The database connections are not created right away, so it
-  is important to use the class-based functions, \code{manifestdb()},
-  \code{statdb()}, \code{evidenceSets()}, \code{histNodesdb()},
-  \code{studentRecords()}, and \code{admindb()} rather than accessing
-  the fields directly.
+  Much of this information comes from the \dQuote{config.json} file, with the \code{dburi}, \code{eadbname},
+  \code{admindbname}, and \code{sslops} arguments come from the \dQuote{EA.ini} file.
 
 }
 \seealso{
@@ -79,7 +125,7 @@ admindbname = "Proc4", waittime = 0.25, profModel = character(),
   Constituent parts:
   \code{\link{StudentRecordSet}}, \code{\link[Peanut]{PnetWarehouse}}
   \code{\link[Proc4]{ListenerSet}}
-  
+
   Setup Functions:
   \code{\link{loadManifest}},
   \code{\link{setupDefaultSR}},
@@ -104,7 +150,7 @@ admindbname = "Proc4", waittime = 0.25, profModel = character(),
 \dontrun{%Mongo%
 ## Requires database setup, also PNetica
 library(RNetica)  ## Must load to setup Netica DLL
-app <- "ecd://epls.coe.fsu.edu/EITest"
+app <- "ecd://epls.coe.fsu.edu/EATest"
 sess <- RNetica::NeticaSession()
 RNetica::startSession(sess)
 
@@ -127,13 +173,13 @@ ls <- ListenerSet(sender= paste("EAEngine[",basename(app),"]"),
                   colname="Messages")
 
 
-eng <- BNEngineMongo(app=app,warehouse=Nethouse,
+eng <- newBNEngineMongo(app=app,warehouse=Nethouse,
                      listenerSet=ls,
                      dburi=makeDBuri(host="localhost"),
                      dbname="EARecords",profModel="miniPP_CM",
                      histNodes="Physics")
 
-## Standard initialization methods.                     
+## Standard initialization methods.
 loadManifest(eng,netman)
 eng$setHistNodes("Physics")
 configStats(eng,stattab)

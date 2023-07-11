@@ -1,5 +1,5 @@
-###  Evedence -- A set of evidence coming from the EI process.
-###  This roughy follow a combination of the xAPI format.
+###  Evidence -- A set of evidence coming from the EI process.
+###  This roughly follow a combination of the xAPI format.
 
 setClass("EvidenceSet",
          slots=c(seqno="integer"),
@@ -9,7 +9,7 @@ EvidenceSet <- function(uid,context,timestamp=Sys.time(),
                         obs=list(),app="default",mess="Accumulate",
                         sender="EI", processed=FALSE) {
   new("EvidenceSet",app=app,uid=uid,context=context,mess=mess,
-      timestamp=timestamp,data=obs,sender=sender,"_id"=NA_character_,
+      timestamp=timestamp,data=obs,sender=sender,"_id"=c(oid=NA_character_),
       seqno=NA_integer_ , processed=processed)
 }
 
@@ -49,10 +49,13 @@ setMethod("as.jlist",c("EvidenceSet","list"), function(obj,ml,serialize=TRUE) {
 parseEvidence<- function (rec) {
   rec <- cleanMessageJlist(rec)
   if (is.null(rec$seqno)) rec$seqno <- NA_integer_
-  new("EvidenceSet","_id"=ununboxer(rec$"_id"),
+  mid <- ununboxer(rec$"_id")
+  if (is.null(mid)) mid <- NA_character_
+  new("EvidenceSet","_id"=mid,
       app=as.vector(ununboxer(rec$app)),
       uid=as.vector(ununboxer(rec$uid)),
       context=as.vector(ununboxer(rec$context)),
+      sender=as.vector(ununboxer(rec$sender)),
       mess=as.vector(ununboxer(rec$mess)),
       timestamp=as.POSIXlt(ununboxer(rec$timestamp)),
       processed=as.logical(ununboxer(rec$processed)),
@@ -60,5 +63,4 @@ parseEvidence<- function (rec) {
       data=parseData(ununboxer(rec$data)),
       seqno=as.vector(rec$seqno))
 }
-
 

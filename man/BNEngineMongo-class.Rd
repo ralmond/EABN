@@ -13,14 +13,14 @@
 Class \code{"\linkS4class{BNEngine}"}, directly.
 
 All reference classes extend and inherit methods from
-\code{"\linkS4class{envRefClass}"}. 
+\code{"\linkS4class{envRefClass}"}.
 
 }
 \references{
 
   Almond, Mislevy, Steinberg, Yan and Williamson (2015).  \emph{Bayesian
     Networks in Educational Assessment}.  Springer.  Especially Chapter
-  13. 
+  13.
 
 
 }
@@ -41,7 +41,7 @@ All reference classes extend and inherit methods from
 
   Constituent parts:
   \code{\link{StudentRecordSet}}, \code{\link[Peanut]{PnetWarehouse}}
-  
+
   Setup Functions:
   \code{\link{loadManifest}},
   \code{\link{setupDefaultSR}},
@@ -66,14 +66,27 @@ showClass("BNEngineMongo")
 \keyword{classes}
 \section{Activation}{
 
-  When the \code{\link{mainLoop}} runs out of evidence sets to process,
-  it checks the \code{is.active()} method of the engine.  If this
-  returns, false, it stops.
+  At the start of each iteration of the \code{\link{mainLoop}}, it
+  checks \code{eng$shouldHalt()} method. If this returns \code{TRUE},
+  then execution is immediately halted.  When the queue is empty, it
+  checks the \code{eng$stopWhenFinished()} method.  If this returns
+  true, then the main loop also terminates.
 
-  For the \code{BNEngineMongo} this checks the \dQuote{AuthorizedApps}
+
+  The \code{BNEngineMongo} this checks the \dQuote{AuthorizedApps}
   collection in the database to see if the current \code{app} is
-  active.  It returns the value of the \code{active} field for the app's
-  record. 
+  active and the value of the field \code{EAsignal}.  The
+  \code{eng$activate()} method sets this field to \dQuote{Running}.  If
+  the field is set to \dQuote{Halt}, then \code{eng$shouldHalt()} will
+  return \code{TRUE} and the \code{\link{mainLoop}} will stop after
+  processing the current evidence set.  If the field is set to
+  \dQuote{Halt} (actually, anything other than \dQuote{Running}), then
+  \code{eng$stopWhenFinished()} will return \code{TRUE} and the
+  \code{mainLoop} will stop when the queue is empty.
+
+  The methods \code{eng$activate()} and \code{eng$deactivate()} set and
+  clear the \code{EAactive} flag in the \dQuote{AuthorizedApps}
+  database.
 
 }
 \section{Fields}{
@@ -95,7 +108,7 @@ showClass("BNEngineMongo")
       names of the nodes in the proficiency model whose history will be
       recorded. }
     \item{\code{warehouseObj}:}{Object of class
-      \code{\link[Peanut]{PnetWarehouse}} 
+      \code{\link[Peanut]{PnetWarehouse}}
       which stores the Bayes nets, both evidence models and student
       models are stored here.}
     \item{\code{waittime}:}{Object of class \code{numeric} giving the
@@ -109,11 +122,11 @@ showClass("BNEngineMongo")
     \item{\code{dbname}:}{Object of class \code{character} giving the
       name of the database to be used. }
     \item{\code{manifestDB}:}{Object of class
-      \code{\link[Proc4]{MongoDB-class}} giving the collection used to store
+      \code{\link[mongo:MongoDB-class]{MongoDB}} giving the collection used to store
       the manifest.  This object may not be initialized so it should be
       accessed through the class-based function \code{manifestdb()}.}
     \item{\code{evidenceDB}:}{Object of class
-      \code{\link[Proc4]{MongoDB-class}} accessing the evidence set
+      \code{\link[mongo:MongoDB-class]{MongoDB}} accessing the evidence set
       collection. This object may not be initialized so it should be
       accessed through the class-based function \code{evidenceSets()}.}
     \item{\code{statDB}:}{Object of class \code{MongoDB} giving the
@@ -123,23 +136,31 @@ showClass("BNEngineMongo")
       history nodes.  This object may not be initialized so it should be
       accessed through the class-based function \code{histNodesdb()}.}
     \item{\code{admindbname}:}{Object of class \code{character} giving name
-      admin (Proc4) database, used for various listeners and the
+      admin (mongo) database, used for various listeners and the
       \code{is.active()} method.}
-    \item{\code{adminDB}:}{Object of class \code{MongoDB} giving the link
+    \item{\code{adminDB}:}{Object of class \code{\link[mongo:MongoDB-class]{MongoDB}} giving the link
       to the admin database. This object may not be initialized so it should be
       accessed through the class-based function \code{admindb()}.}
   }
 }
 \section{Methods}{
   \describe{
+    \item{\code{activate()}:}{Sets the flag in the admin database to
+      indicate that the process is running.}
+    \item{\code{deactivate()}:}{Clears the flag in the admin database to
+      indicate that the process is no longer running.}
+    \item{\code{shouldHalt()}:}{ This function checks the admin database to
+      see whether or not the flag is set to cause the process to halt
+      after processing the current record.. }
+    \item{\code{stopWhenFinished()}:}{ This function checks the admin
+      database to see whether or not the flag is set to cause the
+      process to stop when the event queue is empty. }
     \item{\code{statdb()}:}{ Returns the database contianing the
       statistic objects. }
     \item{\code{studentRecords()}:}{ Returns the
       \code{\linkS4class{StudentRecordSet}} associated with this engine. }
     \item{\code{fetchStats()}:}{ Fetches the statistics marked in the
       database configuration. }
-    \item{\code{activate()}:}{ Sets the field in the Proc4 database used
-      to indicate that this application is active. }
     \item{\code{initialize(app, warehouse, listeners, username,
         password, host, port, dbname, P4dbname, profModel, waittime,
         statistics, histNodes, processN, ...)}:}{ initializes the class.
@@ -147,15 +168,15 @@ showClass("BNEngineMongo")
       functions, so these should be called instead of directly accessing
       the fields.}
     \item{\code{manifestdb()}:}{ Returns the
-      \code{\link[Proc4]{MongoDB-class}} handle to the manifest information
+      \code{\link[mongo]{MongoDB-class}} handle to the manifest information
       collection.  }
-    \item{\code{admindb()}:}{ Returns the \code{\link[Proc4]{MongoDB-class}}
+    \item{\code{admindb()}:}{ Returns the \code{\link[mongo]{MongoDB-class}}
       handle to the \dQuote{AuthorizedApps} collection.}
     \item{\code{histNodesdb()}:}{ Returns the
-      \code{\link[Proc4]{MongoDB-class}} handle to the hist nodes collection. }
+      \code{\link[mongo]{MongoDB-class}} handle to the hist nodes collection. }
     \item{\code{saveManifest(manifest)}:}{ Saves the current
       \code{\link[Peanut]{PnetWarehouse}} manifest to the
-      \code{manifestdb()} collection } 
+      \code{manifestdb()} collection }
     \item{\code{fetchManifest()}:}{ Retrieves the saved manifest from
       the \code{manifestdb()} collection. }
     \item{\code{fetchNextEvidence()}:}{ Retrieves the next
@@ -170,7 +191,7 @@ showClass("BNEngineMongo")
     \item{\code{setError(mess, e)}:}{ Added an error message to an
       evidence set. }
     \item{\code{evidenceSets()}:}{ Returns a
-      \code{\link[Proc4]{MongoDB-class}} handle to the collection/queue of
+      \code{\link[mongo]{MongoDB-class}} handle to the collection/queue of
       evidence sets. }
     \item{\code{getHistNodes()}:}{ Fetches the history nodes from the
       \code{histNodesdb()} collection. }

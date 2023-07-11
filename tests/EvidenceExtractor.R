@@ -1,10 +1,10 @@
 library(EABN)
-eviddb <- mongo("EvidenceSets","EARecords","mongodb://localhost")
-
+eviddb <- mongolite::mongo("EvidenceSets","EARecords","mongodb://localhost")
+if (FALSE) {
 #ev1 <- getOneRec('{}',eviddb,parseEvidence)
 
-evidSet <- getManyRecs('{"app":"ecd://epls.coe.fsu.edu/P4test"}',
-                       eviddb,parseEvidence)
+evidSet <- getManyRecs(eviddb,'{"app":"ecd://epls.coe.fsu.edu/P4test"}',
+                       parseEvidence)
 
 allfields <- sapply(evidSet, function (s) names(details(s)))
 ufields <- unique(do.call(c,allfields))
@@ -34,3 +34,4 @@ for (n in 1:N) {
   }
 }
 write.csv(obsDF,"Observables2019-05-08.csv")
+}

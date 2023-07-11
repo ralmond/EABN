@@ -16,7 +16,7 @@
 }
 \usage{
 getSR(srs, uid, ser = "")
-newSR(srs, uid)
+newSR(srs, uid, timestamp = Sys.time())
 saveSR(srs, rec)
 clearSRs(srs)
 }
@@ -29,6 +29,8 @@ clearSRs(srs)
     either be a list which is the output of
     \code{\link[jsonlite]{fromJSON}} or \code{NULL}.}
   \item{rec}{A \code{\linkS4class{StudentRecord}} to be saved.}
+  \item{timestamp}{A \code{POSIXt} datetime indicating the last
+    modification date of the record.}
 }
 \details{
 
@@ -54,7 +56,7 @@ clearSRs(srs)
       function \code{saveSR} is called to save the new record.}
     \item{\code{saveSR}}{If the database exists, the student record is
       saved to the database.  Otherwise, if no
-      \code{\link[Proc4]{m_id}} exists for the record one is created
+      \code{\link[mongo]{m_id}} exists for the record one is created
       from the \code{\link[Proc4]{uid}} and \code{\link{seqno}}.}
     \item{\code{clearSRs}}{In database mode, it clears the database.
       Otherwise, nothing is done.}
@@ -64,10 +66,10 @@ clearSRs(srs)
 \value{
 
   The functions \code{getSR}, \code{newSR} and \code{saveSR} return the
-  student record or \code{NULL} if the record was not found or created. 
+  student record or \code{NULL} if the record was not found or created.
 
   The function \code{clearSRs} returns the student record set (its
-  argument). 
+  argument).
 
 }
 \author{Russell Almond}
@@ -84,7 +86,7 @@ clearSRs(srs)
 }
 \examples{
 
-%\dontrun{
+\dontrun{
 ## Requires PNetica
 library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
@@ -106,16 +108,16 @@ cl <- new("CaptureListener")
 listeners <- list("cl"=cl)
 
 ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                  dburi="", listeners=listeners)
+                  db=MongoDB(noMongo=TRUE), listeners=listeners)
 
-eng <- BNEngineNDB(app=app,warehouse=Nethouse,
+eng <- newBNEngineNDB(app=app,warehouse=Nethouse,
                      listenerSet=ls,manifest=netman,
                      profModel="miniPP_CM",
                      histNodes="Physics",
                      statmat=stattab,
                      activeTest="EAActive.txt")
 
-## Standard initialization methods.                     
+## Standard initialization methods.
 loadManifest(eng,netman)
 eng$setHistNodes("Physics")
 configStats(eng,stattab)
@@ -157,9 +159,47 @@ stopifnot(abs(eap1-eap1a) < .001)
 stopifnot(nrow(history(sr1a,"Physcis"))==2L)
 
 
-%PNetica%}
+}
 
 ##  <<Here>> Need test with Mongo implementation
+library(PNetica)  ## Must load to setup Netica DLL
+app <- "ecd://epls.coe.fsu.edu/EITest"
+sess <- RNetica::NeticaSession()
+RNetica::startSession(sess)
+
+config.dir <- file.path(library(help="Peanut")$path, "auxdata")
+net.dir <- file.path(library(help="PNetica")$path,"testnets")
+
+netman <- read.csv(file.path(config.dir, "Mini-PP-Nets.csv"),
+                    row.names=1, stringsAsFactors=FALSE)
+stattab <- read.csv(file.path(config.dir, "Mini-PP-Statistics.csv"),
+                    as.is=TRUE)
+
+Nethouse <- PNetica::BNWarehouse(netman,session=sess,
+             address=net.dir)
+
+cl <- new("CaptureListener")
+listeners <- list("cl"=cl)
+
+ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
+                  db=mongo::MongoDB("Messages","EARecords", makeDBuri()),
+                  registryDB=mongo::MongoDB("OutputFiles","Proc4",makeDBuri()),
+                  listeners=listeners)
+
+eng <- newBNEngineMongo(app=app,warehouse=Nethouse,
+                     listenerSet=ls,
+                     profModel="miniPP_CM",
+                     histNodes="Physics",
+                     dburi=makeDBuri(),
+                     dbname="EARecords",admindbname="Proc4")
+
+
+
+## Standard initialization methods.
+loadManifest(eng,netman)
+eng$setHistNodes("Physics")
+configStats(eng,stattab)
+setupDefaultSR(eng)
 
 }
 \keyword{ interface }

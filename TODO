@@ -1,16 +1,11 @@
-  generic 'evidence' and siglist 'BNEngineNDB'
-  generic 'evidence<-' and siglist 'BNEngineNDB'
-  generic 'fetchNextEvidence' and siglist 'BNEngine'
-  generic 'markProcessed' and siglist 'BNEngine'
-
-
 
 * Add tests with Mongo.
-   ‘clearSRs’ ‘getSR’‘newSR’ ‘saveSR' <<HERE>>
-   ‘getRecordForUser’  <<HERE>>
+
    ‘accumulateEvidence’ ‘handleEvidence’ <<HERE>>
    markProcessed, fetchNextEvidence
    loadManifest
    setupDefaultSR
    configStats
    baselineHist
+
+* Baseline needs to take the timestamp of the initial event, not the time of scoring.

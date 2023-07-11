@@ -79,7 +79,7 @@ updateSM(eng, rec, evidMess, debug = 0)
 }
 \examples{
 
-%PNetica%%\dontrun{
+\dontrun{
 ## Requires Netica
 library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
@@ -101,9 +101,9 @@ cl <- new("CaptureListener")
 listeners <- list("cl"=cl)
 
 ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                  dburi="", listeners=listeners)
+                  db=MongoDB(noMongo=TRUE), listeners=listeners)
 
-eng <- BNEngineNDB(app=app,warehouse=Nethouse,
+eng <- newBNEngineNDB(app=app,warehouse=Nethouse,
                      listenerSet=ls,manifest=netman,
                      profModel="miniPP_CM",
                      histNodes="Physics",
@@ -128,8 +128,7 @@ eap1a <- PnodeEAP(sm(sr1),PnetFindNode(sm(sr1),"Physics"))
 ## This should have changed.
 stopifnot(abs(eap1-eap1a) > .001)
 
-%PNetica%}
-
+}
 
 }
 \keyword{ graphs }
