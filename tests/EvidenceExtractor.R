@@ -1,12 +1,12 @@
 library(EABN)
-eviddb <- mongolite::mongo("EvidenceSets","EARecords","mongodb://localhost")
+eviddb <- try(mongolite::mongo("EvidenceSets","EARecords","mongodb://localhost"))
 if (FALSE) {
 #ev1 <- getOneRec('{}',eviddb,parseEvidence)
 
-evidSet <- getManyRecs(eviddb,'{"app":"ecd://epls.coe.fsu.edu/P4test"}',
+evidSet <- mongo::getManyRecs(eviddb,'{"app":"ecd://epls.coe.fsu.edu/P4test"}',
                        parseEvidence)
 
-allfields <- sapply(evidSet, function (s) names(details(s)))
+allfields <- sapply(evidSet, function (s) names(Proc4::details(s)))
 ufields <- unique(do.call(c,allfields))
 nfields <- c("uid","context","timestamp","app",ufields[ufields!="trophyHall"])
 
@@ -22,7 +22,7 @@ for (n in 1:N) {
   obsDF[n,"context"] <- context(evidSet[[n]])
   obsDF[n,"timestamp"] <- toString(timestamp(evidSet[[n]]))
   obsDF[n,"app"] <- basename(app(evidSet[[n]]))
-  obs <- details(evidSet[[n]])
+  obs <- Proc4::details(evidSet[[n]])
   for (oname in names(obs)) {
     if (oname %in% names(obsDF)) {
       val <- obs[[oname]]
