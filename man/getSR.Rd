@@ -160,7 +160,7 @@ stopifnot(nrow(history(sr1a,"Physcis"))==2L)
 
 
 }
-
+\dontrun{
 ##  <<Here>> Need test with Mongo implementation
 library(PNetica)  ## Must load to setup Netica DLL
 app <- "ecd://epls.coe.fsu.edu/EITest"
@@ -200,7 +200,7 @@ loadManifest(eng,netman)
 eng$setHistNodes("Physics")
 configStats(eng,stattab)
 setupDefaultSR(eng)
-
+}
 }
 \keyword{ interface }
 \keyword{ database }
