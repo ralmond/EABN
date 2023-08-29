@@ -187,7 +187,7 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
     flog.warn("No evidence model for context %s",context(evidMess))
     stop("No evidence model for context ",context(evidMess))
   }
-  em <- WarehouseSupply(eng$warehouse(),emName)
+  em <- WarehouseSupply(eng$warehouse(),emName,restoreOnly=TRUE)
   if (is.null(em)) {
     flog.warn("No evidence model net for context %s",context(evidMess))
     stop("No evidence model net for context %s",context(evidMess))

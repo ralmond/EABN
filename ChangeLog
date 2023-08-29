@@ -1,7 +1,14 @@
+2023-08-20  Russell Almond  <ralmond@cherry>
+
+	* R/EngineGears.R (updateSM): Change from WarehouseSupply to
+	use new `restoreOnly` argument as we want an error if the EM has
+	not been built for some reason.
+
+
 2023-04-15  Russell Almond  <ralmond@pei>
 
-	* R/StudentRec.R (fetchSM): Fixed a bug trying to set null value to SM field.
-	
+	* R/StudentRec.R (fetchSM): Fixed a bug trying to set null value
+	to SM field. 
 
 2023-04-05  Russell Almond  <ralmond@cherry>
 
