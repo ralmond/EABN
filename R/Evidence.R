@@ -64,3 +64,36 @@ parseEvidence<- function (rec) {
       seqno=as.vector(rec$seqno))
 }
 
+### Evidence Logs
+
+## Need a way of actually logging which observables are and are not used to
+## facilitate debugging.
+
+setClass("EvidenceLog",
+         slots=c(eid="character",
+                 context="character",
+                 used="list",
+                 ignored="list"))
+
+eid <- function(el) {el@eid}
+
+setMethod("context","EvidenceLog",function(x) {x@context})
+
+observables <- function (el) {list(used=el@used,ignored=el@ignored)}
+
+setGeneric("useObs", function (x,name,value) standardGeneric("useObs"))
+setGeneric("ignoreObs", function (x,name,value) standardGeneric("ignoreObs"))
+
+setMethod("useObs",c("EvidenceLog"), function (x,name,value) {
+  obs <- list(value)
+  names(obs) <- name
+  x@used <- c(x@used,obs)
+  x
+})
+
+setMethod("ignoreObs",c("EvidenceLog"), function (el,name,value) {
+  obs <- list(value)
+  names(obs) <- name
+  x@ignored <- c(x@used,obs)
+  x
+}

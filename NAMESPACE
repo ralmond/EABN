@@ -26,6 +26,9 @@ exportMethods(evidence, "evidence<-",
 export(EvidenceSet, parseEvidence, seqno, "seqno<-", observables)
 exportClasses(EvidenceSet)
 exportMethods(seqno, "seqno<-")
+export(EvidenceLog, eid, observables, useObs, ignoreObs)
+exportClasses("EvidenceLog")
+exportMethods("useObs","ignoreObs")
 
 exportClass(BNEngine,BNEngineMongo)
 export(BNEngine,BNEngineMongo, newBNEngineMongo, loadManifest, setupDefaultSR,
@@ -35,8 +38,6 @@ export(BNEngine,BNEngineMongo, newBNEngineMongo, loadManifest, setupDefaultSR,
 exportMethods(notifyListeners)
 
 export(trimTable,doBuild,doRunrun)
-
-export(trimTable,doBuild,doRunrun,rebuildOutputs,buildAppHist,buildHistMat)
 
 exportClass(BNEngineNDB)
 export(BNEngineNDB, newBNEngineNDB)

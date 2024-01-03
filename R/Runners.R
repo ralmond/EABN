@@ -153,8 +153,10 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   if (is.null(dbname)) dbname<-"EARecords"
   admindbname <- EAeng.local$admindbname
   if (is.null(admindbname)) admindbname<-"Proc4"
-  mongoverbose <- EAeng.local$mongoverbose
-  if (is.null(mongoverbose)) mongoverbose <- FALSE
+  mongoverbose <- isTRUE(EAeng.local$mongoverbose)
+  if (is.null(lscolName)) lscolName <- "Messages"
+  registrycol <- EIeng.local$registrycol
+  if (is.null(registrycol)) registrycol <- "OutputFiles"
 
   flog.info("Building and configuring engine.")
 
@@ -189,9 +191,11 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
       withFlogging({
         buildListenerSet(sender= sub("<app>",sappid,EA.config$sender),
                         EA.config$listeners,appid,
-                        EA.config$colnames$listenerSetLog,
-                        dburi,sslops,EA.config$colnames$registry,
-                        admindbname,mongoverbose=FALSE)
+                        lscol=lscolName,dbname=dbname,
+                        dburi=dburi,sslops=sslops,
+                        registrycol=registrycol,
+                        registrydbname=admindbname,
+                        mongoverbose=mongoverbose)
       }, context="Building listener set.")
     if (is(EAeng.params$listenerSet,'try-error')) {
       flog.fatal("Could not build listener set: %s",EAeng.params$listenerSet)

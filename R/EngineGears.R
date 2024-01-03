@@ -207,9 +207,11 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
         flog.trace("Processing observable %s.",oname)
         oval <- observables(evidMess)[[oname]]
         if (is.null(oval) || is.na(oval) || length(oval)==0L) {
+          rec <- ignoreObs(rec,oname,oval)
           flog.trace("Observable %s is null/NA, skipping.", oname)
         } else {
           flog.trace("Setting observable %s to %s",oname,as.character(oval))
+          rec <- useObs(rec,oname,oval)
           PnodeEvidence(obs[[oname]]) <- oval
         }
       } else {

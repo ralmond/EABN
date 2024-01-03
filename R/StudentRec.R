@@ -10,6 +10,7 @@ setClass("StudentRecord",
                  uid="character",
                  context="character",
                  evidence="character",
+                 evidLog="list",
                  timestamp="POSIXt",      #Date of last update.
                  sm="ANY",                #Damn Package Locking Anyway!
                  smser="list",
@@ -46,6 +47,28 @@ setMethod("histNames","StudentRecord", function (sr) names(sr@hist))
 setMethod("history",c("StudentRecord","character"),
           function (sr, name) sr@hist[[name]])
 
+setGeneric("evidenceLog", function(sr) standardGeneric("evidenceLog"))
+setGeneric("evidenceLog<-", function(sr,value) standardGeneric("evidenceLog<-"))
+setMethod("evidenceLog", c("StudentRecord"), function (sr) sr@evidLog)
+setMethod("evidenceLog<-", c("StudentRecord"), function (sr,value) {
+  sr@evidLog <- value
+  sr
+})
+
+setMethod("useObs",c("EvidenceLog"), function (x,name,value) {
+  if (length(evidenceLog) > 0L) {
+    evidenceLog(x)[[1]] <- useObs(evidenceLog(x)[[1]],name,value)
+  }
+  x
+})
+
+setMethod("ignoreObs",c("EvidenceLog"), function (x,name,value) {
+  if (length(evidenceLog) > 0L) {
+    evidenceLog(x)[[1]] <- ignoreObs(evidenceLog(x)[[1]],name,value)
+  }
+  x
+})
+
 setGeneric("getIssues", function(sr) standardGeneric("getIssues"))
 setGeneric("logIssue", function(sr,issue) standardGeneric("logIssue"))
 setMethod("getIssues",c("StudentRecord"), function (sr) sr@issues)
@@ -55,7 +78,6 @@ setMethod("logIssue",c("StudentRecord","character"),
             sr})
 setMethod("logIssue",c("StudentRecord","ANY"),
           function (sr, issue) logIssue(sr,as.character(issue)))
-
 
 
 
@@ -281,13 +303,18 @@ setMethod("evidence","StudentRecord", function(x) x@evidence)
 
 
 ## This is not currently being used.  The functionality is used
-updateRecord <- function (rec, evidMess) {
+updateRecord <- function (rec, evidMess,logEvidence=TRUE) {
   rec@prev_id <- m_id(rec)
   rec@"_id" <- NA_character_
   evidence(rec) <- c(m_id(evidMess),evidence(rec))
   seqno(rec) <- seqno(rec)+1
   rec@context <- context(evidMess)
   rec@timestamp <- timestamp(evidMess)
+  if (logEvidence) {
+    evidenceLog(rec) <- c(evidenceLog(c),
+                          EvidenceLog(m_id(evidMess),
+                                      context(evidMess)))
+  }
   rec
 }
 
