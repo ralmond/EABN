@@ -1,13 +1,6 @@
-  generic 'evidence' and siglist 'BNEngineNDB'
-  generic 'evidence<-' and siglist 'BNEngineNDB'
-  generic 'fetchNextEvidence' and siglist 'BNEngine'
-  generic 'markProcessed' and siglist 'BNEngine'
-
-
 
 * Add tests with Mongo.
-   ‘clearSRs’ ‘getSR’‘newSR’ ‘saveSR' <<HERE>>
-   ‘getRecordForUser’  <<HERE>>
+
    ‘accumulateEvidence’ ‘handleEvidence’ <<HERE>>
    markProcessed, fetchNextEvidence
    loadManifest

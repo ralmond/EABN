@@ -4,7 +4,7 @@
 \title{Convert EvidenceSet objects to and from JSON}
 \description{
 
-  The \code{\link[Proc4]{as.json}} function takes an
+  The \code{\link[mongo]{as.json}} function takes an
   \code{\linkS4class{EvidenceSet}} (among other objects) and turns it
   into JSON.  The function \code{parseEvidence} takes the list produced
   as the output to \code{\link[jsonlite]{fromJSON}} and turns it back
@@ -29,11 +29,11 @@ parseEvidence(rec)
 }
 \details{
 
-  See the description for \code{\link[Proc4]{as.json}} for more
+  See the description for \code{\link[mongo]{as.json}} for more
   description of the JSON conversion prototocl.
 
   The \code{parseEvidence} method is designed to be used with the
-  \code{\link[Proc4]{getOneRec}} and \code{\link[Proc4]{getManyRecs}}
+  \code{\link[mongo]{getOneRec}} and \code{\link[mongo]{getManyRecs}}
   functions for fetching information from the database.
 }
 \value{
@@ -48,8 +48,8 @@ parseEvidence(rec)
 \author{Russell Almond}
 \seealso{
 
-  \code{\linkS4class{EvidenceSet}}, \code{\link[Proc4]{as.json}},
-  \code{\link[Proc4]{getOneRec}}, \code{\link[Proc4]{getManyRecs}}
+  \code{\linkS4class{EvidenceSet}}, \code{\link[mongo]{as.json}},
+  \code{\link[mongo]{getOneRec}}, \code{\link[mongo]{getManyRecs}}
 
 }
 \examples{
@@ -61,9 +61,9 @@ e2 <- EvidenceSet(uid="S1",app="Test",context="PPdurAttEM",
                   obs=list("Attempts"=2,"Duration"=38.3))
 
 e1.ser <- as.json(e1)
-e1a <- parseEvidence(fromJSON(e1.ser))
+e1a <- parseEvidence(jsonlite::fromJSON(e1.ser))
 e2.ser <- as.json(e2)
-e2a <- parseEvidence(fromJSON(e2.ser))
+e2a <- parseEvidence(jsonlite::fromJSON(e2.ser))
 
 stopifnot(all.equal(e1,e1a), all.equal(e2,e2a))
 

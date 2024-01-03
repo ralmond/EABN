@@ -1,5 +1,6 @@
 \name{BNEngineNDB}
 \alias{BNEngineNDB}
+\alias{newBNEngineNDB}
 \title{Creates a Bayes net engine not attached to a database.}
 \description{
 
@@ -8,14 +9,17 @@
   In particular, it cannot store student records, so it cannot maintain
   state between scoring sessions without extenal help.
 
-  
+
 }
 \usage{
-BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
+newBNEngineNDB(app = "default", warehouse, listenerSet = NULL,
   manifest = data.frame(), processN = Inf, waittime = 0.25,
   profModel = character(), statmat = data.frame(),
-  evidenceQueue = list(), activeTest =
-  "EAActive", ...) 
+  evidenceQueue = new("ListQueue",app, list()),
+  activeTest = "EAActive",
+  errorRestart=c("checkNoScore","stopProcessing","scoreAvailable"),
+  srs =StudentRecordSet(app=app,warehouse=warehouse, db=MongoDB(noMongo=TRUE)),
+  ...)
 
 }
 \arguments{
@@ -37,10 +41,18 @@ BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
     warehouse manifest).}
   \item{statmat}{A data.frame describing the statistics.  See
     \code{\link{configStats}}.}
-  \item{evidenceQueue}{A list of \code{\linkS4class{EvidenceSet}}
-    objects to be processed.}
+  \item{evidenceQueue}{A object of class \code{\link[Proc4]{MessageQueue-class}}
+    containing evidence sets to be processed.}
   \item{activeTest}{The pathname for the file whose existance will be
     used to determine when the engine should shut down.}
+  \item{errorRestart}{A character scalar describing how to handle
+    errors.  The default, "checkNoScore" will continue scoreing to try
+    to find additional errors, but will not report statistics; the
+    "scoreAvailable" option reports the scores based on the evidence
+    sets which do not produce errors.  The "stopProcessing" option
+    immediately stops processing.}
+  \item{srs}{A \code{\linkS4class{StudentRecordSet}} object used to
+    manage student records.}
   \item{\dots}{Extra arguments are ignored.  This allows arguments for
     other engine versions to be set in the parameters and ignored.}
 }
@@ -60,7 +72,7 @@ BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
 
   Almond, Mislevy, Steinberg, Yan and Williamson (2015).  \emph{Bayesian
     Networks in Educational Assessment}.  Springer.  Especially Chapter
-  13. 
+  13.
 
 
 }
@@ -73,7 +85,7 @@ BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
   Constituent parts:
   \code{\link{StudentRecordSet}}, \code{\link[Peanut]{PnetWarehouse}}
   \code{\link[Proc4]{ListenerSet}}
-  
+
   Setup Functions:
   \code{\link{loadManifest}},
   \code{\link{setupDefaultSR}},
@@ -97,7 +109,7 @@ BNEngineNDB(app = "default", warehouse, listenerSet = NULL,
 %PNetica%\dontrun{
 ## Requires database setup, also PNetica
 library(RNetica)  ## Must load to setup Netica DLL
-app <- "ecd://epls.coe.fsu.edu/EITest"
+appid <- "ecd://epls.coe.fsu.edu/EITest"
 sess <- RNetica::NeticaSession()
 RNetica::startSession(sess)
 
@@ -115,17 +127,17 @@ Nethouse <- PNetica::BNWarehouse(netman,session=sess,
 cl <- new("CaptureListener")
 listeners <- list("cl"=cl)
 
-ls <- ListenerSet(sender= paste("EAEngine[",app,"]"),
-                  dburi="", listeners=listeners)
+ls <- ListenerSet(sender= paste("EAEngine[",appid,"]"),
+                  listeners=listeners)
 
-eng <- BNEngineNDB(app=app,warehouse=Nethouse,
+eng <- newBNEngineNDB(app=appid,warehouse=Nethouse,
                      listenerSet=ls,manifest=netman,
                      profModel="miniPP_CM",
                      histNodes="Physics",
                      statmat=stattab,
                      activeTest="EAActive.txt")
 
-## Standard initialization methods.                     
+## Standard initialization methods.
 loadManifest(eng,netman)
 eng$setHistNodes("Physics")
 configStats(eng,stattab)

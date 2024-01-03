@@ -1,5 +1,5 @@
 ###  Evidence -- A set of evidence coming from the EI process.
-###  This roughy follow a combination of the xAPI format.
+###  This roughly follow a combination of the xAPI format.
 
 setClass("EvidenceSet",
          slots=c(seqno="integer"),
@@ -49,7 +49,9 @@ setMethod("as.jlist",c("EvidenceSet","list"), function(obj,ml,serialize=TRUE) {
 parseEvidence<- function (rec) {
   rec <- cleanMessageJlist(rec)
   if (is.null(rec$seqno)) rec$seqno <- NA_integer_
-  new("EvidenceSet","_id"=ununboxer(rec$"_id"),
+  mid <- ununboxer(rec$"_id")
+  if (is.null(mid)) mid <- NA_character_
+  new("EvidenceSet","_id"=mid,
       app=as.vector(ununboxer(rec$app)),
       uid=as.vector(ununboxer(rec$uid)),
       context=as.vector(ununboxer(rec$context)),
@@ -61,5 +63,4 @@ parseEvidence<- function (rec) {
       data=parseData(ununboxer(rec$data)),
       seqno=as.vector(rec$seqno))
 }
-
 

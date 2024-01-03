@@ -19,7 +19,7 @@ The most important object in the package is the
 \code{\linkS4class{BNEngine}} which does most of the work of scoring.
 In particular, it takes a \code{\link[Proc4]{P4Message}} object
 containing observables, and a \code{\linkS4class{StudentRecord}} object
-and updates the student record.  
+and updates the student record.
 
 It comes in two variants, \code{\linkS4class{BNEngineMongo}} which links
 to a Mongo database, and \code{\linkS4class{BNEngineNDB}} which
@@ -40,9 +40,10 @@ Maintainer: \packageMaintainer{EABN}
 }
 \references{
 
+
   Almond, Mislevy, Steinberg, Yan and Williamson (2015).  \emph{Bayesian
     Networks in Educational Assessment}.  Springer.  Especially Chapters
-  5 and 13. 
+  5 and 13.
 
 
 }
@@ -54,7 +55,6 @@ Maintainer: \packageMaintainer{EABN}
    messaging.
    \code{\link[EIEvent:EIEvent-package]{EIEvent}} -- Evidence
    Accumulation which produces the input messages for \code{EABN}.
-   
 }
 \examples{
 cat("This sample file is available in", system.file("conf/RunEABN.R",
@@ -64,6 +64,9 @@ cat("This sample file is available in", system.file("conf/RunEABN.R",
 library(R.utils)
 library(EABN)
 library(PNetica)
+library(futile.logger)
+library(jsonlite)
+
 
 if (interactive()) {
   ## Edit these for the local application
@@ -87,7 +90,7 @@ source("/usr/local/share/Proc4/EAini.R")
 ## Assumes the path config.dir (set in the INI file) contains a file
 ## config.json giving the location of the necessary configuration files
 ## and network files.
-EA.config <- fromJSON(file.path(config.dir,"config.json"),FALSE)
+EA.config <- jsonlite::fromJSON(file.path(config.dir,"config.json"),FALSE)
 
 app <- as.character(Proc4.config$apps[appStem])
 if (length(app)==0L || any(app=="NULL")) {

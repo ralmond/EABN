@@ -23,26 +23,23 @@ mainLoop(eng, N=NULL)
 }
 \details{
 
-  The \code{\linkS4class{BNEngineMongo}} class uses the EvidenceSets
-  collection in the database as a queue.  All events have a
+  The \code{evidenceQueue} field of the \code{\linkS4class{BNEngine}} class is an object of type
+  \code{\link[Proc4:MessageQueue-class]{MessageQueue}}. All events have a
   \code{\link[Proc4]{processed}} field which is set to true when the
-  evidence set is processed.  The function \code{\link{fetchNextEvidence}}
-  fetches the oldest unprocessed evidence set.
+  evidence set is processed.  The function \code{\link[Proc4]{fetchNextMessage}}
+  fetches the oldest unprocessed evidence set, while \code{\link[Proc4]{markAsProcessed}} sets the processed flag.
 
-  The \code{\linkS4class{BNEngineNDB}} has an internal \code{eventQueue}
-  field which is a list of evidence setsn.  The \code{\link{fetchNextEvidence}}
-  simply fetches the first evidence set in the queue.
 
   The \code{mainLoop} function iterates over the following steps.
   \enumerate{
     \item{Fetch the oldest unprocessed Event: \code{eve <-
-        \link{fetchNextEvidence}()}.}
+        \link{fetchNextMessage}(eng)}.}
     \item{Process the evidence set: \code{out <-
-        \link{handleEvidence}(eng,eve)}. 
-      (Note: this expression will always return.  If it generates an error, the 
+        \link{handleEvidence}(eng,eve)}.
+      (Note: this expression will always return.  If it generates an error, the
       error will be logged and an object of class \code{try-error} will be
-      returned.)} 
-    \item{Mark the event as processed: \code{\link{markProcessed}(eve)}.}
+      returned.)}
+    \item{Mark the event as processed: \code{\link{markAsProcessed}(eng,eve)}.}
   }
 
   At its simplest level, the funciton produces an infinite loop over
@@ -81,7 +78,7 @@ mainLoop(eng, N=NULL)
   process should continue to wait for more messages in the queue.
 
   \bold{Database Engine.} For the Mongo engine
-  (\code{\linkS4class{BNEngineMongo}}) the 
+  (\code{\linkS4class{BNEngineMongo}}) the
   communication channel is the \code{AuthorizedApps} collection in the
   administrative database.  In particular, the \code{EAsignal} field is
   read by both methods.  The \code{eng$activate()} method changes the
@@ -96,12 +93,11 @@ mainLoop(eng, N=NULL)
   will shut down the server for an application containing the string
   "appName" as part of its name (note \dQuote{Halt} could be replaced
   with \dQuote{finish}).
-  
   \code{db.AuthorizedApps.update(\{app:\{$regex:"appName"\}\},
     \{$set:\{"EAsignal":"Halt"\}\});}
 
   \bold{No Database Engine.} For the Mongo engine
-  (\code{\linkS4class{BNEngineMongo}}) the 
+  (\code{\linkS4class{BNEngineMongo}}) the
   communication channel is a file named \code{activeTest}.  The
   name (extension) of this file is changed to produce the signals.
   The \code{eng$activate()} method creates it with the extension
@@ -114,7 +110,7 @@ mainLoop(eng, N=NULL)
 \value{
 
   There is no return value.  The function is used entirely for its side
-  effects. 
+  effects.
 
 }
 \author{Russell Almond}
@@ -133,11 +129,12 @@ mainLoop(eng, N=NULL)
 \seealso{
 
   \code{\linkS4class{BNEngine}}, \code{\linkS4class{BNEngineMongo}},
-  \code{\linkS4class{BNEngineNDB}}
+  \code{\linkS4class{BNEngineNDB}}, \code{\link[Proc4:MessageQueue-class]{MessageQueue}}
 
-  \code{\link{fetchNextEvidence}}, \code{\link{handleEvidence}}
+  \code{\link[Proc4]{fetchNextMessage}}, \code{\link{handleEvidence}},
+  \code{\link[Proc4]{markAsProcessed}}
 
-  
+
 }
 \examples{
 
@@ -147,8 +144,8 @@ mainLoop(eng, N=NULL)
   loglevel <- "DEBUG"
 
 source("/usr/local/share/Proc4/EAini.R")
-flog.appender(appender.file(logfile))
-flog.threshold(loglevel)
+futile.logger::flog.appender(appender.file(logfile))
+futile.logger::flog.threshold(loglevel)
 
 sess <- NeticaSession(LicenseKey=NeticaLicenseKey)
 startSession(sess)

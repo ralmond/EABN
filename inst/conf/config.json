@@ -1,0 +1,91 @@
+{
+    "ConfigName":"default",
+    "Branch":"default",
+    "Version":"0.0.1",
+    "Date":"2023-06-21",
+    "appStemOne":["default"],
+    "appStem":["default","test"],
+    "rebuildNets":true,
+    "logLevel":"INFO",
+    "logname":"EA_<app>0.log",
+    "Tables":{
+        "netdir":"nets",
+        "tabdir":"tables",
+        "TableIDComment":"This is the unique part of the spreadsheet ID.",
+        "TableID":"13nbzvAoFlq_4eJoW-MM53",
+        "downloadScript":"download.sh",
+        "NetsName":"Nets",
+        "NodesName":"Nodes",
+	"OmegaName":"Omega",
+        "QName":"Q",
+        "StatName":"Statistics",
+        "profModel":"PP_OrangeNodes_6",
+        "manifestFile":"PPManifest.csv",
+        "statFile":"StatisticList.csv",
+	"OverrideComment":"Setting to false prevents accidentally changing structure of graphs.",
+	"profOverride":true,
+	"emOverride":true
+    },
+    "sender":"EA_<app>",
+    "dbname":"EARecords",
+    "admindbname":"Proc4",
+    "colnames":{
+	"studentRecords"="StudentRecords",
+	"manifest":"Manifest",
+	"evidence":"EvidenceSets",
+	"hist":"histCodes",
+	"stat":"Statistics",
+	"admin":"AuthorizedApps",
+	"registry":"OutputFiles",
+	"listenerSetLog":"Messages"
+    },
+    "listeners":[
+	{
+	    "name":"ToAS",
+	    "type":"InjectionListener",
+	    "sender":"EA_<app>",
+	    "dbname":"ASRecords",
+	    "colname":"Statistics",
+	    "messages":["Statistics"]
+	},
+	{
+	    "name":"PPStats",
+	    "type":"UpdateListener",
+	    "dbname":"Proc4",
+	    "colname":"Statistics",
+	    "targetField":"data",
+	    "jsonEncoder":"stats2json",
+	    "messages":["Statistics"]
+	}
+	    
+    ],
+    "SRreset":true,
+    "listenerReset":"ALL",
+    "netdir":"nets",
+    "EAEngine":{
+        "manifestFile":"PPManifest.csv",
+        "statFile":"StatisticList.csv",
+        "histNodes":["Physics"],
+        "profModel":"PP_OrangeNodes_6",
+        "waittime":0.25
+    },
+    "filter":{
+        "RemoveComment":"Records matching query are removed.",
+        "doRemove":false,
+        "remove":{},
+	"importFile":"",
+        "doPurge":false,
+        "purge":{},
+        "ReprocessComment":"Records matching query are set processed<-false",
+        "doReprocess":true,
+        "reprocess":{},
+        "reprocessX":{"uid":["219c3","218c3"]}
+    },
+    "extensions":"",
+    "limitNNcomment":"Special value Inf runs in server mode.  Value ALL sets limits based on contents.",
+    "limitNN":"ALL",
+    "statListener":"PPStats",
+    "statfile":"stats-<app>.csv",
+    "histListener":"ToAS",
+    "histfile":"hist-<app>.csv"
+}

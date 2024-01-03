@@ -187,7 +187,7 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
     flog.warn("No evidence model for context %s",context(evidMess))
     stop("No evidence model for context ",context(evidMess))
   }
-  em <- WarehouseSupply(eng$warehouse(),emName)
+  em <- WarehouseSupply(eng$warehouse(),emName,restoreOnly=TRUE)
   if (is.null(em)) {
     flog.warn("No evidence model net for context %s",context(evidMess))
     stop("No evidence model net for context %s",context(evidMess))
@@ -198,7 +198,7 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
   flog.trace("Evidence:",details(evidMess),capture=TRUE)
   if (interactive() && debug>1) utils::recover()
   ## This variable will be set to the first error.  Need to for errors
-  ## after main loop. 
+  ## after main loop.
   anErr <- NULL
   issues <- character()
   for (oname in names(observables(evidMess))) {
@@ -241,7 +241,7 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
     flog.debug("%d issues found while processing evidence for level %s.",
              length(issues),context(evidMess))
     rec <- logIssue(rec,issues)
-    if (eng$getRestart() == "stopProcessing")     
+    if (eng$getRestart() == "stopProcessing")
       signalCondition(anErr)
     else
       return (rec)
@@ -272,11 +272,11 @@ handleEvidence <- function (eng, evidMess, srser=NULL, debug=0) {
   if (interactive() && debug>1) utils::recover()
   out <- accumulateEvidence(eng,rec,evidMess,debug)
   if (interactive() && debug>1) utils::recover()
-  eng$setProcessed(evidMess)
+  markAsProcessed(eng,evidMess)
   if (is(out,'try-error')) {
     flog.warn("Processing %s for user %s generated error: %s",
               context,uid,toString(out))
-    eng$setError(evidMess,out)
+    markAsError(eng,evidMess,out)
   }
   out
 }
@@ -293,7 +293,7 @@ mainLoop <- function(eng,N=NULL) {
                    basename(app(eng)))
         break
       }
-      eve <- fetchNextEvidence(eng)
+      eve <- fetchNextMessage(eng)
       if (is.null(eve)) {
         ## Queue is empty, wait and check again.
         Sys.sleep(eng$waittime)
@@ -307,7 +307,7 @@ mainLoop <- function(eng,N=NULL) {
         }
       } else {
         handleEvidence(eng,eve)
-        markProcessed(eng,eve)
+        markAsProcessed(eng,eve)
         eng$processN <- eng$processN -1
         active <- eng$processN > 0
       }

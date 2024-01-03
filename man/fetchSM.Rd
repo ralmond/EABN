@@ -106,7 +106,7 @@ pnodenames <- names(PnetPnodes(sm(dsr)))
 ## Serialization and unserialization
 dsr.ser <- as.json(dsr)
 
-dsr1 <- parseStudentRecord(fromJSON(dsr.ser))
+dsr1 <- parseStudentRecord(jsonlite::fromJSON(dsr.ser))
 stopifnot(is.null(sm(dsr1)))
 ## at this point, SM has not yet been restored.
 
@@ -121,7 +121,7 @@ stopifnot(all.equal(pnodenames,names(PnetPnodes(sm(dsr1)))))
 ## So we are sure we are building it from serialized version.
 WarehouseFree(Nethouse,PnetName(sm(dsr)))
 
-dsr1 <- parseStudentRecord(fromJSON(dsr.ser))
+dsr1 <- parseStudentRecord(jsonlite::fromJSON(dsr.ser))
 stopifnot(is.null(sm(dsr1)))
 ## at this point, SM has not yet been restored.
 

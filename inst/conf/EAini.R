@@ -4,6 +4,19 @@ EAeng.common <- list(host="localhost",username="EA",password="secret",
                      dbname="EARecords",P4dbname="Proc4",waittime=.25)
 appstem <- basename(app)
 
+dburi 
+sslopts <- mongolite::ssl_options()
+
+
+EAeng.local <-
+  list(dburi = mongo::makeDBuri(),
+       ssloptions = mongo::ssl_options(),
+       dbname = "EARecords",
+       admindbname = "Proc4",
+       outputreistry = "OutputFiles",
+       activeTest="EAactive" # Only needed for NDB impelementations.
+       )
+
 ## These are for application specific parameters
 EAeng.params <- list(app=app)
 
@@ -28,7 +41,7 @@ EA.listenerSpecs <-
             messSet=c("Statistics"),
             jsonEncoder="stats2json"))
 
-NeticaLicenseKey <- ""
+NeticaLicenseKey <- Sys.getenv("NETICA_LICENSE_KEY")
 
 config.dir <- "/home/ralmond/ownCloud/Projects/NSFCyberlearning/EvidenceAc/Sp2019nets"
 manifestFile <- "PPManifest.csv"

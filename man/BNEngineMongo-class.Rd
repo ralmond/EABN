@@ -13,14 +13,14 @@
 Class \code{"\linkS4class{BNEngine}"}, directly.
 
 All reference classes extend and inherit methods from
-\code{"\linkS4class{envRefClass}"}. 
+\code{"\linkS4class{envRefClass}"}.
 
 }
 \references{
 
   Almond, Mislevy, Steinberg, Yan and Williamson (2015).  \emph{Bayesian
     Networks in Educational Assessment}.  Springer.  Especially Chapter
-  13. 
+  13.
 
 
 }
@@ -41,7 +41,7 @@ All reference classes extend and inherit methods from
 
   Constituent parts:
   \code{\link{StudentRecordSet}}, \code{\link[Peanut]{PnetWarehouse}}
-  
+
   Setup Functions:
   \code{\link{loadManifest}},
   \code{\link{setupDefaultSR}},
@@ -108,7 +108,7 @@ showClass("BNEngineMongo")
       names of the nodes in the proficiency model whose history will be
       recorded. }
     \item{\code{warehouseObj}:}{Object of class
-      \code{\link[Peanut]{PnetWarehouse}} 
+      \code{\link[Peanut]{PnetWarehouse}}
       which stores the Bayes nets, both evidence models and student
       models are stored here.}
     \item{\code{waittime}:}{Object of class \code{numeric} giving the
@@ -122,11 +122,11 @@ showClass("BNEngineMongo")
     \item{\code{dbname}:}{Object of class \code{character} giving the
       name of the database to be used. }
     \item{\code{manifestDB}:}{Object of class
-      \code{\link[Proc4]{MongoDB-class}} giving the collection used to store
+      \code{\link[mongo:MongoDB-class]{MongoDB}} giving the collection used to store
       the manifest.  This object may not be initialized so it should be
       accessed through the class-based function \code{manifestdb()}.}
     \item{\code{evidenceDB}:}{Object of class
-      \code{\link[Proc4]{MongoDB-class}} accessing the evidence set
+      \code{\link[mongo:MongoDB-class]{MongoDB}} accessing the evidence set
       collection. This object may not be initialized so it should be
       accessed through the class-based function \code{evidenceSets()}.}
     \item{\code{statDB}:}{Object of class \code{MongoDB} giving the
@@ -136,9 +136,9 @@ showClass("BNEngineMongo")
       history nodes.  This object may not be initialized so it should be
       accessed through the class-based function \code{histNodesdb()}.}
     \item{\code{admindbname}:}{Object of class \code{character} giving name
-      admin (Proc4) database, used for various listeners and the
+      admin (mongo) database, used for various listeners and the
       \code{is.active()} method.}
-    \item{\code{adminDB}:}{Object of class \code{MongoDB} giving the link
+    \item{\code{adminDB}:}{Object of class \code{\link[mongo:MongoDB-class]{MongoDB}} giving the link
       to the admin database. This object may not be initialized so it should be
       accessed through the class-based function \code{admindb()}.}
   }
@@ -168,15 +168,15 @@ showClass("BNEngineMongo")
       functions, so these should be called instead of directly accessing
       the fields.}
     \item{\code{manifestdb()}:}{ Returns the
-      \code{\link[Proc4]{MongoDB-class}} handle to the manifest information
+      \code{\link[mongo]{MongoDB-class}} handle to the manifest information
       collection.  }
-    \item{\code{admindb()}:}{ Returns the \code{\link[Proc4]{MongoDB-class}}
+    \item{\code{admindb()}:}{ Returns the \code{\link[mongo]{MongoDB-class}}
       handle to the \dQuote{AuthorizedApps} collection.}
     \item{\code{histNodesdb()}:}{ Returns the
-      \code{\link[Proc4]{MongoDB-class}} handle to the hist nodes collection. }
+      \code{\link[mongo]{MongoDB-class}} handle to the hist nodes collection. }
     \item{\code{saveManifest(manifest)}:}{ Saves the current
       \code{\link[Peanut]{PnetWarehouse}} manifest to the
-      \code{manifestdb()} collection } 
+      \code{manifestdb()} collection }
     \item{\code{fetchManifest()}:}{ Retrieves the saved manifest from
       the \code{manifestdb()} collection. }
     \item{\code{fetchNextEvidence()}:}{ Retrieves the next
@@ -191,7 +191,7 @@ showClass("BNEngineMongo")
     \item{\code{setError(mess, e)}:}{ Added an error message to an
       evidence set. }
     \item{\code{evidenceSets()}:}{ Returns a
-      \code{\link[Proc4]{MongoDB-class}} handle to the collection/queue of
+      \code{\link[mongo]{MongoDB-class}} handle to the collection/queue of
       evidence sets. }
     \item{\code{getHistNodes()}:}{ Fetches the history nodes from the
       \code{histNodesdb()} collection. }
