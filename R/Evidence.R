@@ -75,6 +75,10 @@ setClass("EvidenceLog",
                  used="list",
                  ignored="list"))
 
+EvidenceLog <- function (eid,context,used=list(),ignored=list())
+  new("EvidenceLog",eid,context,used,ignored)
+
+
 eid <- function(el) {el@eid}
 
 setMethod("context","EvidenceLog",function(x) {x@context})
@@ -91,9 +95,10 @@ setMethod("useObs",c("EvidenceLog"), function (x,name,value) {
   x
 })
 
-setMethod("ignoreObs",c("EvidenceLog"), function (el,name,value) {
+setMethod("ignoreObs",c("EvidenceLog"), function (x,name,value) {
   obs <- list(value)
   names(obs) <- name
   x@ignored <- c(x@used,obs)
   x
-}
+})
+

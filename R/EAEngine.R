@@ -30,7 +30,7 @@ BNEngine <-
                                         srs=NULL,evidenceQueue=NULL,
                                         sender="EABN",...) {
                       if (is.null(evidenceQueue))
-                        evidenceQueue=new("ListQueue",app)
+                        evidenceQueue <- new("ListQueue",app)
                       callSuper(app=app,warehouseObj=warehouse,
                                 srs=srs,listenerSet=listenerSet,
                                 statistics=statistics,

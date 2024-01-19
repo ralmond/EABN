@@ -42,7 +42,7 @@ export(trimTable,doBuild,doRunrun)
 exportClass(BNEngineNDB)
 export(BNEngineNDB, newBNEngineNDB)
 
-
+export(local_warehouses)
 
 
 

@@ -91,35 +91,21 @@ outdir=config.dir, override = FALSE, logfile="", noprep=FALSE)
     \item{Date}{A edit date for the configuration. Documentation only,
       not used by \code{doRunrun}. }
     \item{appStem}{A list of app stems that will be affected.  Sample
-<<<<<<< HEAD
-      value \code{["P4Test"]}.} 
-    \item{rebuildNets}{A logical flag, should the nets be rebuilt.
-      Example value \code{true}.} 
-=======
       value \code{["P4Test"]}.}
     \item{rebuildNets}{A logical flag, should the nets be rebuilt.
       Example value \code{true}.}
->>>>>>> master
     \item{logLevel}{This controls the
       \code{\link[futile.logger]{flog.threshold}}. Default value
       \code{"INFO"}.  Note that \code{doRunrun} does not set the log
       value, that should be done in the calling script.}
     \item{logname}{This is the name of the file to which logs should be
       sent. Example value \code{"EA_<app>0.log"}. Note that
-<<<<<<< HEAD
-      \code{doRunrun} does not set the log 
-=======
       \code{doRunrun} does not set the log
->>>>>>> master
       file, that should be done in the calling script.}
     \item{Tables}{This is a whole object describing the \code{EA.tables}
       field see \code{\link{doBuild}}.}
     \item{sender}{The sender field on output messages.  Example value
-<<<<<<< HEAD
-      \code{"EA_<app>"}.} 
-=======
       \code{"EA_<app>"}.}
->>>>>>> master
     \item{lscolname}{The name of the column to which the listener set
       should log messages. Example value \code{"Messages"}.}
     \item{listeners}{This is a list of listener descriptions. See the
@@ -131,11 +117,7 @@ outdir=config.dir, override = FALSE, logfile="", noprep=FALSE)
      names of listeners.  The special value \dQuote{Self} refers to the
      ListenerSet object, and the special value \dQuote{ALL} resets all
      listeners.  See \code{\link[Proc4]{resetListeners}}.  Example value
-<<<<<<< HEAD
-     \code{"ALL"}.} 
-=======
      \code{"ALL"}.}
->>>>>>> master
     \item{netdir}{The name of the subdirectory of \code{config.dir}
       which contains the nets.   Default value \code{"nets"}.}
     \item{EAEngine}{A complex object describing engine parameters. See
@@ -151,54 +133,26 @@ outdir=config.dir, override = FALSE, logfile="", noprep=FALSE)
       process all records currently in the database and stop.
       \dQuote{Inf} will cause the process to run in server mode until it
       is shut down.}
-<<<<<<< HEAD
-    \item{statListener}{The name of the listener which should be
-      consulted to gather the Stat table afterwards. Example value
-      \code{"PPStats"}.} 
-    \item{statfile}{Name of the file, relative to \code{outdir} where
-      the statistcs file should be exported. Example value
-      \code{"stats-<app>.csv"}.}
-    \item{histListener}{The name of the listener which should be
-      consulted to gather the history table afterwards. Example value
-      \code{"ToAS"}.} 
-    \item{histfile}{Name of the file, relative to \code{outdir} where
-      the history file should be exported. Example value
-      \code{"hist-<app>.csv"}.}
-=======
     \item{listenerExports}{Information about data tables which should be
       exported at the end of the run.  See
       \code{\link[Proc4]{generateListenerExports}}.}
->>>>>>> master
   }
 
   A number of these values do \dQuote{<app>} substitution, that is they
   will substitute the string \dQuote{<app>} for the short name of the
-<<<<<<< HEAD
-  application. 
-  
-=======
   application.
 
->>>>>>> master
 }
 \section{Listener Configruation}{
 
   The listeners consist of a \code{\link[Proc4]{ListenerSet}} and a
   collection of \code{\link[Proc4]{Listener}} objects.  The listener
-<<<<<<< HEAD
-  objects are made by using the information from the \dQuote{listners}
-  element of the \code{EA.config} argument.  This should be a list of
-  specifications (each specification itself is a list).  These are
-  passed to \code{\link[Proc4]{buildListener}}, which provides some
-  examples.
-=======
   objects are made by using the information from the \dQuote{listeners}
   element of the \code{EA.config} argument.  This should be a list of
   specifications (each specification itself is a list).  These are
   passed to \code{\link[Proc4]{buildListener}}, which provides some
   examples.  The \dQuote{listenerExports} part of the configuration is used
   to call \code{\link[Proc4]{generateListenerExports}} when the engine stops.
->>>>>>> master
 
   The listener set is controlled by the \code{EAeng.local$dburi} value
   and the \dQuote{lscolname} field.  If \code{dbuir} is a name of a
@@ -286,19 +240,11 @@ outdir=config.dir, override = FALSE, logfile="", noprep=FALSE)
 
   If the value of \code{EA.config$statListener} is not null, then the
   final statistic values for all users are put into a table which is
-<<<<<<< HEAD
-  exported (to the file \code{EA.config$statfile}).  
-
-  If the value of \code{EA.config$histListener} is not null, then the
-  history of all statistic values for all users are put into a table
-  which is exported (to the file \code{EA.config$histfile}).  
-=======
   exported (to the file \code{EA.config$statfile}).
 
   If the value of \code{EA.config$histListener} is not null, then the
   history of all statistic values for all users are put into a table
   which is exported (to the file \code{EA.config$histfile}).
->>>>>>> master
 
   Both the statfile and histfile are registered using the
   \code{\link[Proc4]{ListenerSet}$registerOutput} method.
@@ -317,20 +263,10 @@ outdir=config.dir, override = FALSE, logfile="", noprep=FALSE)
   \code{\link[Proc4]{ListenerSet}$registerOutput} method.
 
 }
-<<<<<<< HEAD
-  
-=======
-
->>>>>>> master
 \value{
 
   This returns the engine invisibly, in case the calling program wants
   to do something with it.
-<<<<<<< HEAD
-  
-=======
-
->>>>>>> master
 }
 \references{
 
@@ -347,21 +283,11 @@ outdir=config.dir, override = FALSE, logfile="", noprep=FALSE)
   (\code{file.path(help(package="EABN")$path,"conf","RunEABN.R")})
 
   The shell script \code{EABN} found in the same directory will run this
-<<<<<<< HEAD
-  script.  
-=======
   script.
->>>>>>> master
 
 }
 \seealso{
 
-<<<<<<< HEAD
-  \code{\link{doBuild}}, \code{\link{rebuildOutputs}}
-
-  \code{\linkS4class{BNEngine}}, \code{\link{mainLoop}},
-  \code{\link[Proc4]{ListenerSet}}
-=======
   \code{\linkS4class{BNEngine}}, \code{\link{mainLoop}},   \code{\link{doBuild}}
 
   \code{\link[Proc4]{resetProcessedMessages}},
@@ -372,7 +298,6 @@ outdir=config.dir, override = FALSE, logfile="", noprep=FALSE)
   \code{\link[Proc4]{generateListenerExports}},
   \code{\link[Proc4]{resetListeners}}
 
->>>>>>> master
 
 
 }
@@ -391,11 +316,7 @@ if (FALSE) {
 
 source("/usr/local/share/Proc4/EAini.R")
 
-<<<<<<< HEAD
-EA.config <- fromJSON(file.path(config.dir,"config.json"),FALSE)
-=======
 EA.config <- jsonlite::fromJSON(file.path(config.dir,"config.json"),FALSE)
->>>>>>> master
 
 app <- as.character(Proc4.config$apps[appStem])
 if (length(app)==0L || any(app=="NULL")) {
@@ -408,19 +329,11 @@ startSession(sess)
 
 logfile <- (file.path(logpath, sub("<app>",appStem,EA.config$logname)))
 if (interactive()) {
-<<<<<<< HEAD
-  flog.appender(appender.tee(logfile))
-} else {
-  flog.appender(appender.file(logfile))
-}
-flog.threshold(EA.config$logLevel)
-=======
   futile.logger::flog.appender(appender.tee(logfile))
 } else {
   futile.logger::flog.appender(appender.file(logfile))
 }
 futile.logger::flog.threshold(EA.config$logLevel)
->>>>>>> master
 
 eng <- doRunrun(app,sess,EA.config,EAeng.local,config.dir,outdir,
                 logfile=logfile)

@@ -21,7 +21,7 @@ Suggests:
 Description: Extracts observables from a sequence of events.
 License: Artistic-2.0 
 URL: http://pluto.coe.fsu.edu/Proc4
-Collate: Evidence.R StudentRec.R EAEngine.R EAEngineMongo.R EAEngineNDB.R EngineGears.R Runners.R
+Collate: Evidence.R StudentRec.R EAEngine.R EAEngineMongo.R EAEngineNDB.R EngineGears.R Runners.R test-helpers.R
 VignetteBuilder: knitr
 Support: c(
    'Bill & Melinda Gates Foundation grant
