@@ -55,14 +55,14 @@ setMethod("evidenceLog<-", c("StudentRecord"), function (sr,value) {
   sr
 })
 
-setMethod("useObs",c("EvidenceLog"), function (x,name,value) {
+setMethod("useObs",c("StudentRecord"), function (x,name,value) {
   if (length(evidenceLog) > 0L) {
     evidenceLog(x)[[1]] <- useObs(evidenceLog(x)[[1]],name,value)
   }
   x
 })
 
-setMethod("ignoreObs",c("EvidenceLog"), function (x,name,value) {
+setMethod("ignoreObs",c("StudentRecord"), function (x,name,value) {
   if (length(evidenceLog) > 0L) {
     evidenceLog(x)[[1]] <- ignoreObs(evidenceLog(x)[[1]],name,value)
   }
@@ -175,10 +175,11 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
   if (length(obj@evidence)>0L) {
     ml$evidence <- obj@evidence
   }
+  ml$evidLog <- lapply(obj@evidLog,as.json)
   ## Normalize Prev_id
   ml$"prev_id" <- NULL
   if (!is.na(obj@"prev_id")) {
-    ml$prev <- unboxer(obj@"prev_id")
+    ml$prev_id <- unboxer(obj@"prev_id")
   }
   ml$seqno <- NULL
   if (!is.na(obj@seqno)) {
@@ -190,32 +191,46 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
 })
 
 parseStudentRecord <- function (rec) {
-  if (is.null(rec$"_id")) rec$"_id" <- NA_character_
-  names(rec$"_id") <- "oid"
-  if (is.null(rec$prev_id)) rec$prev_id <- NA_character_
-  if (is.null(rec$seqno)) rec$seqno <- NA_integer_
-  else rec$seqno <- as.integer(rec$seqno)
-  if (!is.null(rec$sm)) {
-    smo <- list()
-    smo$name <- unlist(as.character(rec$sm[["name"]]))
-    smo$data <- unlist(base64_dec(as.character(rec$sm[["data"]])))
-    smo$factory <- unlist(as.character(rec$sm[["factory"]]))
-  } else {
-    smo <- NULL
-  }
-
-  slist <- parseStats(rec$stats)
-  hist <- parseData(rec$hist)
-  new("StudentRecord","_id"=ununboxer(rec$"_id"),
-      app=as.character(rec$app),
-      context=as.character(rec$context),
-      uid=as.character(rec$uid),
-      timestamp=as.POSIXlt(ununboxer(rec$timestamp)),
-      evidence=as.character(rec$evidence),
-      sm=NULL,smser=smo,stats=slist,hist=hist,
-      seqno=rec$seqno,
-      prev_id=as.vector(rec$prev_id))
+  buildObject(rec,"StudentRecord")
 }
+
+setMethod("parse.jlist", c("StudentRecord","list"),
+  function (class, rec) {
+    if (is.null(rec$"_id")) {
+      rec$"_id" <- NA_character_
+    } else {
+      rec$"_id" <- ununboxer(rec$"_id")
+    }
+    names(rec$"_id") <- "oid"
+    if (is.null(rec$prev_id)) {
+      rec$prev_id <- NA_character_
+    } else {
+      rec$prev_id <- as.vector(ununboxer(rec$prev_id))
+    }
+    if (is.null(rec$seqno)) rec$seqno <- NA_integer_
+    else rec$seqno <- as.integer(ununboxer(rec$seqno))
+    rec$app <- as.character(ununboxer(rec$app))
+    rec$context <- as.character(ununboxer(rec$context))
+    rec$uid<-as.character(ununboxer(rec$uid))
+    rec$timestamp <- parsePOSIX(ununboxer(rec$timestamp))
+    rec$evidence <- as.character(ununboxer(rec$evidence))
+    if (!is.null(rec$sm)) {
+      smo <- list()
+      smo$name <- unlist(as.character(rec$sm[["name"]]))
+      smo$data <- unlist(base64_dec(as.character(rec$sm[["data"]])))
+      smo$factory <- unlist(as.character(rec$sm[["factory"]]))
+    } else {
+      smo <- NULL
+    }
+    rec$sm <- NULL
+    rec$smser <- smo
+    rec$stats <- parseStats(rec$stats)
+    rec$hist <- parseData(rec$hist)
+    if (!is.null(rec$evidLog))
+    rec$evidLog <- lapply(rec$evidLog,parseEvidenceLog)
+    rec$issues <- as.character(rec$issues)
+    rec
+})
 
 
 unparseStats <- function (slist,flatten=FALSE) {
@@ -251,6 +266,7 @@ strsplit2 <- function (labels, splitchar=".", fixed=TRUE) {
 }
 
 unflattenNames <- function (slist) {
+  if (is.null(names(slist))) return(NULL)
   nlist <- strsplit2(names(slist),".",fixed=TRUE)
   snames <- unique(nlist$head)
   if (length(snames)==length(slist)) return (slist) #Nothing to do
@@ -311,7 +327,7 @@ updateRecord <- function (rec, evidMess,logEvidence=TRUE) {
   rec@context <- context(evidMess)
   rec@timestamp <- timestamp(evidMess)
   if (logEvidence) {
-    evidenceLog(rec) <- c(evidenceLog(c),
+    evidenceLog(rec) <- c(evidenceLog(rec),
                           EvidenceLog(m_id(evidMess),
                                       context(evidMess)))
   }
@@ -413,13 +429,12 @@ setGeneric("clearSRs", function(srs) standardGeneric("clearSRs"))
 setMethod("getSR", c("StudentRecordSet","ANY"),
 function (srs,uid,ser=NULL) {
   if (length(ser) > 0L) {
-    rec <- parseStudentRecord(ser)
+    rec <- buildObject(ser,"StudentRecord")
     if (length(m_id(rec))==0L || is.na(m_id(rec))) {
       rec@"_id" <- paste(uid(rec),seqno(rec),sep="@")
     }
   } else if (!is.null(srs$recorddb())) {
-    rec <- getOneRec(srs$recorddb(),buildJQuery(app=app(srs),uid=uid),
-                     parseStudentRecord)
+    rec <- getOneRec(srs$recorddb(),buildJQuery(app=app(srs),uid=uid))
   } else {
     rec <- NULL
   }

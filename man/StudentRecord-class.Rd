@@ -4,6 +4,7 @@
 \alias{StudentRecord-class}
 \alias{app,StudentRecord-method}
 \alias{context,StudentRecord-method}
+\alias{evidenceLog,StudentRecord-method}
 \alias{evidence,StudentRecord-method}
 \alias{evidence<-,StudentRecord-method}
 \alias{histNames,StudentRecord-method}
@@ -25,7 +26,7 @@
 
   This is a wrapper for the Bayesian network information for a
   particular student.  It contains a local copy of the Bayesian
-  network. 
+  network.
 
 }
 \section{Objects from the Class}{
@@ -46,6 +47,7 @@ Objects can be created by calls to the function
       unique identifier for the user (student, player). }
     \item{\code{context}:}{Object of class \code{"character"} which
       identifies the scoring context (scoring window). }
+    \item{\code{evidLog}:}{A list of \code{\linkS4class{EvidenceLog}} objects which show which observables were used in each update step.}
     \item{\code{evidence}:}{Object of class \code{"character"} giving
       the IDs of the evidence sets applied to this student model. }
     \item{\code{timestamp}:}{Object of class \code{"POSIXt"} giving the
@@ -76,6 +78,10 @@ Objects can be created by calls to the function
     \item{context}{\code{signature(x = "StudentRecord")}: return the
       context (scoring window) identifier asociated with the last
       processed evidence set. }
+    \item{evidenceLog}{\code{signature(sr = "StudentRecord")}:
+      returns the list of \code{\linkS4class{EvidenceLog}} objects
+      that describe which observables were used from each evidence
+      accumulation step.}
     \item{evidence}{\code{signature(x = "StudentRecord")}: returns the
       ids of the aborbed evidence sets. }
     \item{evidence<-}{\code{signature(x = "StudentRecord")}: sets the
@@ -94,7 +100,7 @@ Objects can be created by calls to the function
       net (\code{\link[Peanut]{Pnet}}) associated with this record. }
     \item{sm<-}{\code{signature(x = "StudentRecord", value="ANY")}: sets
       the Bayes net (\code{\link[Peanut]{Pnet}}) associated with this
-      record. } 
+      record. }
     \item{stat}{\code{signature(sr = "StudentRecord", name =
         "character")}: returns the current value of the named
       statistics.  }
@@ -122,7 +128,7 @@ Objects can be created by calls to the function
 \seealso{
 
   \code{\link{StudentRecord}}, \code{\link{EvidenceSet}},
-  \code{\link{StudentRecordSet}} 
+  \code{\link{StudentRecordSet}}
 
 }
 \examples{

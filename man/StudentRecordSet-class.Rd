@@ -96,7 +96,7 @@ showClass("StudentRecordSet")
       the application identifier }
     \item{\code{dbname}:}{Object of class \code{character} which
       contains the name of the database.}
-    \item{\code{db}:}{Object of class \code{\link[mongo]{JSONDB}} a connection to the
+    \item{\code{db}:}{Object of class \code{\link[mongo:JSONDB-class]{JSONDB}} a connection to the
       database or \code{NULL} if the object is not connected to the
       database.  Users should call the \code{recorddb()} function rather
       than access this field directly.}

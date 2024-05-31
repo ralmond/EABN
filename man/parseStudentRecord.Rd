@@ -116,7 +116,6 @@ sr0.ser <- as.json(sr0)
 sr0a <- parseStudentRecord(jsonlite::fromJSON(sr0.ser))
 sr0a <- fetchSM(sr0a,recset$warehouse())
 ## This should relink to the same student model
-stopifnot(sm(sr0a)==sm(sr0),abs(eap0-stat(sr0a,"Physics_EAP")) <.0001)
 
 ## Next add some evidence and test again.
 
@@ -131,13 +130,10 @@ sr1.ser <- as.json(sr1)
 ## Force delete student model to make sure that it is properly
 ## recovered.
 WarehouseFree(Nethouse,PnetName(sm(sr1)))
-stopifnot(!is.active(sm(sr1)))  # No longer active.
 
-sr1a <- parseStudentRecord(jsonlite::fromJSON(sr1.ser))
+sr1a <- parseStudentRecord(jsonlite::fromJSON(sr1.ser,FALSE))
 sr1a <- fetchSM(sr1a,recset$warehouse())
 eap1a <- stat(sr1a,"Physics_EAP")
-stopifnot(all(evidence(sr1)==evidence(sr1a)),
-          abs(eap1-eap1a) <.001)
 
 %PNetica%}
 

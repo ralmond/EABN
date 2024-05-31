@@ -18,16 +18,16 @@ export(StudentRecord, sm, "sm<-", stats, evidence, "evidence<-",
        StudentRecordSet, getSR, saveSR, newSR, clearSRs,
        getIssues, logIssue)
 exportClasses(StudentRecord,StudentRecordSet)
-exportMethods(evidence, "evidence<-",
+exportMethods(evidence, "evidence<-", evidenceLog,
               sm, stats, app, uid, context, timestamp, mess,
-              as.jlist, toString, show, statNames, histNames, stat,
-              history)
+              as.jlist, parse.jlist, toString, show, statNames,
+              histNames, stat, history)
 
-export(EvidenceSet, parseEvidence, seqno, "seqno<-", observables)
+export(EvidenceSet, seqno, "seqno<-", observables)
 exportClasses(EvidenceSet)
 exportMethods(seqno, "seqno<-")
 export(EvidenceLog, eid, observables, useObs, ignoreObs)
-exportClasses("EvidenceLog")
+exportClasses(EvidenceLog)
 exportMethods("useObs","ignoreObs")
 
 exportClass(BNEngine,BNEngineMongo)

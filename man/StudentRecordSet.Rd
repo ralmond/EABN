@@ -17,7 +17,7 @@ StudentRecordSet(app = "default", warehouse = NULL,
   \item{app}{A character scalar providing a guid for the application.}
   \item{warehouse}{An object of type \code{\link[Peanut]{PnetWarehouse}}
     that contains already built student models.}
-  \item{db}{A \code{\link[mongo]{JSONDB}} object which store the student
+  \item{db}{A \code{\link[mongo:JSONDB-class]{JSONDB}} object which store the student
     records. }
   \item{\dots}{Other arguments for future extensions.}
 }

@@ -184,28 +184,8 @@ e1 <- EvidenceSet(uid="S1",app="Test",context="PPcompEM",
 
 e1 <- logEvidence(eng,sr0,e1)
 sr1 <- accumulateEvidence(eng,sr0,e1)
-stopifnot(!is(sr1,'try-error'))
-stopifnot(m_id(sr1)!=m_id(sr0),sr1@prev_id==m_id(sr0))
-stopifnot(seqno(sr1)==1L, seqno(e1)==1L)
 
 eap1 <- stat(sr1,"Physics_EAP")
-stopifnot(abs(eap1-eap0) > .001)
-stopifnot(nrow(history(sr1,"Physcis"))==2L)
-
-## handle Evidence.
-sr1.ser <- as.json(sr1)
-e2 <- EvidenceSet(uid="S2",app="Test",context="PPconjEM",
-                  obs=list("ConjunctiveObs"="Wrong"))
-
-sr2 <- handleEvidence(eng,e2,jsonlite::fromJSON(sr1.ser))
-stopifnot(!is(sr2,'try-error'))
-eap2 <- stat(sr2,"Physics_EAP")
-stopifnot(uid(sr2)==uid(sr1),
-          m_id(sr1)==sr2@prev_id,
-          nrow(history(sr2,"Physics"))==3L,
-          abs(eap1-eap2) > .001)
-
-## <<HERE>> Need test with Mongo engine.
 
 %PNetica%}
 

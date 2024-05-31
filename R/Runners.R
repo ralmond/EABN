@@ -154,8 +154,9 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   admindbname <- EAeng.local$admindbname
   if (is.null(admindbname)) admindbname<-"Proc4"
   mongoverbose <- isTRUE(EAeng.local$mongoverbose)
+  lscolName <- EAeng.local$lscolName
   if (is.null(lscolName)) lscolName <- "Messages"
-  registrycol <- EIeng.local$registrycol
+  registrycol <- EAeng.local$registrycol
   if (is.null(registrycol)) registrycol <- "OutputFiles"
 
   flog.info("Building and configuring engine.")

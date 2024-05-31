@@ -43,27 +43,44 @@ test_that("StudentRecord", {
 
 test_that("toString(StudentRecord) & show()", {
 
+  dsr <- StudentRecord("*DEFAULT*",app="ecd://epls.coe.fsu.edu/P4Test",
+                     context="*Baseline*")
+  expect_equal(toString(dsr),
+  "StudentRecord:{uid: *DEFAULT* , context: *Baseline* , seqno: -1 }")
 })
 
-
 test_that("app(StudentRecord)", {
-
+  dsr <- StudentRecord("*DEFAULT*",app="ecd://epls.coe.fsu.edu/P4Test",
+                     context="*Baseline*")
+  expect_equal(app(dsr),"ecd://epls.coe.fsu.edu/P4Test")
 })
 
 test_that("uid(StudentRecord)", {
-
+  dsr <- StudentRecord("*DEFAULT*",app="ecd://epls.coe.fsu.edu/P4Test",
+                     context="*Baseline*")
+  expect_equal(uid(dsr),"*DEFAULT*")
 })
 
 test_that("context(StudentRecord)", {
-
+ dsr <- StudentRecord("*DEFAULT*",app="ecd://epls.coe.fsu.edu/P4Test",
+                     context="*Baseline*")
+ expect_equal(context(dsr),"*Baseline*")
 })
 
 test_that("timestamp(StudentRecord)", {
-
+  ts <- Sys.time()
+  dsr <- StudentRecord("*DEFAULT*",app="ecd://epls.coe.fsu.edu/P4Test",
+                     context="*Baseline*",timestamp=ts)
+  expect_equal(timestamp(dsr),ts)
 })
 
 test_that("seqno(StudentRecord)", {
   ## Getter & Setter
+ dsr <- StudentRecord("*DEFAULT*",app="ecd://epls.coe.fsu.edu/P4Test",
+                     context="*Baseline*")
+ expect_equal(seqno(dsr),-1)
+ seqno(dsr) <- 7
+ expect_equal(seqno(dsr),7)
 })
 
 test_that("stats(StudentRecord), stat() & statNames()", {
@@ -358,17 +375,21 @@ test_that("getSR(StudentRecordSet) No Mongo", {
 
   eap1 <- stat(sr1,"Physics_EAP")
   expect_gt(abs(eap1-eap0), .001)
-  expect_equal(nrow(history(sr1,"Physcis")),2L)
+  expect_equal(nrow(history(sr1,"Physics")),2L)
 
   sr1.ser <- mongo::as.json(sr1)
-  Peanut::WarehouseFree(Nethouse,Peanut::PnetName(sm(sr1))) # Delete student model to
+  Peanut::WarehouseFree(wh$Nethouse,Peanut::PnetName(sm(sr1))) # Delete student model to
                                         # force restore.
-
-  sr1a <- getSR(eng$studentRecords(),"S1",mongolite::fromJSON(sr1.ser))
+  ## Do these steps manually so we can check parser errors with debugger
+  sr1.jl <- jsonlite::fromJSON(sr1.ser,FALSE)
+  #print(sr1.jl$hist)
+  sr1.pjl <- parse.jlist(sr1,sr1.jl)
+  #print(sr1.pjl$hist)
+  sr1a <- getSR(eng$studentRecords(),"S1",sr1.jl)
   Peanut::PnetCompile(sm(sr1a))
   eap1a <- stat(sr1a,"Physics_EAP")
   expect_lt(abs(eap1-eap1a), .001)
-  expect_equal(nrow(history(sr1a,"Physcis")),2L)
+  expect_equal(nrow(history(sr1a,"Physics")),2L)
 
 })
 

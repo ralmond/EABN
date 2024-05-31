@@ -9,8 +9,10 @@ EvidenceSet <- function(uid,context,timestamp=Sys.time(),
                         obs=list(),app="default",mess="Accumulate",
                         sender="EI", processed=FALSE) {
   new("EvidenceSet",app=app,uid=uid,context=context,mess=mess,
-      timestamp=timestamp,data=obs,sender=sender,"_id"=c(oid=NA_character_),
-      seqno=NA_integer_ , processed=processed)
+      timestamp=as.POSIXct(timestamp),
+      data=obs,sender=sender,"_id"=c(oid=NA_character_),
+      seqno=NA_integer_ , processed=processed,
+      pError="")
 }
 
 setGeneric("seqno",function(x) standardGeneric("seqno"))
@@ -46,23 +48,15 @@ setMethod("as.jlist",c("EvidenceSet","list"), function(obj,ml,serialize=TRUE) {
   ml
 })
 
-parseEvidence<- function (rec) {
+setMethod("parse.jlist", c("EvidenceSet","list"),
+ function (class,rec) {
   rec <- cleanMessageJlist(rec)
   if (is.null(rec$seqno)) rec$seqno <- NA_integer_
-  mid <- ununboxer(rec$"_id")
-  if (is.null(mid)) mid <- NA_character_
-  new("EvidenceSet","_id"=mid,
-      app=as.vector(ununboxer(rec$app)),
-      uid=as.vector(ununboxer(rec$uid)),
-      context=as.vector(ununboxer(rec$context)),
-      sender=as.vector(ununboxer(rec$sender)),
-      mess=as.vector(ununboxer(rec$mess)),
-      timestamp=as.POSIXlt(ununboxer(rec$timestamp)),
-      processed=as.logical(ununboxer(rec$processed)),
-      pError=rec$pError,
-      data=parseData(ununboxer(rec$data)),
-      seqno=as.vector(rec$seqno))
-}
+  rec$"_id" <- ununboxer(rec$"_id")
+  if (is.null(rec$"_id")) rec$"_id" <- c(oid=NA_character_)
+  rec$data <- parseData(ununboxer(rec$data))
+  rec
+})
 
 ### Evidence Logs
 
@@ -76,14 +70,17 @@ setClass("EvidenceLog",
                  ignored="list"))
 
 EvidenceLog <- function (eid,context,used=list(),ignored=list())
-  new("EvidenceLog",eid,context,used,ignored)
+  new("EvidenceLog",eid=eid,context=context,
+      used=used,ignored=ignored)
 
 
 eid <- function(el) {el@eid}
 
 setMethod("context","EvidenceLog",function(x) {x@context})
 
-observables <- function (el) {list(used=el@used,ignored=el@ignored)}
+setMethod("observables","EvidenceLog", function (x) {
+  list(used=x@used,ignored=x@ignored)
+  })
 
 setGeneric("useObs", function (x,name,value) standardGeneric("useObs"))
 setGeneric("ignoreObs", function (x,name,value) standardGeneric("ignoreObs"))
@@ -98,7 +95,28 @@ setMethod("useObs",c("EvidenceLog"), function (x,name,value) {
 setMethod("ignoreObs",c("EvidenceLog"), function (x,name,value) {
   obs <- list(value)
   names(obs) <- name
-  x@ignored <- c(x@used,obs)
+  x@ignored <- c(x@ignored,obs)
   x
 })
 
+
+setMethod("as.jlist",c("EvidenceLog","list"),function(obj,ml,serialize=TRUE) {
+  ml$eid <- unboxer(ml$eid)
+  ml$context <- unboxer(ml$context)
+  ml$used <- unboxer(ml$used)
+  ml$ignored <- unboxer(ml$ignored)
+  callNextMethod(obj,ml,serialize)
+})
+
+
+parseEvidenceLog <- function (rec) {
+  rec$eid <- ununboxer(rec$eid)
+  rec$context <- ununboxer(rec$context)
+  rec$used <- as.list(ununboxer(rec$used))
+  rec$ignored <- as.list(ununboxer(rec$ignored))
+  rec
+}
+
+setMethod("parse.jlist",c("EvidenceLog","list"),function(class,rec) {
+  parseEvidenceLog(rec)
+})

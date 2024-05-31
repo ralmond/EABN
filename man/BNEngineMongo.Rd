@@ -71,15 +71,15 @@ newBNEngineMongo(app = "default", warehouse, listenerSet = NULL, processN = Inf,
   \item{mongoverbose}{A flag.  If true, extra debugging information from database calls is generated.}
   \item{srs}{A \code{\linkS4class{StudentRecordSet}} object for storing the student records.}
   \item{manifestCol}{The name of the column containing the manifest data, ignored if \code{manifestDB} is supplied.}
-  \item{manifestDB}{A \code{\link[mongo]{JSONDB}} the database where manifest information is cached.}
+  \item{manifestDB}{A \code{\link[mongo:JSONDB-class]{JSONDB}} the database where manifest information is cached.}
   \item{evidenceCol}{The name of the column containing the evidence sets, ignored if \code{evidenceQueue} is supplied.}
   \item{evidenceQueue}{A \code{\link[Proc4:MessageQueue-class]{MessageQueue}} where the evidence sets exist.}
   \item{histcol}{The name of the column into which history data should be stored, ignored if \code{histNodesDB} is supplied.}
-  \item{histNodesDB}{A \code{\link[mongo]{JSONDB}} database where history information is stored.}
+  \item{histNodesDB}{A \code{\link[mongo:JSONDB-class]{JSONDB}} database where history information is stored.}
   \item{statcol}{The name of the column into which statistics should be stored, ignored if \code{statDB} is supplied.}
-  \item{statDB}{A \code{\link[mongo]{JSONDB}} database where statistics are stored.}
+  \item{statDB}{A \code{\link[mongo:JSONDB-class]{JSONDB}} database where statistics are stored.}
   \item{admincol}{The name of the column in the administrative database where engine status information is stored, ignored if \code{adminDB} is supplied.}
-  \item{adminDB}{A \code{\link[mongo]{JSONDB}} where status information about the engine is stored.}
+  \item{adminDB}{A \code{\link[mongo:JSONDB-class]{JSONDB}} where status information about the engine is stored.}
   \item{\dots}{Extra arguments are ignored.  This allows arguments for
     other engine versions to be set in the parameters and ignored.}
 }
