@@ -175,7 +175,7 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
   if (length(obj@evidence)>0L) {
     ml$evidence <- obj@evidence
   }
-  ml$evidLog <- lapply(obj@evidLog,as.json)
+  ml$evidLog <- sapply(obj@evidLog,as.json)
   ## Normalize Prev_id
   ml$"prev_id" <- NULL
   if (!is.na(obj@"prev_id")) {
@@ -226,8 +226,11 @@ setMethod("parse.jlist", c("StudentRecord","list"),
     rec$smser <- smo
     rec$stats <- parseStats(rec$stats)
     rec$hist <- parseData(rec$hist)
-    if (!is.null(rec$evidLog))
-    rec$evidLog <- lapply(rec$evidLog,parseEvidenceLog)
+    if (!is.null(rec$evidLog)) {
+      rec$evidLog <- lapply(rec$evidLog,
+                          function (el) {
+                            parseEvidenceLog(fromJSON(el,FALSE))})
+    }
     rec$issues <- as.character(rec$issues)
     rec
 })

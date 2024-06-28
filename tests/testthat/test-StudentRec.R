@@ -231,6 +231,10 @@ test_that("as.jlist(StudentRecord)", {
 
 
 test_that("parseStudentRecord(StudentRecord)", {
+  jin <- jsonlite::fromJSON(system.file("testData/arec.json",package="EABN"),
+                  FALSE)
+  sr <- parseStudentRecord(jin$StudentRecord)
+  expect_equal(length(evidenceLog(sr)),1L)
 
 })
 

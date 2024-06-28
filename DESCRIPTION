@@ -1,6 +1,6 @@
 Package: EABN
-Version: 0.6-2
-Date: 2023/06/21
+Version: 0.6-3
+Date: 2023/06/28
 Title: Evidence Accumulation Bayes Net Engine
 Authors@R: 
     person(given = "Russell",
