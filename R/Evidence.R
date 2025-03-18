@@ -15,6 +15,13 @@ EvidenceSet <- function(uid,context,timestamp=Sys.time(),
       pError="")
 }
 
+setGeneric("as_EvidenceSet",function(x)
+  standardGeneric("as_EvidenceSet"))
+setMethod("as_EvidenceSet","EvidenceSet",function(x) x)
+setMethod("as_EvidenceSet","P4Message",function(x)
+  EvidenceSet(x$uid,x$context,x$timestamp,x$data,
+              x$sender,x$processed))
+
 setGeneric("seqno",function(x) standardGeneric("seqno"))
 setMethod("seqno","EvidenceSet", function(x) x@seqno)
 setGeneric("seqno<-",function(x,value) standardGeneric("seqno<-"))

@@ -173,12 +173,12 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
     EAeng.params$admindbnam <- admindbname
     EAeng.params$mongoverbose <- mongoverbose
     srscol <- ifelse(is.null(cnms$srec),"StudentRecords",cnms$srec)
-    srDB <- mongo::MongoDB(srscol,dbname,dburi,mongoverbose,options=sslops)
+    srsDB <- mongo::MongoDB(srscol,dbname,dburi,mongoverbose,options=sslops)
     EAeng.params$statcol <- ifelse(is.null(cnms$stats),"Statistics",cnms$stats)
     EAeng.params$manifestCol <- ifelse(is.null(cnms$manifest),"Manifest",cnms$manifest)
     EAeng.params$evidenceCol<- ifelse(is.null(cnms$evidence),"EvidenceSets",cnms$evidence)
     EAeng.params$histcol <- ifelse(is.null(cnms$hist),"histNodes",cnms$hist)
-    EAeng.params$admincol- ifelse(is.null(cnms$stat),"AuthorizedApps",cnms$stat)
+    EAeng.params$admincol <- ifelse(is.null(cnms$auth),"AuthorizedApps",cnms$auth)
 
   }
 

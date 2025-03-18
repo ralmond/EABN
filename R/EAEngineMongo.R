@@ -59,7 +59,8 @@ BNEngineMongo <-
                   getHistNodes = function() {
                     if (length(histNodes) == 0L) {
                       histNodes <<-
-                        mdbFind(histNodesdb(),buildJQuery(app=app))$Nodes[[1]]
+                        as.character(
+                          mdbFind(histNodesdb(),buildJQuery(app=app))$Nodes[[1]])
                     }
                     histNodes
                   },
@@ -167,8 +168,7 @@ newBNEngineMongo <- function(app="default",warehouse,
                                                            eadbname,dburi,
                                                            verbose=mongoverbose,
                                                            options=sslops),
-                                            builder=Proc4::buildMessage),
-
+                                            builder=\(m) Proc4::buildMessage(m,"EvidenceSet")),
                           histcol="histNodes",
                           histNodesDB=MongoDB(histcol,eadbname,dburi,
                                               verbose=mongoverbose,
