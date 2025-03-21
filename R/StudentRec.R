@@ -100,6 +100,7 @@ setMethod("sm<-","StudentRecord", function(x,value) {
 
 fetchSM <- function (sr, warehouse) {
   sm <- WarehouseFetch(warehouse,as.legal.name(warehouse,uid(sr)))
+  #recover()
   if (is.null(sm) || !is.valid(warehouse,sm)) {
     sm(sr) <- unpackSM(sr,warehouse)
   } else {
@@ -190,7 +191,7 @@ setMethod("as.jlist",c("StudentRecord","list"), function(obj,ml,serialize=TRUE) 
   ml
 })
 
-parseStudentRecord <- function (rec) {
+buildStudentRecord <- function (rec) {
   buildObject(rec,"StudentRecord")
 }
 
@@ -429,6 +430,7 @@ setGeneric("clearSRs", function(srs) standardGeneric("clearSRs"))
 
 
 ## Student Record Methods
+getSR.StudentRecordSet <- function(){}
 setMethod("getSR", c("StudentRecordSet","ANY"),
 function (srs,uid,ser=NULL) {
   if (length(ser) > 0L) {
@@ -437,7 +439,9 @@ function (srs,uid,ser=NULL) {
       rec@"_id" <- paste(uid(rec),seqno(rec),sep="@")
     }
   } else if (!is.null(srs$recorddb())) {
-    rec <- getOneRec(srs$recorddb(),buildJQuery(app=app(srs),uid=uid))
+    rec <- getOneRec(srs$recorddb(),
+                     buildJQuery(app=app(srs),uid=uid),
+                     buildStudentRecord)
   } else {
     rec <- NULL
   }

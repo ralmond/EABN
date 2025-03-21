@@ -185,9 +185,13 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   ## Force to character, JSON leave as list.
   EAeng.params$histNodes <- as.character(EAeng.params$histNodes)
 
-  if (is.null(EA.config$listners)) {
+  if (is.null(EA.config$listeners)) {
+    flog.info("Skipping building listener sets")
     EAeng.params$listenerSet <- NULL # Listener set not used
   } else {
+    flog.info("Building Listeners: ",
+              sapply(EA.config$listeners,\(l) l$name),
+              capture=TRUE)
     EAeng.params$listenerSet <-
       withFlogging({
         buildListenerSet(sender= sub("<app>",sappid,EA.config$sender),

@@ -13,7 +13,7 @@ importFrom("stats","na.omit")
 
 export(StudentRecord, sm, "sm<-", stats, evidence, "evidence<-",
        statNames, histNames, stat,
-       history, parseStudentRecord, parseStats, stats2json, unparseStats,
+       history, buildStudentRecord, parseStats, stats2json, unparseStats,
        fetchSM, unpackSM, updateRecord,
        StudentRecordSet, getSR, saveSR, newSR, clearSRs,
        getIssues, logIssue)
