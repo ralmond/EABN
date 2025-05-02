@@ -116,14 +116,16 @@ setMethod("as.jlist",c("EvidenceLog","list"),function(obj,ml,serialize=TRUE) {
 })
 
 
-parseEvidenceLog <- function (rec) {
+buildEvidenceLog <- function (rec) {
   rec$eid <- ununboxer(rec$eid)
   rec$context <- ununboxer(rec$context)
   rec$used <- as.list(ununboxer(rec$used))
   rec$ignored <- as.list(ununboxer(rec$ignored))
+  rec$class <- NULL
+  class(rec) <- "EvidenceLog"
   rec
 }
 
 setMethod("parse.jlist",c("EvidenceLog","list"),function(class,rec) {
-  parseEvidenceLog(rec)
+  buildEvidenceLog(rec)
 })

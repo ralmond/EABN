@@ -18,7 +18,9 @@ BNEngine <-
                   manifestFile="character",
                   statFile="character",
                   errorRestart="character",
-                  sender="character"
+                  sender="character",
+                  logEvidence="logical",
+                  basetime="POSIXct"
               ),
               methods = list(
                   initialize = function(app=character(),profModel=character(),
@@ -28,9 +30,11 @@ BNEngine <-
                                         errorRestart="checkNoScore",
                                         listenerSet=NULL,
                                         srs=NULL,evidenceQueue=NULL,
-                                        sender="EABN",...) {
+                                        sender="EABN",logEvidence=TRUE,
+                                        basetime=Sys.time(),...) {
                       if (is.null(evidenceQueue))
                         evidenceQueue <- new("ListQueue",app)
+                      flog.debug("Basetime: %s",basetime)
                       callSuper(app=app,warehouseObj=warehouse,
                                 srs=srs,listenerSet=listenerSet,
                                 statistics=statistics,
@@ -38,6 +42,8 @@ BNEngine <-
                                 waittime=waittime, processN=processN,
                                 errorRestart=errorRestart[1],
                                 evidenceQueue=evidenceQueue,
+                                logEvidence=logEvidence,
+                                basetime=as.POSIXct(basetime),
                                 ...)
                   },
                   stats = function() {

@@ -56,14 +56,14 @@ setMethod("evidenceLog<-", c("StudentRecord"), function (sr,value) {
 })
 
 setMethod("useObs",c("StudentRecord"), function (x,name,value) {
-  if (length(evidenceLog) > 0L) {
+  if (length(evidenceLog(x)) > 0L) {
     evidenceLog(x)[[1]] <- useObs(evidenceLog(x)[[1]],name,value)
   }
   x
 })
 
 setMethod("ignoreObs",c("StudentRecord"), function (x,name,value) {
-  if (length(evidenceLog) > 0L) {
+  if (length(evidenceLog(x)) > 0L) {
     evidenceLog(x)[[1]] <- ignoreObs(evidenceLog(x)[[1]],name,value)
   }
   x
@@ -119,7 +119,7 @@ unpackSM <- function (sr, warehouse) {
 
 StudentRecord <- function(uid,context="",timestamp=Sys.time(),
                           smser=list(),sm=NULL,stats=list(),hist=list(),
-                          evidence=character(),
+                          evidence=character(),evidLog=list(),
                           app="default",seqno=-1L, prev_id=NA_character_) {
   if (!is.null(sm)) {
     flog.debug("Creating student record for %s with no sm.", uid)
@@ -129,7 +129,7 @@ StudentRecord <- function(uid,context="",timestamp=Sys.time(),
   }
   new("StudentRecord",app=app,uid=uid,context=context,
       timestamp=timestamp,smser=smser,evidence=evidence,
-      sm=sm,stats=stats,hist=hist,
+      sm=sm,stats=stats,hist=hist,evidLog=evidLog,
       seqno=seqno,"_id"=NA_character_,issues=character(),
       prev_id=prev_id)
 }
@@ -230,7 +230,7 @@ setMethod("parse.jlist", c("StudentRecord","list"),
     if (!is.null(rec$evidLog)) {
       rec$evidLog <- lapply(rec$evidLog,
                           function (el) {
-                            parseEvidenceLog(fromJSON(el,FALSE))})
+                            buildEvidenceLog(fromJSON(el,FALSE))})
     }
     rec$issues <- as.character(rec$issues)
     rec
@@ -326,15 +326,15 @@ setMethod("evidence","StudentRecord", function(x) x@evidence)
 ## This is not currently being used.  The functionality is used
 updateRecord <- function (rec, evidMess,logEvidence=TRUE) {
   rec@prev_id <- m_id(rec)
-  rec@"_id" <- NA_character_
+  #rec@"_id" <- NA_character_
   evidence(rec) <- c(m_id(evidMess),evidence(rec))
   seqno(rec) <- seqno(rec)+1
   rec@context <- context(evidMess)
   rec@timestamp <- timestamp(evidMess)
   if (logEvidence) {
-    evidenceLog(rec) <- c(evidenceLog(rec),
-                          EvidenceLog(m_id(evidMess),
-                                      context(evidMess)))
+    evidenceLog(rec) <- c(EvidenceLog(m_id(evidMess),
+                                      context(evidMess)),
+                          evidenceLog(rec))
   }
   rec
 }
@@ -477,7 +477,8 @@ setMethod("revertSM", c("StudentRecordSet","ANY","StudentRecord","ANY"),
 
 setMethod("saveSR", c("StudentRecordSet","ANY"), function (srs,rec) {
   if (mdbAvailable(srs$recorddb())) {
-    saveRec(srs$recorddb(),rec)
+    rec <- saveRec(srs$recorddb(),rec)
+    flog.debug("Saving Record %d for %s @ %s",seqno(rec),uid(rec),timestamp(rec))
   } else {
     if (length(m_id(rec))==0L || is.na(m_id(rec))) {
       rec@"_id" <- paste(uid(rec),seqno(rec),sep="@")
@@ -504,11 +505,12 @@ setMethod("newSR", c("StudentRecordSet","ANY"),
                       as.legal.name(srs$warehouse(),uid))
   flog.debug("Created new Bayes Net %s (%s)", toString(bn), PnetName(bn))
   #recover()
-  rec <- StudentRecord(uid=uid,context(dsr),timestamp=timestamp,
+  rec <- StudentRecord(uid=uid,context(dsr),timestamp=timestamp(dsr),
                        sm=bn,
                        stats=stats(dsr),hist=dsr@hist,app=app(srs),
                        seqno=0L)
-  saveRec(srs$recorddb(),rec)
+  flog.debug("Saving New Record for %s@%s",uid,timestamp(rec))
+  rec <- saveRec(srs$recorddb(),rec)
   rec
 })
 

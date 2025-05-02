@@ -28,7 +28,8 @@ loadManifest <- function(eng,manifest=data.frame()) {
 setupDefaultSR <- function (eng) {
   eng$studentRecords()                  #Make sure initialized
   dsr <- StudentRecord("*DEFAULT*",app=app(eng),context="*Baseline*",
-                       seqno=0L)
+                       seqno=0L,timestamp=eng$basetime)
+  flog.info("Basetime: %s.",as.character(eng$basetime))
   ## If an old record exists, clear it out.
   clearSRs(eng$studentRecords())
   if (length(eng$profModel) > 0L) {
@@ -60,7 +61,9 @@ getRecordForUser <- function(eng,uid,srser=NULL) {
   rec <- getSR(eng$studentRecords(),uid,srser)
   if (is.null(rec)) {
     rec <- newSR(eng$studentRecords(),uid)
+    flog.debug("New SR Timestamp %s",as.character(timestamp(rec)))
     rec <- saveSR(eng$studentRecords(),rec)
+    flog.debug("New SR Timestamp %s",as.character(timestamp(rec)))
     announceStats(eng,rec)
   }
   rec
@@ -157,7 +160,7 @@ logEvidence <- function (eng,rec,evidMess) {
 
 accumulateEvidence <- function(eng,rec,evidMess, debug=0) {
   result <- withFlogging({
-    rec1 <- updateRecord(rec,evidMess)
+    rec1 <- updateRecord(rec,evidMess,eng$logEvidence)
     rec1 <- updateSM(eng,rec1,evidMess, debug)
     if (interactive() && debug>1) utils::recover()
     rec1 <- updateStats(eng,rec1, debug)
@@ -202,10 +205,10 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
   anErr <- NULL
   issues <- character()
   for (oname in names(observables(evidMess))) {
+    oval <- observables(evidMess)[[oname]]
     continue <-tryCatch({
       if(!is.null(obs[[oname]])) {
-        flog.trace("Processing observable %s.",oname)
-        oval <- observables(evidMess)[[oname]]
+        flog.trace("Processing observable %s=%s.",oname,oval)
         if (is.null(oval) || is.na(oval) || length(oval)==0L) {
           rec <- ignoreObs(rec,oname,oval)
           flog.trace("Observable %s is null/NA, skipping.", oname)
@@ -216,6 +219,7 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
         }
       } else {
         flog.trace("Skipping observable %s:  not a node.",oname)
+        rec <- ignoreObs(rec,oname,oval)
       }
       TRUE ## Continue
     },
@@ -280,6 +284,7 @@ handleEvidence <- function (eng, evidMess, srser=NULL, debug=0) {
               context,uid,toString(out))
     markAsError(eng,evidMess,out)
   }
+  flog.info("Update Finished\n\n")
   out
 }
 

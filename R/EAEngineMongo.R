@@ -22,8 +22,9 @@ BNEngineMongo <-
                              profModel=character(),waittime=.25,
                              statistics=list(), histNodes=character(),
                              processN=Inf,errorRestart="checkNoScore",
-                             srs=NULL,
+                             srs=NULL,basetime=Sys.time(),
                              ...) {
+                      flog.debug("Basetime %s",basetime)
                       callSuper(app=app,
                                 warehouse=warehouse,
                                 statDB=statDB,
@@ -37,6 +38,7 @@ BNEngineMongo <-
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
                                 errorRestart=errorRestart[1],
+                                basetime=basetime,
                                ...)
                   },
                   manifestdb = function() {
@@ -181,6 +183,7 @@ newBNEngineMongo <- function(app="default",warehouse,
                           adminDB=MongoDB(admincol,admindbname,dburi,
                                           verbose=mongoverbose,
                                           options=sslops),
+                          basetime=Sys.time(),
                           ...) {
   ## Drop ... from new() so we can quietly delete unused arguments.
   if (is.null(warehouse)) stop("Warehouse must be supplied.")
@@ -196,6 +199,7 @@ newBNEngineMongo <- function(app="default",warehouse,
       histNodesDB=histNodesDB,
       adminDB=adminDB,
       statistics=statistics,
-      histNodes=histNodes)
+      histNodes=histNodes,
+      basetime=basetime)
 }
 

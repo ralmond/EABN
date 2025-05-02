@@ -29,7 +29,7 @@ BNEngineNDB <-
                                 histNodes=histNodes,profModel=profModel,
                                 waittime=waittime, processN=processN,
                                 activeTest=activeTest,
-                                errorRestart=errorRestart[1], 
+                                errorRestart=errorRestart[1],
                                 ...)
                   },
                   fetchStats = function() {
@@ -83,6 +83,7 @@ newBNEngineNDB <- function(app="default",warehouse, listenerSet=NULL,
                                           "scoreAvailable"),
                            srs=StudentRecordSet(app=app,warehouse=warehouse,
                                                 db=MongoDB(noMongo=TRUE)),
+                           basetime=Sys.time(),
                            ...) {
   ## Removed ... from new, so we can silently drop unused arguments.
   if (is.null(warehouse)) stop("Warehouse must be supplied.")
@@ -91,6 +92,7 @@ newBNEngineNDB <- function(app="default",warehouse, listenerSet=NULL,
       listenerSet=listenerSet,manifest=manifest,processN=processN,
       waittime=waittime,profModel=profModel,
       activeTest=activeTest,errorRestart=errorRestart[1],srs=srs,
+      basetime=basetime,
       ...)
 }
 

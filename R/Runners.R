@@ -137,6 +137,8 @@ doBuild <- function (sess, EA.tables,  config.dir,
     write.csv(stattab,file.path(config.dir,netdir,statFile))
   }, context="Writing Nets.")
 
+  invisible(eng)
+
 }
 
 doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
@@ -162,6 +164,7 @@ doRunrun <- function (appid, sess, EA.config,  EAeng.local, config.dir,
   flog.info("Building and configuring engine.")
 
   EAeng.params <- EA.config$EAEngine
+  flog.debug("Basetime: %s",EAeng.params$basetime)
   EAeng.params$dburi <- dburi
   if (is.null(dburi)) {
     EAeng.params$activeTest <- EAeng.local$activeTest
