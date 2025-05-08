@@ -209,7 +209,7 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
     continue <-tryCatch({
       if(!is.null(obs[[oname]])) {
         flog.trace("Processing observable %s=%s.",oname,oval)
-        if (is.null(oval) || is.na(oval) || length(oval)==0L) {
+        if (is.null(oval) || any(is.na(oval)) || length(oval)==0L) {
           rec <- ignoreObs(rec,oname,oval)
           flog.trace("Observable %s is null/NA, skipping.", oname)
         } else {
@@ -229,6 +229,16 @@ updateSM <- function (eng,rec,evidMess, debug=0) {
                           ", Observable ", oname,
                      ": got error: ", conditionMessage(e), ".")
       flog.error(issue)
+      if (flog.threshold() %in% c("DEBUG","TRACE")) {
+        calls <- sys.calls()
+        calls <- calls[1:length(calls) - 1]
+        trace <- limitedLabels(c(calls, attr(e, "calls")))
+        if (length(trace) > 0L) {
+          trace <- trace[length(trace):1L]
+        }
+        flog.debug("Traceback:", trace,
+                   capture = TRUE)
+      }
       list(e=e,issue=issue)
     })
     if (isTRUE(continue)) next
